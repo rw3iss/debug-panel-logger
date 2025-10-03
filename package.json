@@ -1,0 +1,18 @@
+{
+  "name": "debug-panel-logger",
+  "version": "1.0.0",
+  "description": "",
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "eventbusjs": "^0.2.0",
+    "get-loggers": "^1.1.4",
+    "jsondiffpatch": "^0.7.3",
+    "safe-stringify": "^1.2.0"
+  }
+}
