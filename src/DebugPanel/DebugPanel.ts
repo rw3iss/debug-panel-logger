@@ -1,7 +1,7 @@
 import EventBus from 'eventbusjs';
 import { LogModule } from 'get-loggers';
 import safeStringify from 'safe-stringify';
-import { JsonView } from '../JsonView';
+import { JsonView } from '../JsonView/JsonView';
 import { getWindowSize, makeResizable, makeDraggable } from '../utils/domUtils';
 
 const DEBUG_STATE_NAMESPACE = 'objects';
@@ -40,7 +40,7 @@ interface DebugState {
 	isExpanded: boolean;
 }
 
-interface DebugPanelSettings {
+export interface DebugPanelSettings {
 	left: number;
 	top: number;
 	width: number;
@@ -49,7 +49,7 @@ interface DebugPanelSettings {
 	opacity: number;
 }
 
-interface DebugPanelOptions {
+export interface DebugPanelOptions {
 	show?: boolean;
 	position?: ScreenPosition;
 	width?: number;
@@ -91,7 +91,7 @@ export class DebugPanel {
 	private tabContainer: HTMLElement;
 	private contentContainer: HTMLElement;
 	private toolbar: HTMLElement;
-	private opacitySlider: HTMLInputElement;
+	private opacitySlider!: HTMLInputElement;
 	private tabEntries: TabEntries = {};
 	private debugStates: { [id: string]: DebugState } = {};
 	private activeTab: string = 'global';

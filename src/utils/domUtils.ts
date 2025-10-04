@@ -1,4 +1,4 @@
-type ResizeOptions = {
+export type ResizeOptions = {
 	handles?: ('top' | 'left' | 'right' | 'bottom' | 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right')[];
 	maxWidth?: number;
 	maxHeight?: number;
@@ -109,7 +109,7 @@ export function makeResizable(container: HTMLElement, options: ResizeOptions = {
 	handles.forEach((handle) => createHandle(handle));
 }
 
-type DragOptions = {
+export type DragOptions = {
 	onDragStart?: (e: MouseEvent) => void;
 	onDrag?: (x: number, y: number) => void;
 	onDragEnd?: () => void;

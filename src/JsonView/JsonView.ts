@@ -1,6 +1,6 @@
 import * as jsondiffpatch from 'jsondiffpatch';
 
-type JsonViewOptions = {
+export type JsonViewOptions = {
 	expandAll?: boolean;
 	expandObjs?: Array<string | RegExp>;
 	useViewState?: boolean;
@@ -16,7 +16,7 @@ export class JsonView {
 	private json: any;
 	private parentContainer: HTMLElement;
 	private options: JsonViewOptions;
-	private viewStates = {}; // viewstate tree for retaining view during state updates
+	private viewStates: { [key: string]: boolean } = {}; // viewstate tree for retaining view during state updates
 
 	constructor(json: any, parentContainer: HTMLElement, options?: JsonViewOptions) {
 		this.json = json;
@@ -93,7 +93,7 @@ export class JsonView {
 
 						// if a viewstate exists use that always:
 						if (this.options.useViewState) {
-							if (typeof this.viewStates[keyPath] != 'undefined') expand = !this.viewStates[keyPath];
+							if (typeof this.viewStates[keyPath] !== 'undefined') expand = !this.viewStates[keyPath];
 						}
 
 						if (expand) {
