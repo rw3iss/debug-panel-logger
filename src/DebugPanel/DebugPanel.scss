@@ -11,16 +11,16 @@
 	font-family: Arial, sans-serif;
 	color: #fff;
 	transition:
-		opacity 0.2s ease-in-out,
-		transform 0.2s ease-in-out;
+		transform 0.2s ease-in-out,
+		visibility 0.2s ease-in-out;
 
 	&.visible {
-		opacity: 1;
+		visibility: visible;
 		transform: translateY(0);
 	}
 
 	&:not(.visible) {
-		opacity: 0;
+		visibility: hidden;
 		transform: translateY(10px);
 		pointer-events: none;
 	}
@@ -71,7 +71,7 @@
 		display: flex;
 		flex-direction: column;
 		overflow-y: auto;
-		padding: 10px;
+		padding: 0px 15px;
 		background: #1a1a1a;
 
 		.debug-tab-content {
@@ -160,15 +160,91 @@
 		width: 100%;
 		align-items: center;
 		justify-content: flex-end;
+		gap: 8px;
 		padding: 8px;
 		background: #111;
 		border-top: 1px solid rgba(255, 255, 255, 0.1);
+		flex-wrap: wrap;
 
 		.debug-keyboard-hint {
 			margin-right: auto;
-			padding-left: 5px;
 			color: #999;
 			font-size: 11px;
+			white-space: nowrap;
+		}
+
+		.debug-opacity-container {
+			display: flex;
+			align-items: center;
+			gap: 5px;
+			max-width: 100px;
+			min-width: 40px;
+			flex-shrink: 1;
+			padding: 5px 0;
+
+			.debug-opacity-label {
+				font-size: 11px;
+				color: #999;
+				white-space: nowrap;
+			}
+
+			.debug-opacity-slider {
+				flex: 1;
+				min-width: 40px;
+				width: 100%;
+				max-width: 100%;
+				height: 4px;
+				background: #444;
+				border-radius: 2px;
+				outline: none;
+				-webkit-appearance: none;
+				appearance: none;
+
+				&::-webkit-slider-thumb {
+					-webkit-appearance: none;
+					appearance: none;
+					width: 14px;
+					height: 14px;
+					background: #007bff;
+					cursor: pointer;
+					border-radius: 50%;
+					position: relative;
+					top: -4px;
+					transition: background 0.2s;
+
+					&:hover {
+						background: #0056b3;
+					}
+				}
+
+				&::-moz-range-thumb {
+					width: 14px;
+					height: 14px;
+					background: #007bff;
+					cursor: pointer;
+					border-radius: 50%;
+					border: none;
+					position: relative;
+					top: -4px;
+					transition: background 0.2s;
+
+					&:hover {
+						background: #0056b3;
+					}
+				}
+
+				&::-webkit-slider-runnable-track {
+					height: 4px;
+					background: #444;
+					border-radius: 2px;
+				}
+
+				&::-moz-range-track {
+					height: 4px;
+					background: #444;
+					border-radius: 2px;
+				}
+			}
 		}
 
 		button {
@@ -176,11 +252,12 @@
 			color: white;
 			border: none;
 			padding: 6px 12px;
-			margin-left: 8px;
 			border-radius: 4px;
 			font-size: 12px;
 			cursor: pointer;
 			transition: background 0.2s;
+			white-space: nowrap;
+			flex-shrink: 0;
 
 			&:hover {
 				background: #c9302c;
@@ -188,6 +265,44 @@
 
 			&:focus {
 				outline: none;
+			}
+		}
+	}
+
+	// Responsive layout for narrow panels
+	.debug-toolbar {
+		container-type: inline-size;
+
+		// When panel width is less than 400px, stack toolbar vertically
+		@container (max-width: 350px) {
+			flex-direction: column;
+			align-items: stretch;
+
+			.debug-keyboard-hint {
+				display: none;
+			}
+
+			.debug-opacity-container {
+				max-width: 100%;
+				justify-content: center;
+			}
+		}
+	}
+
+	// Container query alternative using JavaScript-set class
+	&.narrow-panel {
+		.debug-toolbar {
+			flex-direction: column;
+			align-items: stretch;
+
+			.debug-keyboard-hint {
+				margin-right: 0;
+				text-align: center;
+			}
+
+			.debug-opacity-container {
+				max-width: 100%;
+				justify-content: center;
 			}
 		}
 	}
@@ -276,12 +391,12 @@
 	display: flex;
 	flex-direction: column;
 	margin-bottom: 10px;
-	margin-left: 20px;
+	margin-left: 10px;
 
 	.json-toggle {
 		position: absolute;
-		top: 5px;
-		left: -25px;
+		top: 7px;
+		left: -20px;
 		margin-right: 5px;
 		border: none;
 		background: none;
@@ -305,12 +420,18 @@
 	.debug-state-label {
 		font-size: 13px;
 		font-weight: bold;
-		padding: 4px 0 5px 0;
+		padding: 5px 0;
 		color: #ccc;
+		&:hover {
+			color: #fff;
+			cursor: pointer;
+			text-decoration: underline;
+		}
 	}
 
 	.json-wrapper {
-		padding: 8px;
+		padding: 5px;
+		margin-left: -15px;
 		background: #292929;
 		border-radius: 4px;
 		border-left: 3px solid #28a745;

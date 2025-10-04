@@ -1,10 +1,11 @@
 'use client';
 
+// TODO: remove this, add react example...
 import { addLogModule } from 'get-loggers';
 import { useEffect, useRef } from 'react';
-import { DebugPanelLogModule } from './DebugPanel';
+import { DebugPanelLogModule } from 'debug-panel-logger';
 import './DebugPanel.scss';
-import { debugState, ScreenPosition } from './DebugPanel';
+import { debugState, ScreenPosition } from 'debug-panel-logger';
 
 // Client-only React wrapper for DebugPanel. This is essentially a virtual wrapped. The core DebugPanel handles its own state and rendering (it's vanilla).
 export const DebugPanelComponent = ({ data = undefined, startingHeight = 400, startingWidth = 200 }) => {

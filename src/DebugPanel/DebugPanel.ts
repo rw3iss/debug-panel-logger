@@ -17,6 +17,8 @@ export enum ScreenPosition {
 	Left = 'left'
 }
 
+const MIN_WIDTH = 280;
+
 type LogEntry = {
 	id: string;
 	message: Array<any> | object | string;
@@ -44,6 +46,7 @@ interface DebugPanelSettings {
 	width: number;
 	height: number;
 	visible: boolean;
+	opacity: number;
 }
 
 interface DebugPanelOptions {
@@ -87,6 +90,8 @@ export class DebugPanel {
 	private container: HTMLElement;
 	private tabContainer: HTMLElement;
 	private contentContainer: HTMLElement;
+	private toolbar: HTMLElement;
+	private opacitySlider: HTMLInputElement;
 	private tabEntries: TabEntries = {};
 	private debugStates: { [id: string]: DebugState } = {};
 	private activeTab: string = 'global';
@@ -109,8 +114,8 @@ export class DebugPanel {
 		this.container.appendChild(this.tabContainer);
 		this.container.appendChild(this.contentContainer);
 
-		const toolbar = this.createGlobalToolbar();
-		this.container.appendChild(toolbar);
+		this.toolbar = this.createGlobalToolbar();
+		this.container.appendChild(this.toolbar);
 
 		document.body.appendChild(this.container);
 
@@ -136,6 +141,7 @@ export class DebugPanel {
 		container.style.width = `${this.options.width}px`;
 		container.style.height = `${this.options.height}px`;
 		container.style.position = 'fixed';
+		container.style.opacity = '1'; // Set default opacity
 		return container;
 	}
 
@@ -160,6 +166,13 @@ export class DebugPanel {
 			this.container.style.top = `${savedSettings.top}px`;
 			this.container.style.width = `${savedSettings.width}px`;
 			this.container.style.height = `${savedSettings.height}px`;
+
+			// Restore opacity
+			const opacity = savedSettings.opacity !== undefined ? savedSettings.opacity : 1;
+			this.container.style.opacity = String(opacity);
+			if (this.opacitySlider) {
+				this.opacitySlider.value = String(Math.round(opacity * 100));
+			}
 
 			// Restore visibility state without triggering saveSettings
 			if (savedSettings.visible) {
@@ -188,12 +201,14 @@ export class DebugPanel {
 
 	private saveSettings(): void {
 		try {
+			const opacity = parseFloat(this.container.style.opacity) || 1;
 			const settings: DebugPanelSettings = {
 				left: parseInt(this.container.style.left) || this.container.offsetLeft,
 				top: parseInt(this.container.style.top) || this.container.offsetTop,
 				width: this.container.offsetWidth,
 				height: this.container.offsetHeight,
-				visible: this.container.classList.contains('visible')
+				visible: this.container.classList.contains('visible'),
+				opacity: opacity
 			};
 			localStorage.setItem('debugPanelSettings', JSON.stringify(settings));
 		} catch (error) {
@@ -254,10 +269,30 @@ export class DebugPanel {
 
 		const hint = document.createElement('span');
 		hint.classList.add('debug-keyboard-hint');
-		hint.textContent = 'Press Ctrl+Alt+D to hide or show';
+		hint.textContent = 'Ctrl+Alt+D to hide/show';
 		hint.style.color = '#999';
 		hint.style.fontSize = '11px';
-		hint.style.marginRight = 'auto';
+
+		const opacityContainer = document.createElement('div');
+		opacityContainer.classList.add('debug-opacity-container');
+
+		const opacityLabel = document.createElement('label');
+		opacityLabel.classList.add('debug-opacity-label');
+		opacityLabel.textContent = 'O';
+		opacityLabel.style.fontSize = '11px';
+		opacityLabel.style.color = '#999';
+		opacityLabel.style.marginRight = '5px';
+
+		this.opacitySlider = document.createElement('input');
+		this.opacitySlider.type = 'range';
+		this.opacitySlider.min = '20';
+		this.opacitySlider.max = '100';
+		this.opacitySlider.value = '100';
+		this.opacitySlider.classList.add('debug-opacity-slider');
+		this.opacitySlider.oninput = () => this.handleOpacityChange();
+
+		//opacityContainer.appendChild(opacityLabel);
+		opacityContainer.appendChild(this.opacitySlider);
 
 		const clearButton = document.createElement('button');
 		clearButton.classList.add('debug-clear-button');
@@ -270,10 +305,23 @@ export class DebugPanel {
 		hideButton.onclick = () => this.hide();
 
 		toolbar.appendChild(hint);
+		toolbar.appendChild(opacityContainer);
 		toolbar.appendChild(clearButton);
 		toolbar.appendChild(hideButton);
 
 		return toolbar;
+	}
+
+	private handleOpacityChange(): void {
+		const opacityPercent = parseInt(this.opacitySlider.value);
+		const opacity = opacityPercent / 100;
+
+		// Only set opacity when visible
+		if (this.container.classList.contains('visible')) {
+			this.container.style.opacity = String(opacity);
+		}
+
+		this.saveSettings();
 	}
 
 	private setupResizable(): void {
@@ -285,8 +333,20 @@ export class DebugPanel {
 			maxHeight: height - 20,
 			minWidth: 200,
 			minHeight: 150,
-			onResize: () => this.saveSettings()
+			onResize: (newWidth: number) => {
+				this.updateToolbarLayout(newWidth);
+				this.saveSettings();
+			}
 		});
+	}
+
+	private updateToolbarLayout(width: number): void {
+		// Toggle narrow-panel class based on width
+		if (width < MIN_WIDTH) {
+			this.container.classList.add('narrow-panel');
+		} else {
+			this.container.classList.remove('narrow-panel');
+		}
 	}
 
 	private setupDraggable(): void {
@@ -408,31 +468,32 @@ export class DebugPanel {
 		debugWrapper.classList.add('debug-state');
 		debugWrapper.setAttribute('id', `debug-state-${id}`);
 
-		const toggleButton = document.createElement('button');
-		toggleButton.classList.add('json-toggle');
-		toggleButton.textContent = '[-]';
-		toggleButton.onclick = () => {
+		const toggleObjectOpen = () => {
 			const isExpanded = this.debugStates[id].isExpanded;
 			this.debugStates[id].isExpanded = !isExpanded;
 			debugWrapper.classList.toggle('collapsed', isExpanded);
 			toggleButton.textContent = isExpanded ? '[+]' : '[-]';
-		};
+		}
+
+		const toggleButton = document.createElement('button');
+		toggleButton.classList.add('json-toggle');
+		toggleButton.textContent = '[-]';
+		toggleButton.onclick = toggleObjectOpen;
 		debugWrapper.appendChild(toggleButton);
 
 		const label = document.createElement('div');
 		label.classList.add('debug-state-label');
 		label.innerText = id || 'untitled';
+		label.onclick = toggleObjectOpen;
 		debugWrapper.appendChild(label);
 
 		const jsonWrapper = document.createElement('div');
 		jsonWrapper.classList.add('json-wrapper');
+		debugWrapper.appendChild(jsonWrapper);
 
 		const jsonView = new JsonView(state, jsonWrapper as HTMLElement, {
 			expandObjs: [/children/, /children\/(.*)/, /entry/]
 		});
-
-		debugWrapper.appendChild(jsonWrapper);
-		console.log(`Debug`, debugWrapper, jsonWrapper, jsonView)
 
 		this.debugStates[id] = {
 			state,
@@ -573,6 +634,9 @@ export class DebugPanel {
 
 	public show(): void {
 		this.container.classList.add('visible');
+		// Restore the opacity setting when showing
+		const opacity = parseFloat(this.container.style.opacity) || 1;
+		this.container.style.opacity = String(opacity);
 		this.saveSettings();
 	}
 

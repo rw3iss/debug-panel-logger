@@ -1,0 +1,29 @@
+{
+	"compilerOptions": {
+		"moduleResolution": "Bundler",
+		"target": "ESNext", // Or your desired target
+		"module": "ESNext", // Or your desired module system
+		"esModuleInterop": true,
+		"outDir": "dist",
+		"baseUrl": ".",
+		"rootDir": "./src",
+		"strictNullChecks": true, // this allows overriding of existing base class members without errors?
+		"forceConsistentCasingInFileNames": true,
+		"skipLibCheck": true,
+		"paths": {},
+		"strict": false,
+		"declaration": true, // Enables generation of .d.ts files
+		"declarationMap": true, // Enables generation of .d.ts.map files for source navigation
+		"lib": [
+			"ESNext",
+			"dom"
+		],
+	},
+	"include": [
+		"src/**/*.ts"
+	], // Or your desired file inclusion pattern
+	"exclude": [
+		"node_modules",
+		"examples"
+	]
+}
