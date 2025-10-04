@@ -2,7 +2,20 @@ import EventBus from 'eventbusjs';
 import { LogModule } from 'get-loggers';
 import safeStringify from 'safe-stringify';
 import { JsonView } from '../JsonView';
-import { getWindowSize, makeResizable } from '../../../../utils/domUtils';
+import { getWindowSize, makeResizable, makeDraggable } from '../utils/domUtils';
+
+const DEBUG_STATE_NAMESPACE = 'objects';
+
+export enum ScreenPosition {
+	TopLeft = 'topLeft',
+	Top = 'top',
+	TopRight = 'topRight',
+	Right = 'right',
+	BottomRight = 'bottomRight',
+	Bottom = 'bottom',
+	BottomLeft = 'bottomLeft',
+	Left = 'left'
+}
 
 type LogEntry = {
 	id: string;
@@ -19,31 +32,52 @@ interface TabEntries {
 	[namespace: string]: LogEntry[];
 }
 
-// Wrapping class to use the DebugPanel within the Logging framework.  This will automatically add the debug panel to the document body (unless root is passed in opts).
-// Add this to the logging framework with addLogModule(new DebugPanelLogModule())
+interface DebugState {
+	state: any;
+	jsonView: JsonView;
+	isExpanded: boolean;
+}
+
+interface DebugPanelSettings {
+	left: number;
+	top: number;
+	width: number;
+	height: number;
+	visible: boolean;
+}
+
+interface DebugPanelOptions {
+	show?: boolean;
+	position?: ScreenPosition;
+	width?: number;
+	height?: number;
+	snap?: boolean;
+	snapPadding?: number;
+}
+
+// Wrapping class to use the DebugPanel within the Logging framework
 export class DebugPanelLogModule implements LogModule {
 	public name = 'DebugPanel';
 	public panel: DebugPanel;
 
-	constructor(opts: any = {}) {
-		this.panel = new DebugPanel(opts?.root || document.body);
-		if (opts.show) this.panel.show();
+	constructor(opts: DebugPanelOptions = {}) {
+		this.panel = new DebugPanel(opts);
+		// Don't auto-show here - let the DebugPanel constructor handle it
 	}
 
-	// called from the logging framework when a log is received that it may process.
 	public onLog(log: LogEvent) {
 		this.panel.addLog(log.namespace, log.args);
 	}
 
-	// try to print anything to this panel (object, msg, etc)
-	// should not use this unless you mean to (use the normal Logger api, ie. getLogger, log, etc)
-	public print(...args) {
+	public print(...args: any[]) {
 		if (args.length) {
-			// separate args, msgs and objects
-			const printArgs = [];
+			const printArgs: any[] = [];
 			args.forEach((a) => {
-				if (typeof a == 'object') this.panel.debugState('', a);
-				else printArgs.push(a);
+				if (typeof a === 'object') {
+					this.panel.debugState('', a);
+				} else {
+					printArgs.push(a);
+				}
 			});
 		}
 	}
@@ -54,28 +88,54 @@ export class DebugPanel {
 	private tabContainer: HTMLElement;
 	private contentContainer: HTMLElement;
 	private tabEntries: TabEntries = {};
-	private debugStates = {};
+	private debugStates: { [id: string]: DebugState } = {};
 	private activeTab: string = 'global';
+	private options: DebugPanelOptions;
 
-	constructor(parent: HTMLElement) {
+	constructor(options: DebugPanelOptions = {}) {
+		this.options = {
+			position: ScreenPosition.BottomRight,
+			width: 600,
+			height: 400,
+			snap: false,
+			snapPadding: 20,
+			...options
+		};
+
 		this.container = this.createContainer();
 		this.tabContainer = this.createTabContainer();
 		this.contentContainer = this.createContentContainer();
 
 		this.container.appendChild(this.tabContainer);
 		this.container.appendChild(this.contentContainer);
-		parent.appendChild(this.container);
+
+		const toolbar = this.createGlobalToolbar();
+		this.container.appendChild(toolbar);
+
+		document.body.appendChild(this.container);
 
 		this.addTab(DEBUG_STATE_NAMESPACE);
 		this.addTab('global');
 
+		// Restore settings first (including visibility) before setting up interactions
+		this.restoreSettings();
 		this.setupResizable();
+		this.setupDraggable();
 		this.setupEventListeners();
+		this.setupKeyboardShortcut();
+
+		// Only show if explicitly requested in options AND no saved settings exist
+		if (options.show && !this.loadSettings()) {
+			this.show();
+		}
 	}
 
 	private createContainer(): HTMLElement {
 		const container = document.createElement('div');
 		container.classList.add('debug-panel');
+		container.style.width = `${this.options.width}px`;
+		container.style.height = `${this.options.height}px`;
+		container.style.position = 'fixed';
 		return container;
 	}
 
@@ -91,16 +151,198 @@ export class DebugPanel {
 		return contentContainer;
 	}
 
-	private setupResizable() {
+	private restoreSettings(): void {
+		const savedSettings = this.loadSettings();
+
+		if (savedSettings) {
+			// Restore saved position and size
+			this.container.style.left = `${savedSettings.left}px`;
+			this.container.style.top = `${savedSettings.top}px`;
+			this.container.style.width = `${savedSettings.width}px`;
+			this.container.style.height = `${savedSettings.height}px`;
+
+			// Restore visibility state without triggering saveSettings
+			if (savedSettings.visible) {
+				this.container.classList.add('visible');
+			} else {
+				this.container.classList.remove('visible');
+			}
+		} else {
+			// Use default position if no saved settings
+			this.setupPosition();
+			// Don't set visibility - let the constructor handle it
+		}
+	}
+
+	private loadSettings(): DebugPanelSettings | null {
+		try {
+			const settingsJson = localStorage.getItem('debugPanelSettings');
+			if (settingsJson) {
+				return JSON.parse(settingsJson);
+			}
+		} catch (error) {
+			console.error('Failed to load debug panel settings:', error);
+		}
+		return null;
+	}
+
+	private saveSettings(): void {
+		try {
+			const settings: DebugPanelSettings = {
+				left: parseInt(this.container.style.left) || this.container.offsetLeft,
+				top: parseInt(this.container.style.top) || this.container.offsetTop,
+				width: this.container.offsetWidth,
+				height: this.container.offsetHeight,
+				visible: this.container.classList.contains('visible')
+			};
+			localStorage.setItem('debugPanelSettings', JSON.stringify(settings));
+		} catch (error) {
+			console.error('Failed to save debug panel settings:', error);
+		}
+	}
+
+	private setupPosition(): void {
+		const { width, height } = getWindowSize();
+		const panelWidth = this.options.width || 600;
+		const panelHeight = this.options.height || 400;
+
+		let left = 0;
+		let top = 0;
+
+		switch (this.options.position) {
+			case ScreenPosition.TopLeft:
+				left = 0;
+				top = 0;
+				break;
+			case ScreenPosition.Top:
+				left = (width - panelWidth) / 2;
+				top = 0;
+				break;
+			case ScreenPosition.TopRight:
+				left = width - panelWidth;
+				top = 0;
+				break;
+			case ScreenPosition.Right:
+				left = width - panelWidth;
+				top = (height - panelHeight) / 2;
+				break;
+			case ScreenPosition.BottomRight:
+				left = width - panelWidth;
+				top = height - panelHeight;
+				break;
+			case ScreenPosition.Bottom:
+				left = (width - panelWidth) / 2;
+				top = height - panelHeight;
+				break;
+			case ScreenPosition.BottomLeft:
+				left = 0;
+				top = height - panelHeight;
+				break;
+			case ScreenPosition.Left:
+				left = 0;
+				top = (height - panelHeight) / 2;
+				break;
+		}
+
+		this.container.style.left = `${left}px`;
+		this.container.style.top = `${top}px`;
+	}
+
+	private createGlobalToolbar(): HTMLElement {
+		const toolbar = document.createElement('div');
+		toolbar.classList.add('debug-toolbar');
+
+		const hint = document.createElement('span');
+		hint.classList.add('debug-keyboard-hint');
+		hint.textContent = 'Press Ctrl+Alt+D to hide or show';
+		hint.style.color = '#999';
+		hint.style.fontSize = '11px';
+		hint.style.marginRight = 'auto';
+
+		const clearButton = document.createElement('button');
+		clearButton.classList.add('debug-clear-button');
+		clearButton.textContent = 'Clear';
+		clearButton.onclick = () => this.clearCurrentTab();
+
+		const hideButton = document.createElement('button');
+		hideButton.classList.add('debug-hide-button');
+		hideButton.textContent = 'Hide';
+		hideButton.onclick = () => this.hide();
+
+		toolbar.appendChild(hint);
+		toolbar.appendChild(clearButton);
+		toolbar.appendChild(hideButton);
+
+		return toolbar;
+	}
+
+	private setupResizable(): void {
 		const { width, height } = getWindowSize();
 
 		makeResizable(this.container, {
-			handles: ['left', 'top', 'top-left'],
+			handles: ['top', 'left', 'right', 'bottom', 'top-left', 'top-right', 'bottom-left', 'bottom-right'],
 			maxWidth: width - 20,
 			maxHeight: height - 20,
 			minWidth: 200,
-			minHeight: 150
-			//onResize: (width, height) => console.log(`Resized: ${width}x${height}`)
+			minHeight: 150,
+			onResize: () => this.saveSettings()
+		});
+	}
+
+	private setupDraggable(): void {
+		if (this.options.snap) {
+			makeDraggable(this.container, this.tabContainer, {
+				onDrag: (x: number, y: number) => this.handleSnapWhileDragging(x, y),
+				onDragEnd: () => this.saveSettings()
+			});
+		} else {
+			makeDraggable(this.container, this.tabContainer, {
+				onDragEnd: () => this.saveSettings()
+			});
+		}
+	}
+
+	private handleSnapWhileDragging(x: number, y: number): void {
+		const snapPadding = this.options.snapPadding || 20;
+		const { width: windowWidth, height: windowHeight } = getWindowSize();
+		const panelWidth = this.container.offsetWidth;
+		const panelHeight = this.container.offsetHeight;
+
+		let snappedX = x;
+		let snappedY = y;
+
+		// Snap to left edge
+		if (x < snapPadding) {
+			snappedX = 0;
+		}
+		// Snap to right edge
+		else if (x + panelWidth > windowWidth - snapPadding) {
+			snappedX = windowWidth - panelWidth;
+		}
+
+		// Snap to top edge
+		if (y < snapPadding) {
+			snappedY = 0;
+		}
+		// Snap to bottom edge
+		else if (y + panelHeight > windowHeight - snapPadding) {
+			snappedY = windowHeight - panelHeight;
+		}
+
+		// Only update if position changed (for performance)
+		if (snappedX !== x || snappedY !== y) {
+			this.container.style.left = `${snappedX}px`;
+			this.container.style.top = `${snappedY}px`;
+		}
+	}
+
+	private setupKeyboardShortcut(): void {
+		document.addEventListener('keydown', (event: KeyboardEvent) => {
+			// Check for Ctrl+Alt+D
+			if (event.ctrlKey && event.altKey && event.key.toLowerCase() === 'd') {
+				event.preventDefault();
+				this.toggle();
+			}
 		});
 	}
 
@@ -112,77 +354,93 @@ export class DebugPanel {
 
 		EventBus.addEventListener('debug-state', (event: any) => {
 			const { id, state } = event.target;
-			if (!id || !state) return console.log('Invalid event data for debug-state. Expected {id,state}, got:', event);
+			if (!id || !state) {
+				console.log('Invalid event data for debug-state. Expected {id,state}, got:', event);
+				return;
+			}
 			this.debugState(id, state);
 		});
 	}
 
-	// display an object for debugging, in the objects tab.
-	public debugState(id: string, state: any) {
+	public debugState(id: string, state: any): void {
 		const safeState = safeStringify(state);
-		state = JSON.parse(safeState);
+		const parsedState = JSON.parse(safeState);
 
-		const updateDebugState = (id, state) => {
-			//console.log(`update debug`, id, state);
-			const content = this.contentContainer.querySelector(`[data-namespace=${DEBUG_STATE_NAMESPACE}]`);
-			if (!content) return console.error('No content for debug namespace.');
-			const debugWrapper: HTMLElement | null = content.querySelector(`#debug-state-${id}`);
-			if (!debugWrapper) return console.error(`No debug state found for ${id}.`);
-			const jsonWrapper = debugWrapper.querySelector('.json-wrapper');
-			if (!jsonWrapper) return console.error(`No json wrapper found for existing state ${id}`);
-			//debugElement.innerText = printJson(state);
-			jsonWrapper.innerHTML = '';
-			this.debugStates[id].state = state;
-			this.debugStates[id].jsonView.updateJson(state);
-			// const tree = jsonTree.create(state, jsonWrapper);
-			// tree.expand();
-			//log(`updated debug state`, debugWrapper);
+		if (this.debugStates[id]) {
+			this.updateDebugState(id, parsedState);
+		} else {
+			this.addDebugState(id, parsedState);
+		}
+	}
+
+	private updateDebugState(id: string, state: any): void {
+		const content = this.contentContainer.querySelector(`[data-namespace="${DEBUG_STATE_NAMESPACE}"]`);
+		if (!content) {
+			console.error('No content for debug namespace.');
+			return;
+		}
+
+		const debugWrapper: HTMLElement | null = content.querySelector(`#debug-state-${id}`);
+		if (!debugWrapper) {
+			console.error(`No debug state found for ${id}.`);
+			return;
+		}
+
+		const jsonWrapper = debugWrapper.querySelector('.json-wrapper');
+		if (!jsonWrapper) {
+			console.error(`No json wrapper found for existing state ${id}`);
+			return;
+		}
+
+		jsonWrapper.innerHTML = '';
+		this.debugStates[id].state = state;
+		this.debugStates[id].jsonView.updateJson(state);
+	}
+
+	private addDebugState(id: string, state: any): void {
+		const content = this.contentContainer.querySelector(`[data-namespace="${DEBUG_STATE_NAMESPACE}"]`);
+		if (!content) {
+			console.error('No content for debug namespace.');
+			return;
+		}
+
+		const debugWrapper = document.createElement('div');
+		debugWrapper.classList.add('debug-state');
+		debugWrapper.setAttribute('id', `debug-state-${id}`);
+
+		const toggleButton = document.createElement('button');
+		toggleButton.classList.add('json-toggle');
+		toggleButton.textContent = '[-]';
+		toggleButton.onclick = () => {
+			const isExpanded = this.debugStates[id].isExpanded;
+			this.debugStates[id].isExpanded = !isExpanded;
+			debugWrapper.classList.toggle('collapsed', isExpanded);
+			toggleButton.textContent = isExpanded ? '[+]' : '[-]';
+		};
+		debugWrapper.appendChild(toggleButton);
+
+		const label = document.createElement('div');
+		label.classList.add('debug-state-label');
+		label.innerText = id || 'untitled';
+		debugWrapper.appendChild(label);
+
+		const jsonWrapper = document.createElement('div');
+		jsonWrapper.classList.add('json-wrapper');
+
+		const jsonView = new JsonView(state, jsonWrapper as HTMLElement, {
+			expandObjs: [/children/, /children\/(.*)/, /entry/]
+		});
+
+		debugWrapper.appendChild(jsonWrapper);
+		console.log(`Debug`, debugWrapper, jsonWrapper, jsonView)
+
+		this.debugStates[id] = {
+			state,
+			jsonView,
+			isExpanded: true
 		};
 
-		const addDebugState = (id, state) => {
-			//console.log(`add debug`, id, state)
-			const content = this.contentContainer.querySelector(`[data-namespace=${DEBUG_STATE_NAMESPACE}]`);
-			if (!content) return console.error('No content for debug namespace.');
-
-			// create debug state
-			const debugWrapper = document.createElement('div');
-			debugWrapper.classList.add('debug-state');
-			debugWrapper.setAttribute('id', `debug-state-${id}`);
-
-			const toggleButton = document.createElement('button');
-			toggleButton.classList.add('json-toggle');
-			toggleButton.textContent = '[-]';
-			toggleButton.onclick = () => {
-				const isCollapsed = debugWrapper.classList.contains('collapsed');
-				debugWrapper.classList.toggle('collapsed', !isCollapsed);
-				toggleButton.textContent = isCollapsed ? '[-]' : '[+]';
-			};
-			debugWrapper.appendChild(toggleButton);
-
-			const label = document.createElement('div');
-			label.classList.add('debug-state-label');
-			label.innerText = `${id}`;
-			debugWrapper.appendChild(label);
-
-			const jsonWrapper = document.createElement('div');
-			jsonWrapper.classList.add('json-wrapper');
-			debugWrapper.appendChild(jsonWrapper);
-
-			const jsonView = new JsonView(state, jsonWrapper as HTMLElement, {
-				expandObjs: [/children/, /children\/(.*)/, /entry/]
-			});
-			this.debugStates[id] = { state, jsonView };
-
-			// const tree = jsonTree.create(state, jsonWrapper);
-			// tree.expand();
-			content.appendChild(debugWrapper);
-
-			//log(`added debug state`, debugWrapper);
-		};
-
-		//log(`DEBUG STATE:`, id, state);
-		if (this.debugStates[id]) updateDebugState(id, state);
-		else addDebugState(id, state);
+		content.appendChild(debugWrapper);
 	}
 
 	private addTab(namespace: string): void {
@@ -201,48 +459,51 @@ export class DebugPanel {
 		content.dataset.namespace = namespace;
 		this.contentContainer.appendChild(content);
 
-		if (namespace === 'global') {
-			this.addClearButton(content, true);
-		} else {
-			this.addClearButton(content);
-		}
-
 		if (Object.keys(this.tabEntries).length === 1) {
 			this.switchTab(namespace);
 		}
 	}
 
-	private switchTab(namespace: string): void {
-		this.activeTab = namespace;
-		document.querySelectorAll('.debug-tab-content').forEach((el) => ((el as HTMLElement).style.display = 'none'));
-		const activeContent = this.contentContainer.querySelector(`[data-namespace="${namespace}"]`) as HTMLElement;
-		if (activeContent) activeContent.style.display = 'block';
+	private clearCurrentTab(): void {
+		this.clearTab(this.activeTab);
 	}
 
-	private addClearButton(content: HTMLElement, isGlobal: boolean = false): void {
-		const clearButton = document.createElement('button');
-		clearButton.classList.add('debug-clear-button');
-		clearButton.textContent = 'Clear';
-		clearButton.onclick = () => {
-			if (isGlobal) {
-				Object.keys(this.tabEntries).forEach((key) => {
-					this.tabEntries[key] = [];
-					const tabContent = this.contentContainer.querySelector(`[data-namespace="${key}"]`);
-					if (tabContent) tabContent.innerHTML = '';
-				});
-			} else {
-				const namespace = content.dataset.namespace;
-				if (namespace) {
-					if (namespace == DEBUG_STATE_NAMESPACE) {
-						this.debugStates = {};
-					} else {
-						content.innerHTML = '';
-						this.tabEntries[namespace] = [];
-					}
-				}
-			}
-		};
-		content.appendChild(clearButton);
+	private clearTab(namespace: string): void {
+		const content = this.contentContainer.querySelector(`[data-namespace="${namespace}"]`);
+		if (!content) return;
+
+		// Clear the data
+		this.tabEntries[namespace] = [];
+
+		if (namespace === DEBUG_STATE_NAMESPACE) {
+			// Clear debug states
+			Object.keys(this.debugStates).forEach((key) => {
+				delete this.debugStates[key];
+			});
+		}
+
+		// Remove all children from content
+		content.innerHTML = '';
+	}
+
+	private switchTab(namespace: string): void {
+		this.activeTab = namespace;
+
+		// Update tab buttons
+		this.tabContainer.querySelectorAll('.debug-tab').forEach((tab, index) => {
+			const tabNamespace = Object.keys(this.tabEntries)[index];
+			tab.classList.toggle('active', tabNamespace === namespace);
+		});
+
+		// Update content visibility
+		this.contentContainer.querySelectorAll('.debug-tab-content').forEach((el) => {
+			(el as HTMLElement).style.display = 'none';
+		});
+
+		const activeContent = this.contentContainer.querySelector(`[data-namespace="${namespace}"]`) as HTMLElement;
+		if (activeContent) {
+			activeContent.style.display = 'block';
+		}
 	}
 
 	public addLog(namespace: string, message: Array<any> | object | string): void {
@@ -263,8 +524,10 @@ export class DebugPanel {
 		const logElement = this.createLogElement(logEntry, namespace);
 		content.appendChild(logElement);
 
-		// add to global
-		if (namespace != 'global') this.addLog('global', message);
+		// Add to global tab if not already global
+		if (namespace !== 'global') {
+			this.addLog('global', message);
+		}
 	}
 
 	private createLogElement(logEntry: LogEntry, namespace: string): HTMLElement {
@@ -272,18 +535,15 @@ export class DebugPanel {
 		logElement.classList.add('debug-log-entry');
 		logElement.dataset.logId = logEntry.id;
 
-		// Add text:
 		const logText = document.createElement('div');
-		logText.innerText = `[${logEntry.timestamp.toLocaleTimeString()}] ${_renderLogEntry(logEntry.message)}`;
+		logText.innerText = `[${logEntry.timestamp.toLocaleTimeString()}] ${this.renderLogEntry(logEntry.message)}`;
 		logText.classList.add('debug-log-entry-text');
 
-		// Add 'Copy' button
 		const copyButton = document.createElement('button');
 		copyButton.innerText = '📋';
 		copyButton.classList.add('debug-copy-button');
-		copyButton.onclick = () => navigator.clipboard.writeText(logText.innerHTML);
+		copyButton.onclick = () => navigator.clipboard.writeText(logText.innerText);
 
-		// Add 'X' (delete) button
 		const deleteButton = document.createElement('button');
 		deleteButton.innerText = '❌';
 		deleteButton.classList.add('debug-delete-button');
@@ -301,26 +561,36 @@ export class DebugPanel {
 		logElement.remove();
 	}
 
+	private renderLogEntry(message: any): string {
+		if (Array.isArray(message)) {
+			return message.join(' ');
+		}
+		if (typeof message === 'object') {
+			return safeStringify(message);
+		}
+		return String(message);
+	}
+
 	public show(): void {
-		//console.log(`SHOW`)
 		this.container.classList.add('visible');
+		this.saveSettings();
 	}
 
 	public hide(): void {
 		this.container.classList.remove('visible');
+		this.saveSettings();
+	}
+
+	public toggle(): void {
+		if (this.container.classList.contains('visible')) {
+			this.hide();
+		} else {
+			this.show();
+		}
 	}
 }
 
-// utilities:
-
-function _renderLogEntry(message: any) {
-	return Array.isArray(message) ? message.join(' ') : typeof message == 'object' ? safeStringify(message) : `${message}`;
-}
-
-// send state to debug panel to show as JSON view.
-const DEBUG_STATE_NAMESPACE = 'objects';
-export function debugState(id, state) {
-	// get log modules?
+// Utility function to send state to debug panel
+export function debugState(id: string, state: any): void {
 	EventBus.dispatch('debug-state', { id, state });
-	console.log(`debugState:`, id, state);
-}
+} 

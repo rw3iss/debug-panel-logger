@@ -31,6 +31,13 @@ export class JsonView {
 		this.parentContainer.appendChild(rootNode);
 	}
 
+	private toggleExpandNode(childNode: HTMLElement, keyPath: string, toggleButton?: HTMLElement) {
+		const isCollapsed = childNode.classList.contains('collapsed');
+		childNode.classList.toggle('collapsed', !isCollapsed);
+		this.viewStates[keyPath] = !isCollapsed;
+		if (toggleButton) toggleButton.textContent = isCollapsed ? '[-]' : '[+]';
+	}
+
 	private drawJsonNode(jsonObj: any, currPath: string = ''): HTMLElement {
 		const nodeContainer = document.createElement('div');
 		nodeContainer.classList.add('json-node');
@@ -57,6 +64,7 @@ export class JsonView {
 				//console.log(`value:`, value, 'obj?', isObject, 'array?', isArray);
 
 				if (isObject) {
+					label.classList.add('clickable');
 					if (isArray) label.textContent = `${key} (${value.length})`;
 					else label.textContent = key;
 					const hasChildren = isArray && value.length > 0 ? true : Object.keys(value).length > 0;
@@ -97,13 +105,8 @@ export class JsonView {
 					}
 
 					// Toggle function for expanding/collapsing
-					toggleButton.onclick = () => {
-						const isCollapsed = childNode.classList.contains('collapsed');
-						childNode.classList.toggle('collapsed', !isCollapsed);
-						this.viewStates[keyPath] = !isCollapsed;
-						console.log(`viewStates updated.`, this.viewStates);
-						toggleButton.textContent = isCollapsed ? '[-]' : '[+]';
-					};
+					toggleButton.onclick = () => this.toggleExpandNode(childNode, keyPath, toggleButton);
+					label.onclick = () => this.toggleExpandNode(childNode, keyPath, toggleButton);
 
 					propertyRow.appendChild(toggleButton);
 					valueContainer.appendChild(childNode);
@@ -131,4 +134,4 @@ export class JsonView {
 
 		this.render();
 	}
-}
+} 
