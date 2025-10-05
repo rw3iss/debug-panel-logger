@@ -47,7 +47,7 @@ export declare class DebugPanel {
     private restoreSettings;
     private loadSettings;
     private saveSettings;
-    debug(id: string, state: any): void;
+    debug(idOrState: any, state?: any): void;
     private updateDebugState;
     private addDebugState;
     private addTab;
@@ -65,5 +65,5 @@ export declare class DebugPanel {
     hide(): void;
     toggle(): void;
 }
-export declare function debug(id: string, state: any): void;
+export declare function debug(idOrState: string, state?: any): void;
 //# sourceMappingURL=DebugPanel.d.ts.map

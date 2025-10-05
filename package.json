@@ -1,6 +1,6 @@
 {
 	"name": "dev-debug-panel",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"description": "A draggable, resizable debug panel for logging and state inspection in web applications",
 	"license": "ISC",
 	"author": "",
