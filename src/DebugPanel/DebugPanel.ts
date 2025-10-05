@@ -444,7 +444,7 @@ export class DebugPanel {
 		debugWrapper.appendChild(jsonWrapper);
 
 		const jsonView = new JsonView(state, jsonWrapper as HTMLElement, {
-			expandObjs: [/children/, /children\/(.*)/, /entry/]
+			//expandObjs: [/children/, /children\/(.*)/, /entry/]
 		});
 
 		this.debugStates[id] = {

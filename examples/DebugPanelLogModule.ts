@@ -12,25 +12,36 @@ class DebugPanelLogModule implements LogModule {
 	public panel: DebugPanel;
 
 	constructor(opts: DebugPanelOptions = {}) {
+    	// this module creates a DebugPanel for the application
 		this.panel = new DebugPanel(opts);
 	}
 
 	public onLog(log: LogEvent) {
+    	// global log events are then drawn to the panel
 		this.panel.log(log.namespace, log.args);
 	}
 
 	// prints any
 	public print(...args: any[]) {
 		if (args.length) {
-			const printArgs: any[] = [];
 			args.forEach((a) => {
 				if (typeof a === 'object') {
 					this.panel.debug('', a);
 				} else {
-					this.panel.log(a
-					printArgs.push(a);
+					this.panel.log(a);
 				}
 			});
 		}
 	}
 }
+
+/* Intantiate and register the module in your application:
+
+const debugModule = new DebugPanelLogModule({
+  position: 'bottomRight',
+  width: 600,
+  height: 400
+});
+
+addLogModule(debugModule);
+*/

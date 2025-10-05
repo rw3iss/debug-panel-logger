@@ -1,9 +1,21 @@
 {
 	"name": "dev-debug-panel",
-	"version": "1.0.1",
+	"version": "1.0.2",
 	"description": "A draggable, resizable debug panel for logging and state inspection in web applications",
 	"license": "ISC",
-	"author": "",
+	"homepage": "https://github.com/rw3iss/dev-debug-panel#readme",
+	"bugs": {
+		"url": "https://github.com/rw3iss/dev-debug-panel/issues"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/rw3iss/dev-debug-panel.git"
+	},
+	"author": {
+		"name": "Ryan Weiss",
+		"email": "rw3iss@gmail.com",
+		"url": "https://www.ryanweiss.net"
+	},
 	"type": "module",
 	"main": "dist/index.cjs.js",
 	"module": "dist/index.esm.js",

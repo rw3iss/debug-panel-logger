@@ -1,10 +1,10 @@
 # Debug Panel (dev-debug-panel)
 
-A lightweight draggable, resizable, and snappable multi-tab debug panel for development, utilizing json diffing to only update its view with changed properties. Maintains view state across object updates to easily debug them. Works with any framework (see below for examples).
+A lightweight draggable, resizable, and snappable multi-tab debug panel for development, utilizing json diffing to only update its view with changed properties. Maintains view state across object updates and page reloads to easily debug them. Works with any framework (see below for examples).
 
 ## Features
 
-- 🎯 **Draggable & Resizable** - Position and size the panel to fit your workflow. Supports configurable snapping options and opacity controls. View settings are preserved across page reloads. Ctrl+Alt+D toggle hiding and showing the panel.
+- 🎯 **Draggable & Resizable** - Drag and resize the panel as needed. Supports configurable snapping options and opacity controls. View settings are preserved across page reloads. Ctrl+Alt+D to hide and show the panel.
 
 - 📊 **State Inspection** - View and track object states with JSON tree visualization. If you update an object, the view will remember it's state, allowing easier debugging.
 
@@ -55,8 +55,8 @@ debug('config', { theme: 'dark', api: 'https://api.example.com' });
 panel.debug('user', { id: 1, name: 'John', active: true });
 
 // And add regular logs
-panel.log('api', ['Fetching user data...']);
-panel.log('ui', ['Button clicked', { buttonId: 'submit' }]);
+panel.log('api', 'Fetching user data...');
+panel.log('ui', 'Button clicked', { buttonId: 'submit' });
 ```
 See [examples/DebugPanelLogModule.ts](../examples/DebugPanelLogModule.ts) for an example of listening to all log events, sending them to DebugPanel automatically, and integrating with other systems.
 
@@ -103,7 +103,7 @@ For example, if using the dev-loggers package, you can draw all log() calls thro
 
 The LogModule will receive log events inside its onLog handler, and pass them to the DebugPanel to draw there.
 
-You can register any class which implements the onLog(log) handler with addLogModule({onLog})
+You can register any class which implements the onLog(log) handler with addLogModule:
 ```typescript
 import { LogModule } from 'dev-debug-panel';
 import { addLogModule } from 'dev-loggers';
@@ -113,29 +113,17 @@ class DebugPanelLogModule implements LogModule {
 	public panel: DebugPanel;
 
 	constructor(opts: DebugPanelOptions = {}) {
+    // this module creates a DebugPanel for the application
 		this.panel = new DebugPanel(opts);
 	}
 
 	public onLog(log: LogEvent) {
+    // global log events are then drawn to the panel
 		this.panel.log(log.namespace, log.args);
-	}
-
-  //
-	public print(...args: any[]) {
-		if (args.length) {
-			const printArgs: any[] = [];
-			args.forEach((a) => {
-				if (typeof a === 'object') {
-					this.panel.debugState('', a);
-				} else {
-					printArgs.push(a);
-				}
-			});
-		}
 	}
 }
 
-// Create a global log module in your app and register it:
+// Instantiate the global log module in your app and register it:
 const debugModule = new DebugPanelLogModule({
   position: 'bottomRight',
   width: 600,
