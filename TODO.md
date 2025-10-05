@@ -1,0 +1,4 @@
+- benchmark the diffing algorithm vs normal replace.
+- currently the dom updates are not done through the diff/patch, fix.
+- make debug first arg identifier optional
+- allow debug to support array args?

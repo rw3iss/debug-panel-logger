@@ -3,9 +3,9 @@ import './DebugPanel/DebugPanel.scss';
 import './JsonView/JsonView.scss';
 
 // Export main classes and utilities
-export { DebugPanel, DebugPanelLogModule, ScreenPosition } from './DebugPanel/DebugPanel';
+export { DebugPanel, ScreenPosition } from './DebugPanel/DebugPanel';
 export { JsonView } from './JsonView/JsonView';
-export { debugState } from './DebugPanel/DebugPanel';
+export { debug } from './DebugPanel/DebugPanel';
 export { makeResizable, makeDraggable, getWindowSize } from './utils/domUtils';
 
 // Export types for TypeScript users
@@ -14,4 +14,4 @@ export type {
 	DebugPanelSettings,
 	ResizeOptions,
 	DragOptions
-} from './types'; 
+} from './types';

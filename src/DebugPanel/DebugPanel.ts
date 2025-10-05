@@ -1,6 +1,5 @@
 import EventBus from 'eventbusjs';
-import { LogModule } from 'get-loggers';
-import safeStringify from 'safe-stringify';
+import safeStringify from 'fast-safe-stringify';
 import { JsonView } from '../JsonView/JsonView';
 import { getWindowSize, makeResizable, makeDraggable } from '../utils/domUtils';
 
@@ -59,32 +58,32 @@ export interface DebugPanelOptions {
 }
 
 // Wrapping class to use the DebugPanel within the Logging framework
-export class DebugPanelLogModule implements LogModule {
-	public name = 'DebugPanel';
-	public panel: DebugPanel;
+// export class DebugPanelLogModule implements LogModule {
+// 	public name = 'DebugPanel';
+// 	public panel: DebugPanel;
 
-	constructor(opts: DebugPanelOptions = {}) {
-		this.panel = new DebugPanel(opts);
-		// Don't auto-show here - let the DebugPanel constructor handle it
-	}
+// 	constructor(opts: DebugPanelOptions = {}) {
+// 		this.panel = new DebugPanel(opts);
+// 		// Don't auto-show here - let the DebugPanel constructor handle it
+// 	}
 
-	public onLog(log: LogEvent) {
-		this.panel.addLog(log.namespace, log.args);
-	}
+// 	public onLog(log: LogEvent) {
+// 		this.panel.log(log.namespace, log.args);
+// 	}
 
-	public print(...args: any[]) {
-		if (args.length) {
-			const printArgs: any[] = [];
-			args.forEach((a) => {
-				if (typeof a === 'object') {
-					this.panel.debugState('', a);
-				} else {
-					printArgs.push(a);
-				}
-			});
-		}
-	}
-}
+// 	public print(...args: any[]) {
+// 		if (args.length) {
+// 			const printArgs: any[] = [];
+// 			args.forEach((a) => {
+// 				if (typeof a === 'object') {
+// 					this.panel.debugState('', a);
+// 				} else {
+// 					printArgs.push(a);
+// 				}
+// 			});
+// 		}
+// 	}
+// }
 
 export class DebugPanel {
 	private container: HTMLElement;
@@ -157,6 +156,161 @@ export class DebugPanel {
 		return contentContainer;
 	}
 
+	private createGlobalToolbar(): HTMLElement {
+		const toolbar = document.createElement('div');
+		toolbar.classList.add('debug-toolbar');
+
+		const hint = document.createElement('span');
+		hint.classList.add('debug-keyboard-hint');
+		hint.textContent = 'Ctrl+Alt+D to hide/show';
+		hint.style.color = '#999';
+		hint.style.fontSize = '11px';
+
+		const opacityContainer = document.createElement('div');
+		opacityContainer.classList.add('debug-opacity-container');
+
+		const opacityLabel = document.createElement('label');
+		opacityLabel.classList.add('debug-opacity-label');
+		opacityLabel.textContent = 'O';
+		opacityLabel.style.fontSize = '11px';
+		opacityLabel.style.color = '#999';
+		opacityLabel.style.marginRight = '5px';
+
+		this.opacitySlider = document.createElement('input');
+		this.opacitySlider.type = 'range';
+		this.opacitySlider.min = '20';
+		this.opacitySlider.max = '100';
+		this.opacitySlider.value = '100';
+		this.opacitySlider.classList.add('debug-opacity-slider');
+		this.opacitySlider.oninput = () => this.handleOpacityChange();
+
+		//opacityContainer.appendChild(opacityLabel);
+		opacityContainer.appendChild(this.opacitySlider);
+
+		const clearButton = document.createElement('button');
+		clearButton.classList.add('debug-clear-button');
+		clearButton.textContent = 'Clear';
+		clearButton.onclick = () => this.clearCurrentTab();
+
+		const hideButton = document.createElement('button');
+		hideButton.classList.add('debug-hide-button');
+		hideButton.textContent = 'Hide';
+		hideButton.onclick = () => this.hide();
+
+		toolbar.appendChild(hint);
+		toolbar.appendChild(opacityContainer);
+		toolbar.appendChild(clearButton);
+		toolbar.appendChild(hideButton);
+
+		return toolbar;
+	}
+
+	private setupResizable(): void {
+		const { width, height } = getWindowSize();
+
+		makeResizable(this.container, {
+			handles: ['top', 'left', 'right', 'bottom', 'top-left', 'top-right', 'bottom-left', 'bottom-right'],
+			maxWidth: width - 20,
+			maxHeight: height - 20,
+			minWidth: 200,
+			minHeight: 150,
+			onResize: (newWidth: number) => {
+				this.updateToolbarLayout(newWidth);
+				this.saveSettings();
+			}
+		});
+	}
+
+	private setupDraggable(): void {
+		if (this.options.snap) {
+			makeDraggable(this.container, this.tabContainer, {
+				onDrag: (x: number, y: number) => this.handleSnapWhileDragging(x, y),
+				onDragEnd: () => this.saveSettings()
+			});
+		} else {
+			makeDraggable(this.container, this.tabContainer, {
+				onDragEnd: () => this.saveSettings()
+			});
+		}
+	}
+
+	private setupPosition(): void {
+		const { width, height } = getWindowSize();
+		const panelWidth = this.options.width || 600;
+		const panelHeight = this.options.height || 400;
+
+		let left = 0;
+		let top = 0;
+
+		switch (this.options.position) {
+			case ScreenPosition.TopLeft:
+				left = 0;
+				top = 0;
+				break;
+			case ScreenPosition.Top:
+				left = (width - panelWidth) / 2;
+				top = 0;
+				break;
+			case ScreenPosition.TopRight:
+				left = width - panelWidth;
+				top = 0;
+				break;
+			case ScreenPosition.Right:
+				left = width - panelWidth;
+				top = (height - panelHeight) / 2;
+				break;
+			case ScreenPosition.BottomRight:
+				left = width - panelWidth;
+				top = height - panelHeight;
+				break;
+			case ScreenPosition.Bottom:
+				left = (width - panelWidth) / 2;
+				top = height - panelHeight;
+				break;
+			case ScreenPosition.BottomLeft:
+				left = 0;
+				top = height - panelHeight;
+				break;
+			case ScreenPosition.Left:
+				left = 0;
+				top = (height - panelHeight) / 2;
+				break;
+		}
+
+		this.container.style.left = `${left}px`;
+		this.container.style.top = `${top}px`;
+	}
+
+	private setupKeyboardShortcut(): void {
+		document.addEventListener('keydown', (event: KeyboardEvent) => {
+			// Check for Ctrl+Alt+D
+			if (event.ctrlKey && event.altKey && event.key.toLowerCase() === 'd') {
+				event.preventDefault();
+				this.toggle();
+			}
+		});
+	}
+
+	private setupEventListeners(): void {
+		EventBus.addEventListener('log', (event: any) => {
+			const { namespace, message } = event.target;
+			this.log(namespace, message);
+		});
+
+		// special listener for sending objects to the objects panel
+		// todo:
+		EventBus.addEventListener('debug', (event: any) => {
+			const { id, state } = event.target;
+			if (!id || !state) {
+				console.log('Invalid event data for debug-state. Expected {id, state}, got:', event);
+				return;
+			}
+			this.debug(id, state);
+		});
+	}
+
+	// Settings management
+
 	private restoreSettings(): void {
 		const savedSettings = this.loadSettings();
 
@@ -216,213 +370,11 @@ export class DebugPanel {
 		}
 	}
 
-	private setupPosition(): void {
-		const { width, height } = getWindowSize();
-		const panelWidth = this.options.width || 600;
-		const panelHeight = this.options.height || 400;
+	// Debug objects
 
-		let left = 0;
-		let top = 0;
-
-		switch (this.options.position) {
-			case ScreenPosition.TopLeft:
-				left = 0;
-				top = 0;
-				break;
-			case ScreenPosition.Top:
-				left = (width - panelWidth) / 2;
-				top = 0;
-				break;
-			case ScreenPosition.TopRight:
-				left = width - panelWidth;
-				top = 0;
-				break;
-			case ScreenPosition.Right:
-				left = width - panelWidth;
-				top = (height - panelHeight) / 2;
-				break;
-			case ScreenPosition.BottomRight:
-				left = width - panelWidth;
-				top = height - panelHeight;
-				break;
-			case ScreenPosition.Bottom:
-				left = (width - panelWidth) / 2;
-				top = height - panelHeight;
-				break;
-			case ScreenPosition.BottomLeft:
-				left = 0;
-				top = height - panelHeight;
-				break;
-			case ScreenPosition.Left:
-				left = 0;
-				top = (height - panelHeight) / 2;
-				break;
-		}
-
-		this.container.style.left = `${left}px`;
-		this.container.style.top = `${top}px`;
-	}
-
-	private createGlobalToolbar(): HTMLElement {
-		const toolbar = document.createElement('div');
-		toolbar.classList.add('debug-toolbar');
-
-		const hint = document.createElement('span');
-		hint.classList.add('debug-keyboard-hint');
-		hint.textContent = 'Ctrl+Alt+D to hide/show';
-		hint.style.color = '#999';
-		hint.style.fontSize = '11px';
-
-		const opacityContainer = document.createElement('div');
-		opacityContainer.classList.add('debug-opacity-container');
-
-		const opacityLabel = document.createElement('label');
-		opacityLabel.classList.add('debug-opacity-label');
-		opacityLabel.textContent = 'O';
-		opacityLabel.style.fontSize = '11px';
-		opacityLabel.style.color = '#999';
-		opacityLabel.style.marginRight = '5px';
-
-		this.opacitySlider = document.createElement('input');
-		this.opacitySlider.type = 'range';
-		this.opacitySlider.min = '20';
-		this.opacitySlider.max = '100';
-		this.opacitySlider.value = '100';
-		this.opacitySlider.classList.add('debug-opacity-slider');
-		this.opacitySlider.oninput = () => this.handleOpacityChange();
-
-		//opacityContainer.appendChild(opacityLabel);
-		opacityContainer.appendChild(this.opacitySlider);
-
-		const clearButton = document.createElement('button');
-		clearButton.classList.add('debug-clear-button');
-		clearButton.textContent = 'Clear';
-		clearButton.onclick = () => this.clearCurrentTab();
-
-		const hideButton = document.createElement('button');
-		hideButton.classList.add('debug-hide-button');
-		hideButton.textContent = 'Hide';
-		hideButton.onclick = () => this.hide();
-
-		toolbar.appendChild(hint);
-		toolbar.appendChild(opacityContainer);
-		toolbar.appendChild(clearButton);
-		toolbar.appendChild(hideButton);
-
-		return toolbar;
-	}
-
-	private handleOpacityChange(): void {
-		const opacityPercent = parseInt(this.opacitySlider.value);
-		const opacity = opacityPercent / 100;
-
-		// Only set opacity when visible
-		if (this.container.classList.contains('visible')) {
-			this.container.style.opacity = String(opacity);
-		}
-
-		this.saveSettings();
-	}
-
-	private setupResizable(): void {
-		const { width, height } = getWindowSize();
-
-		makeResizable(this.container, {
-			handles: ['top', 'left', 'right', 'bottom', 'top-left', 'top-right', 'bottom-left', 'bottom-right'],
-			maxWidth: width - 20,
-			maxHeight: height - 20,
-			minWidth: 200,
-			minHeight: 150,
-			onResize: (newWidth: number) => {
-				this.updateToolbarLayout(newWidth);
-				this.saveSettings();
-			}
-		});
-	}
-
-	private updateToolbarLayout(width: number): void {
-		// Toggle narrow-panel class based on width
-		if (width < MIN_WIDTH) {
-			this.container.classList.add('narrow-panel');
-		} else {
-			this.container.classList.remove('narrow-panel');
-		}
-	}
-
-	private setupDraggable(): void {
-		if (this.options.snap) {
-			makeDraggable(this.container, this.tabContainer, {
-				onDrag: (x: number, y: number) => this.handleSnapWhileDragging(x, y),
-				onDragEnd: () => this.saveSettings()
-			});
-		} else {
-			makeDraggable(this.container, this.tabContainer, {
-				onDragEnd: () => this.saveSettings()
-			});
-		}
-	}
-
-	private handleSnapWhileDragging(x: number, y: number): void {
-		const snapPadding = this.options.snapPadding || 20;
-		const { width: windowWidth, height: windowHeight } = getWindowSize();
-		const panelWidth = this.container.offsetWidth;
-		const panelHeight = this.container.offsetHeight;
-
-		let snappedX = x;
-		let snappedY = y;
-
-		// Snap to left edge
-		if (x < snapPadding) {
-			snappedX = 0;
-		}
-		// Snap to right edge
-		else if (x + panelWidth > windowWidth - snapPadding) {
-			snappedX = windowWidth - panelWidth;
-		}
-
-		// Snap to top edge
-		if (y < snapPadding) {
-			snappedY = 0;
-		}
-		// Snap to bottom edge
-		else if (y + panelHeight > windowHeight - snapPadding) {
-			snappedY = windowHeight - panelHeight;
-		}
-
-		// Only update if position changed (for performance)
-		if (snappedX !== x || snappedY !== y) {
-			this.container.style.left = `${snappedX}px`;
-			this.container.style.top = `${snappedY}px`;
-		}
-	}
-
-	private setupKeyboardShortcut(): void {
-		document.addEventListener('keydown', (event: KeyboardEvent) => {
-			// Check for Ctrl+Alt+D
-			if (event.ctrlKey && event.altKey && event.key.toLowerCase() === 'd') {
-				event.preventDefault();
-				this.toggle();
-			}
-		});
-	}
-
-	private setupEventListeners(): void {
-		EventBus.addEventListener('log', (event: any) => {
-			const { namespace, message } = event.target;
-			this.addLog(namespace, message);
-		});
-
-		EventBus.addEventListener('debug-state', (event: any) => {
-			const { id, state } = event.target;
-			if (!id || !state) {
-				console.log('Invalid event data for debug-state. Expected {id,state}, got:', event);
-				return;
-			}
-			this.debugState(id, state);
-		});
-	}
-
-	public debugState(id: string, state: any): void {
+	public debug(idOrState: any, state?: any): void {
+		//if (typeof idOrState === 'string')
+		const id = idOrState;
 		const safeState = safeStringify(state);
 		const parsedState = JSON.parse(safeState);
 
@@ -504,6 +456,8 @@ export class DebugPanel {
 		content.appendChild(debugWrapper);
 	}
 
+	// Tab controls
+
 	private addTab(namespace: string): void {
 		if (this.tabEntries[namespace]) return;
 
@@ -567,7 +521,9 @@ export class DebugPanel {
 		}
 	}
 
-	public addLog(namespace: string, message: Array<any> | object | string): void {
+	// Log controls
+
+	public log(namespace: string, message: Array<any> | object | string): void {
 		if (!this.tabEntries[namespace]) {
 			this.addTab(namespace);
 		}
@@ -587,7 +543,7 @@ export class DebugPanel {
 
 		// Add to global tab if not already global
 		if (namespace !== 'global') {
-			this.addLog('global', message);
+			this.log('global', message);
 		}
 	}
 
@@ -632,6 +588,65 @@ export class DebugPanel {
 		return String(message);
 	}
 
+	// Misc UI helpers
+
+	private updateToolbarLayout(width: number): void {
+		// Toggle narrow-panel class based on width
+		if (width < MIN_WIDTH) {
+			this.container.classList.add('narrow-panel');
+		} else {
+			this.container.classList.remove('narrow-panel');
+		}
+	}
+
+	private handleOpacityChange(): void {
+		const opacityPercent = parseInt(this.opacitySlider.value);
+		const opacity = opacityPercent / 100;
+
+		// Only set opacity when visible
+		if (this.container.classList.contains('visible')) {
+			this.container.style.opacity = String(opacity);
+		}
+
+		this.saveSettings();
+	}
+
+	private handleSnapWhileDragging(x: number, y: number): void {
+		const snapPadding = this.options.snapPadding || 20;
+		const { width: windowWidth, height: windowHeight } = getWindowSize();
+		const panelWidth = this.container.offsetWidth;
+		const panelHeight = this.container.offsetHeight;
+
+		let snappedX = x;
+		let snappedY = y;
+
+		// Snap to left edge
+		if (x < snapPadding) {
+			snappedX = 0;
+		}
+		// Snap to right edge
+		else if (x + panelWidth > windowWidth - snapPadding) {
+			snappedX = windowWidth - panelWidth;
+		}
+
+		// Snap to top edge
+		if (y < snapPadding) {
+			snappedY = 0;
+		}
+		// Snap to bottom edge
+		else if (y + panelHeight > windowHeight - snapPadding) {
+			snappedY = windowHeight - panelHeight;
+		}
+
+		// Only update if position changed (for performance)
+		if (snappedX !== x || snappedY !== y) {
+			this.container.style.left = `${snappedX}px`;
+			this.container.style.top = `${snappedY}px`;
+		}
+	}
+
+	// Panel controls
+
 	public show(): void {
 		this.container.classList.add('visible');
 		// Restore the opacity setting when showing
@@ -655,6 +670,6 @@ export class DebugPanel {
 }
 
 // Utility function to send state to debug panel
-export function debugState(id: string, state: any): void {
-	EventBus.dispatch('debug-state', { id, state });
-} 
+export function debug(idOrState: string, state?: any): void {
+	EventBus.dispatch('debug', { idOrState, state });
+}

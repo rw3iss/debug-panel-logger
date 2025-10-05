@@ -1,4 +1,3 @@
-import { LogModule } from 'get-loggers';
 export declare enum ScreenPosition {
     TopLeft = "topLeft",
     Top = "top",
@@ -9,10 +8,6 @@ export declare enum ScreenPosition {
     BottomLeft = "bottomLeft",
     Left = "left"
 }
-type LogEvent = {
-    namespace: string;
-    args: Array<any>;
-};
 export interface DebugPanelSettings {
     left: number;
     top: number;
@@ -29,13 +24,6 @@ export interface DebugPanelOptions {
     snap?: boolean;
     snapPadding?: number;
 }
-export declare class DebugPanelLogModule implements LogModule {
-    name: string;
-    panel: DebugPanel;
-    constructor(opts?: DebugPanelOptions);
-    onLog(log: LogEvent): void;
-    print(...args: any[]): void;
-}
 export declare class DebugPanel {
     private container;
     private tabContainer;
@@ -50,33 +38,32 @@ export declare class DebugPanel {
     private createContainer;
     private createTabContainer;
     private createContentContainer;
+    private createGlobalToolbar;
+    private setupResizable;
+    private setupDraggable;
+    private setupPosition;
+    private setupKeyboardShortcut;
+    private setupEventListeners;
     private restoreSettings;
     private loadSettings;
     private saveSettings;
-    private setupPosition;
-    private createGlobalToolbar;
-    private handleOpacityChange;
-    private setupResizable;
-    private updateToolbarLayout;
-    private setupDraggable;
-    private handleSnapWhileDragging;
-    private setupKeyboardShortcut;
-    private setupEventListeners;
-    debugState(id: string, state: any): void;
+    debug(id: string, state: any): void;
     private updateDebugState;
     private addDebugState;
     private addTab;
     private clearCurrentTab;
     private clearTab;
     private switchTab;
-    addLog(namespace: string, message: Array<any> | object | string): void;
+    log(namespace: string, message: Array<any> | object | string): void;
     private createLogElement;
     private removeLogEntry;
     private renderLogEntry;
+    private updateToolbarLayout;
+    private handleOpacityChange;
+    private handleSnapWhileDragging;
     show(): void;
     hide(): void;
     toggle(): void;
 }
-export declare function debugState(id: string, state: any): void;
-export {};
+export declare function debug(id: string, state: any): void;
 //# sourceMappingURL=DebugPanel.d.ts.map

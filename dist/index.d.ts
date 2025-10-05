@@ -1,8 +1,8 @@
 import './DebugPanel/DebugPanel.scss';
-import './JsonView.scss';
-export { DebugPanel, DebugPanelLogModule, ScreenPosition } from './DebugPanel/DebugPanel';
-export { JsonView } from './JsonView';
-export { debugState } from './DebugPanel/DebugPanel';
+import './JsonView/JsonView.scss';
+export { DebugPanel, ScreenPosition } from './DebugPanel/DebugPanel';
+export { JsonView } from './JsonView/JsonView';
+export { debug } from './DebugPanel/DebugPanel';
 export { makeResizable, makeDraggable, getWindowSize } from './utils/domUtils';
 export type { DebugPanelOptions, DebugPanelSettings, ResizeOptions, DragOptions } from './types';
 //# sourceMappingURL=index.d.ts.map

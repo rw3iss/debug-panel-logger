@@ -1,5 +1,5 @@
 {
-	"name": "debug-panel-logger",
+	"name": "dev-debug-panel",
 	"version": "1.0.0",
 	"description": "A draggable, resizable debug panel for logging and state inspection in web applications",
 	"license": "ISC",
@@ -11,10 +11,10 @@
 	"types": "dist/index.d.ts",
 	"exports": {
 		".": {
-			"import": "./dist/index.esm.js",
-			"require": "./dist/index.cjs.js",
+			"types": "./dist/index.d.ts",
 			"browser": "./dist/index.umd.js",
-			"types": "./dist/index.d.ts"
+			"import": "./dist/index.esm.js",
+			"require": "./dist/index.cjs.js"
 		}
 	},
 	"files": [
@@ -38,14 +38,12 @@
 	],
 	"peerDependencies": {
 		"eventbusjs": "^0.2.0",
-		"jsondiffpatch": "^0.7.3",
-		"safe-stringify": "^1.2.0"
+		"jsondiffpatch": "^0.7.3"
 	},
 	"dependencies": {
 		"eventbusjs": "^0.2.0",
-		"get-loggers": "^1.1.4",
-		"jsondiffpatch": "^0.7.3",
-		"safe-stringify": "^1.2.0"
+		"fast-safe-stringify": "^2.1.1",
+		"jsondiffpatch": "^0.7.3"
 	},
 	"devDependencies": {
 		"esbuild": "^0.21.5",

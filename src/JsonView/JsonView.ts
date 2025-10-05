@@ -129,9 +129,11 @@ export class JsonView {
 		//console.log(`json delta`, delta)
 		jsondiffpatch.patch(this.json, delta);
 		//this.json = newJson;
+
 		// todo: only render changed nodes... how? use data-path="" for each node?
 		// ... could keep track of each path in a viewstate... during render... restore viewstate...
+		// or somehow use delta to find nodes to redraw.
 
 		this.render();
 	}
-} 
+}
