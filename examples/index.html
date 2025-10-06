@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DebugPanel Demo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        h1 {
+            color: #333;
+        }
+        .controls {
+            margin: 20px 0;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .info {
+            margin-top: 20px;
+            padding: 15px;
+            background: #e7f3ff;
+            border-left: 4px solid #007bff;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <h1>DebugPanel Demo</h1>
+
+    <div class="controls">
+        <h2>Demo Controls</h2>
+        <button onclick="showSimpleObject()">Show Simple Object</button>
+        <button onclick="showNestedObject()">Show Nested Object</button>
+        <button onclick="updateObject()">Update Object</button>
+        <button onclick="showArray()">Show Array</button>
+        <button onclick="clearPanel()">Clear Panel</button>
+    </div>
+
+    <div class="info">
+        <h3>Instructions:</h3>
+        <ul>
+            <li>Click the buttons above to interact with the DebugPanel</li>
+            <li>The panel can be dragged by the title bar</li>
+            <li>The panel can be resized from the edges</li>
+            <li>Click object keys to expand/collapse nested structures</li>
+            <li>The panel will only update changed DOM nodes when you call update</li>
+        </ul>
+    </div>
+
+    <!-- Import the UMD build -->
+    <script src="../dist/index.umd.js"></script>
+
+    <script>
+        // Access the global DebugPanel and debug function
+        // Both window.DebugPanel and window.DevDebugPanel are available
+        const { DebugPanel, ScreenPosition } = window;
+
+        const panel = new DebugPanel({
+            show: true,
+            position: ScreenPosition.BottomRight,
+            width: 400,
+            height: 500
+        });
+
+        // Sample data
+        let counter = 0;
+        let testData = {
+            name: 'Test Object',
+            value: 42,
+            active: true,
+            timestamp: new Date().toISOString()
+        };
+
+        function showSimpleObject() {
+            const data = {
+                message: 'Hello from DebugPanel!',
+                timestamp: new Date().toISOString(),
+                count: ++counter,
+                status: 'active'
+            };
+            debug('simple', data);
+        }
+
+        function showNestedObject() {
+            const data = {
+                user: {
+                    id: 123,
+                    name: 'John Doe',
+                    email: 'john@example.com',
+                    settings: {
+                        theme: 'dark',
+                        notifications: true,
+                        privacy: {
+                            shareData: false,
+                            showProfile: true
+                        }
+                    }
+                },
+                metadata: {
+                    created: new Date().toISOString(),
+                    version: '1.0.0'
+                }
+            };
+            debug('nested', data);
+        }
+
+        function updateObject() {
+            testData.value = Math.floor(Math.random() * 100);
+            testData.active = !testData.active;
+            testData.timestamp = new Date().toISOString();
+            testData.count = ++counter;
+
+            // This will only update the changed properties in the DOM
+            debug('object', testData);
+        }
+
+        function showArray() {
+            const data = {
+                items: [
+                    { id: 1, name: 'Item 1', price: 10.99 },
+                    { id: 2, name: 'Item 2', price: 25.50 },
+                    { id: 3, name: 'Item 3', price: 15.00 }
+                ],
+                total: 51.49
+            };
+            debug('array', data);
+        }
+
+        function clearPanel() {
+			panel.clear();
+            // Clear by setting empty object
+            //debug('object', {});
+        }
+
+        // Show initial demo data
+        debug('object', testData);
+
+        console.log('DebugPanel demo loaded! Use the buttons to interact with the panel.');
+    </script>
+</body>
+</html>

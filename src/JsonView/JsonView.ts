@@ -126,14 +126,193 @@ export class JsonView {
 
 	public updateJson(newJson: any): void {
 		const delta = jsondiffpatch.diff(this.json, newJson);
-		//console.log(`json delta`, delta)
+		if (!delta) return; // No changes
+
+		// Apply patch to the JSON data
 		jsondiffpatch.patch(this.json, delta);
-		//this.json = newJson;
 
-		// todo: only render changed nodes... how? use data-path="" for each node?
-		// ... could keep track of each path in a viewstate... during render... restore viewstate...
-		// or somehow use delta to find nodes to redraw.
-
-		this.render();
+		// Update only the changed DOM nodes
+		this.patchDOM(delta);
 	}
-}
+
+	private patchDOM(delta: any, currentPath: string = ''): void {
+		for (const key in delta) {
+			if (!Object.prototype.hasOwnProperty.call(delta, key)) continue;
+
+			const change = delta[key];
+			const keyPath = currentPath ? `${currentPath}${key}` : key;
+
+			// Check if this is a jsondiffpatch operation marker
+			if (key === '_t') continue; // Array marker
+
+			// Find the DOM node for this path
+			const propertyNode = this.parentContainer.querySelector(
+				`.json-property[data-path="${keyPath}"]`
+			) as HTMLElement;
+
+			if (Array.isArray(change)) {
+				// Simple value change: [oldValue, newValue]
+				if (change.length === 2) {
+					this.updateValueNode(propertyNode, keyPath, this.getValueAtPath(this.json, keyPath));
+				}
+				// Deleted value: [oldValue, 0, 0]
+				else if (change.length === 3 && change[1] === 0 && change[2] === 0) {
+					if (propertyNode) propertyNode.remove();
+				}
+				// New value: [newValue]
+				else if (change.length === 1) {
+					this.addPropertyNode(keyPath, change[0]);
+				}
+			} else if (typeof change === 'object') {
+				// Nested object changes - recurse
+				this.patchDOM(change, keyPath + '/');
+			}
+		}
+	}
+
+	private getValueAtPath(obj: any, path: string): any {
+		const parts = path.split('/').filter((p) => p);
+		let current = obj;
+		for (const part of parts) {
+			if (current === null || current === undefined) return undefined;
+			current = current[part];
+		}
+		return current;
+	}
+
+	private updateValueNode(propertyNode: HTMLElement | null, keyPath: string, newValue: any): void {
+		if (!propertyNode) return;
+
+		const valueContainer = propertyNode.querySelector('.json-value') as HTMLElement;
+		if (!valueContainer) return;
+
+		const isObject = typeof newValue === 'object' && newValue !== null;
+
+		if (isObject) {
+			// Object/array changed - need to redraw the entire subtree
+			const key = keyPath.split('/').filter((p) => p).pop() || '';
+			const parentPath = keyPath.substring(0, keyPath.lastIndexOf(key));
+
+			// Clear old content
+			valueContainer.innerHTML = '';
+			propertyNode.classList.add('object');
+
+			// Redraw the node
+			const label = propertyNode.querySelector('.json-key') as HTMLElement;
+			const isArray = Array.isArray(newValue);
+
+			if (label) {
+				label.classList.add('clickable');
+				if (isArray) {
+					label.textContent = `${key} (${newValue.length})`;
+				} else {
+					label.textContent = key;
+				}
+			}
+
+			// Check if toggle button already exists
+			let toggleButton = propertyNode.querySelector('.json-toggle') as HTMLElement;
+			if (!toggleButton) {
+				toggleButton = document.createElement('button');
+				toggleButton.classList.add('json-toggle');
+				propertyNode.insertBefore(toggleButton, label);
+			}
+
+			// Recursive call to render child object
+			const childNode = this.drawJsonNode(newValue, keyPath + '/');
+
+			// Preserve expand state if it exists
+			const wasExpanded = this.viewStates[keyPath];
+			if (typeof wasExpanded !== 'undefined') {
+				if (wasExpanded) {
+					toggleButton.textContent = '[-]';
+				} else {
+					toggleButton.textContent = '[+]';
+					childNode.classList.add('collapsed');
+				}
+			} else {
+				toggleButton.textContent = '[+]';
+				childNode.classList.add('collapsed');
+			}
+
+			toggleButton.onclick = () => this.toggleExpandNode(childNode, keyPath, toggleButton);
+			if (label) {
+				label.onclick = () => this.toggleExpandNode(childNode, keyPath, toggleButton);
+			}
+
+			valueContainer.appendChild(childNode);
+		} else {
+			// Simple value - just update text
+			propertyNode.classList.remove('object');
+			const toggleButton = propertyNode.querySelector('.json-toggle');
+			if (toggleButton) toggleButton.remove();
+
+			valueContainer.innerHTML = '';
+			valueContainer.textContent = String(newValue);
+		}
+	}
+
+	private addPropertyNode(keyPath: string, value: any): void {
+		const pathParts = keyPath.split('/').filter((p) => p);
+		const key = pathParts.pop() || '';
+		const parentPath = pathParts.join('/');
+
+		// Find parent container
+		let parentContainer: HTMLElement | null;
+		if (parentPath) {
+			const parentProperty = this.parentContainer.querySelector(
+				`.json-property[data-path="${parentPath}"]`
+			) as HTMLElement;
+			if (parentProperty) {
+				parentContainer = parentProperty.querySelector('.json-properties') as HTMLElement;
+			} else {
+				return; // Parent not found
+			}
+		} else {
+			parentContainer = this.parentContainer.querySelector('.json-properties') as HTMLElement;
+		}
+
+		if (!parentContainer) return;
+
+		// Create new property row
+		const propertyRow = document.createElement('div');
+		propertyRow.classList.add('json-property');
+		propertyRow.setAttribute('data-path', keyPath);
+
+		const label = document.createElement('span');
+		label.classList.add('json-key');
+		label.textContent = key + ': ';
+
+		const valueContainer = document.createElement('div');
+		valueContainer.classList.add('json-value');
+
+		const isObject = typeof value === 'object' && value !== null;
+		const isArray = Array.isArray(value);
+
+		if (isObject) {
+			label.classList.add('clickable');
+			if (isArray) label.textContent = `${key} (${value.length})`;
+			else label.textContent = key;
+			propertyRow.classList.add('object');
+
+			const toggleButton = document.createElement('button');
+			toggleButton.classList.add('json-toggle');
+			toggleButton.textContent = '[+]';
+
+			const childNode = this.drawJsonNode(value, keyPath + '/');
+			childNode.classList.add('collapsed');
+
+			toggleButton.onclick = () => this.toggleExpandNode(childNode, keyPath, toggleButton);
+			label.onclick = () => this.toggleExpandNode(childNode, keyPath, toggleButton);
+
+			propertyRow.appendChild(toggleButton);
+			valueContainer.appendChild(childNode);
+		} else {
+			valueContainer.textContent = String(value);
+		}
+
+		propertyRow.appendChild(label);
+		propertyRow.appendChild(valueContainer);
+		parentContainer.appendChild(propertyRow);
+	}
+} 

@@ -13,5 +13,9 @@ export declare class JsonView {
     private toggleExpandNode;
     private drawJsonNode;
     updateJson(newJson: any): void;
+    private patchDOM;
+    private getValueAtPath;
+    private updateValueNode;
+    private addPropertyNode;
 }
 //# sourceMappingURL=JsonView.d.ts.map

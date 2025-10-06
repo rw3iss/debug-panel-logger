@@ -612,6 +612,7 @@ export class DebugPanel {
 	}
 
 	private handleSnapWhileDragging(x: number, y: number): void {
+		console.log(`snapd`)
 		const snapPadding = this.options.snapPadding || 20;
 		const { width: windowWidth, height: windowHeight } = getWindowSize();
 		const panelWidth = this.container.offsetWidth;
@@ -671,5 +672,5 @@ export class DebugPanel {
 
 // Utility function to send state to debug panel
 export function debug(idOrState: string, state?: any): void {
-	EventBus.dispatch('debug', { idOrState, state });
+	EventBus.dispatch('debug', { id: idOrState, state });
 }

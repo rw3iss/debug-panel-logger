@@ -1,6 +1,6 @@
 {
 	"name": "dev-debug-panel",
-	"version": "1.0.3",
+	"version": "1.0.4",
 	"description": "A draggable, resizable debug panel for logging and state inspection in web applications",
 	"license": "ISC",
 	"homepage": "https://github.com/rw3iss/dev-debug-panel#readme",
@@ -34,7 +34,7 @@
 		"README.md"
 	],
 	"scripts": {
-		"build": "node build.js && tsc --declaration --emitDeclarationOnly --outDir dist",
+		"build": "npm run clean && node build.js && tsc --declaration --emitDeclarationOnly --outDir dist",
 		"dev": "node build.js --watch",
 		"clean": "rm -rf dist",
 		"prepublishOnly": "npm run clean && npm run build",

@@ -73,12 +73,24 @@ async function build() {
       outExtension: { '.js': '.cjs.js' }
     });
 
-    // Build UMD version for browser
+    // Build UMD version for browser (IIFE with global exports)
     await esbuild.build({
       ...buildConfig,
-      format: 'esm',
+      format: 'iife',
+      globalName: 'DevDebugPanel',
       outExtension: { '.js': '.umd.js' },
-      external: [] // Bundle all dependencies for UMD
+      external: [], // Bundle all dependencies for UMD
+      footer: {
+        js: `
+// Export to global window object for easier access
+if (typeof window !== 'undefined') {
+  window.DebugPanel = DevDebugPanel.DebugPanel;
+  window.debug = DevDebugPanel.debug;
+  window.JsonView = DevDebugPanel.JsonView;
+  window.ScreenPosition = DevDebugPanel.ScreenPosition;
+}
+`.trim()
+      }
     });
 
     console.log('✅ Build completed successfully!');
