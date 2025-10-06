@@ -76,8 +76,7 @@ async function build() {
     // Build UMD version for browser
     await esbuild.build({
       ...buildConfig,
-      format: 'iife',
-      globalName: 'DebugPanelLogger',
+      format: 'esm',
       outExtension: { '.js': '.umd.js' },
       external: [] // Bundle all dependencies for UMD
     });
