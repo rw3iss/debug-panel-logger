@@ -111,7 +111,7 @@ export function makeResizable(container: HTMLElement, options: ResizeOptions = {
 
 export type DragOptions = {
 	onDragStart?: (e: MouseEvent) => void;
-	onDrag?: (x: number, y: number) => void;
+	onDrag?: (x: number, y: number) => void | { x?: number; y?: number };
 	onDragEnd?: () => void;
 };
 
@@ -167,13 +167,21 @@ export function makeDraggable(
 		const deltaX = event.clientX - startX;
 		const deltaY = event.clientY - startY;
 
-		const newLeft = initialLeft + deltaX;
-		const newTop = initialTop + deltaY;
+		let newLeft = initialLeft + deltaX;
+		let newTop = initialTop + deltaY;
+
+		// Call onDrag callback which may modify the position (e.g., for snapping)
+		if (onDrag) {
+			const result = onDrag(newLeft, newTop);
+			// If onDrag returns adjusted coordinates, use them
+			if (result && typeof result === 'object') {
+				if (typeof result.x === 'number') newLeft = result.x;
+				if (typeof result.y === 'number') newTop = result.y;
+			}
+		}
 
 		element.style.left = `${newLeft}px`;
 		element.style.top = `${newTop}px`;
-
-		if (onDrag) onDrag(newLeft, newTop);
 	}
 
 	function stopDragging() {

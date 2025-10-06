@@ -57,33 +57,16 @@ export interface DebugPanelOptions {
 	snapPadding?: number;
 }
 
-// Wrapping class to use the DebugPanel within the Logging framework
-// export class DebugPanelLogModule implements LogModule {
-// 	public name = 'DebugPanel';
-// 	public panel: DebugPanel;
+/*
+DebugPanel usage API:
 
-// 	constructor(opts: DebugPanelOptions = {}) {
-// 		this.panel = new DebugPanel(opts);
-// 		// Don't auto-show here - let the DebugPanel constructor handle it
-// 	}
+debug(obj), debug(id, obj)
+log(...args)
+show()
+hide()
+toggle()
 
-// 	public onLog(log: LogEvent) {
-// 		this.panel.log(log.namespace, log.args);
-// 	}
-
-// 	public print(...args: any[]) {
-// 		if (args.length) {
-// 			const printArgs: any[] = [];
-// 			args.forEach((a) => {
-// 				if (typeof a === 'object') {
-// 					this.panel.debugState('', a);
-// 				} else {
-// 					printArgs.push(a);
-// 				}
-// 			});
-// 		}
-// 	}
-// }
+*/
 
 export class DebugPanel {
 	private container: HTMLElement;
@@ -101,7 +84,7 @@ export class DebugPanel {
 			position: ScreenPosition.BottomRight,
 			width: 600,
 			height: 400,
-			snap: false,
+			snap: true,
 			snapPadding: 20,
 			...options
 		};
@@ -205,6 +188,24 @@ export class DebugPanel {
 		return toolbar;
 	}
 
+	private setupEventListeners(): void {
+		EventBus.addEventListener('log', (event: any) => {
+			const { namespace, message } = event.target;
+			this.log(namespace, message);
+		});
+
+		// special listener for sending objects to the objects panel
+		// todo:
+		EventBus.addEventListener('debug', (event: any) => {
+			const { id, state } = event.target;
+			if (!id || !state) {
+				console.log('Invalid event data for debug-state. Expected {id, state}, got:', event);
+				return;
+			}
+			this.debug(id, state);
+		});
+	}
+
 	private setupResizable(): void {
 		const { width, height } = getWindowSize();
 
@@ -291,24 +292,6 @@ export class DebugPanel {
 		});
 	}
 
-	private setupEventListeners(): void {
-		EventBus.addEventListener('log', (event: any) => {
-			const { namespace, message } = event.target;
-			this.log(namespace, message);
-		});
-
-		// special listener for sending objects to the objects panel
-		// todo:
-		EventBus.addEventListener('debug', (event: any) => {
-			const { id, state } = event.target;
-			if (!id || !state) {
-				console.log('Invalid event data for debug-state. Expected {id, state}, got:', event);
-				return;
-			}
-			this.debug(id, state);
-		});
-	}
-
 	// Settings management
 
 	private restoreSettings(): void {
@@ -372,16 +355,24 @@ export class DebugPanel {
 
 	// Debug objects
 
+	// Send any object to the DebugPanel for observation. Use a string id as first argument to label it.
 	public debug(idOrState: any, state?: any): void {
 		//if (typeof idOrState === 'string')
-		const id = idOrState;
-		const safeState = safeStringify(state);
-		const parsedState = JSON.parse(safeState);
+		let _id = idOrState;
+		let _state = state;
+		if (!state && typeof idOrState == 'object') {
+			_id = 'object'; // todo: make object IDs?
+			_state = idOrState;
+		}
 
-		if (this.debugStates[id]) {
-			this.updateDebugState(id, parsedState);
+		// todo: this is not efficient, but is how to deal with circular dependencies.
+		// const safeState = safeStringify(_state);
+		// const parsedState = JSON.parse(safeState);
+
+		if (this.debugStates[_id]) {
+			this.updateDebugState(_id, _state); // parsedState);
 		} else {
-			this.addDebugState(id, parsedState);
+			this.addDebugState(_id, _state);// parsedState);
 		}
 	}
 
@@ -611,8 +602,7 @@ export class DebugPanel {
 		this.saveSettings();
 	}
 
-	private handleSnapWhileDragging(x: number, y: number): void {
-		console.log(`snapd`)
+	private handleSnapWhileDragging(x: number, y: number): { x: number; y: number } {
 		const snapPadding = this.options.snapPadding || 20;
 		const { width: windowWidth, height: windowHeight } = getWindowSize();
 		const panelWidth = this.container.offsetWidth;
@@ -639,11 +629,8 @@ export class DebugPanel {
 			snappedY = windowHeight - panelHeight;
 		}
 
-		// Only update if position changed (for performance)
-		if (snappedX !== x || snappedY !== y) {
-			this.container.style.left = `${snappedX}px`;
-			this.container.style.top = `${snappedY}px`;
-		}
+		// Return the snapped coordinates
+		return { x: snappedX, y: snappedY };
 	}
 
 	// Panel controls
@@ -673,4 +660,4 @@ export class DebugPanel {
 // Utility function to send state to debug panel
 export function debug(idOrState: string, state?: any): void {
 	EventBus.dispatch('debug', { id: idOrState, state });
-}
+} 

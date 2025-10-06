@@ -39,11 +39,11 @@ export declare class DebugPanel {
     private createTabContainer;
     private createContentContainer;
     private createGlobalToolbar;
+    private setupEventListeners;
     private setupResizable;
     private setupDraggable;
     private setupPosition;
     private setupKeyboardShortcut;
-    private setupEventListeners;
     private restoreSettings;
     private loadSettings;
     private saveSettings;

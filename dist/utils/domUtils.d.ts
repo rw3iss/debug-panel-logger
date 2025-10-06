@@ -9,7 +9,10 @@ export type ResizeOptions = {
 export declare function makeResizable(container: HTMLElement, options?: ResizeOptions): void;
 export type DragOptions = {
     onDragStart?: (e: MouseEvent) => void;
-    onDrag?: (x: number, y: number) => void;
+    onDrag?: (x: number, y: number) => void | {
+        x?: number;
+        y?: number;
+    };
     onDragEnd?: () => void;
 };
 export declare function makeDraggable(element: HTMLElement, handleElement?: HTMLElement, options?: DragOptions): () => void;

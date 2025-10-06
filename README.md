@@ -47,7 +47,7 @@ Calls to debug(obj) will update references to the same object using a diffing al
 
 Note that each unique object that the panel draws instantiates its own JsonView tree element. Though it is an efficiently drawn element, tons of calls to debug(obj) with unique objects may be slow. In that case consider just combining the objects to a singlular wrapped object, and debugging that object, which will efficiently manage the objects in a single JsonView using diffing.
 
-You can pass an optional object identifier for the first argument, to show on the panel:
+You can pass an optional string id for the first argument, to show on the panel:
 ```typescript
 debug('config', { theme: 'dark', api: 'https://api.example.com' });
 
