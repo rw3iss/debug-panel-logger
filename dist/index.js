@@ -514,10 +514,6 @@ var DebugPanel = class {
     });
     EventBus.addEventListener("debug", (event) => {
       const { id, state } = event.target;
-      if (!id || !state) {
-        console.log("Invalid event data for debug-state. Expected {id, state}, got:", event);
-        return;
-      }
       this.debug(id, state);
     });
   }

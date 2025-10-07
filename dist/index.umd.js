@@ -2020,10 +2020,6 @@ var DevDebugPanel = (() => {
       });
       import_eventbusjs.default.addEventListener("debug", (event) => {
         const { id, state } = event.target;
-        if (!id || !state) {
-          console.log("Invalid event data for debug-state. Expected {id, state}, got:", event);
-          return;
-        }
         this.debug(id, state);
       });
     }
