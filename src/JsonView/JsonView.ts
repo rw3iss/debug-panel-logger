@@ -34,9 +34,10 @@ export class JsonView {
 
 	private toggleExpandNode(childNode: HTMLElement, keyPath: string, toggleButton?: HTMLElement) {
 		const isCollapsed = childNode.classList.contains('collapsed');
+		console.log(`collapsed?`, isCollapsed)
 		childNode.classList.toggle('collapsed', !isCollapsed);
 		this.viewStates[keyPath] = !isCollapsed;
-		if (toggleButton) toggleButton.textContent = isCollapsed ? COLLAPSED_INDICATOR : EXPANDED_INDICATOR;
+		if (toggleButton) toggleButton.textContent = !isCollapsed ? COLLAPSED_INDICATOR : EXPANDED_INDICATOR;
 	}
 
 	private drawJsonNode(jsonObj: any, currPath: string = ''): HTMLElement {
@@ -79,6 +80,7 @@ export class JsonView {
 					//console.log(`KP`, keyPath)
 
 					if (this.options.expandAll) {
+						console.log(`expand all`)
 						toggleButton.textContent = EXPANDED_INDICATOR;
 					} else {
 						let expand = false;
@@ -98,10 +100,13 @@ export class JsonView {
 						}
 
 						if (expand) {
+							console.log(`EXPANDING`)
 							toggleButton.textContent = EXPANDED_INDICATOR;
 						} else {
 							toggleButton.textContent = COLLAPSED_INDICATOR;
 							childNode.classList.add('collapsed'); // Start collapsed
+							console.log(`start collapsed`, childNode)
+
 						}
 					}
 

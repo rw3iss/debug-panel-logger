@@ -34,7 +34,7 @@
 		"README.md"
 	],
 	"scripts": {
-		"build": "npm run clean && node build.js && tsc --declaration --emitDeclarationOnly --outDir dist",
+		"build": "npm run clean && node build.js && tsc",
 		"dev": "node build.js --watch",
 		"clean": "rm -rf dist",
 		"prepublishOnly": "npm run clean && npm run build",

@@ -15,3 +15,6 @@ export type {
 	DragOptions,
 	JsonViewOptions
 } from './types';
+
+// Re-export DebugPanel as default for easier importing
+export { DebugPanel as default } from './DebugPanel/DebugPanel';

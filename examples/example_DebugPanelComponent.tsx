@@ -3,7 +3,7 @@
 /* React component that mounts a singleton DebugPanel with options, and starting Data */
 
 import { useEffect, useRef } from 'react';
-import { DebugPanel, ScreenPosition } from 'dev-debug-panel';
+import { DebugPanel, ScreenPosition } from '../dist/index.js';
 
 // React wrapper for showing a DebugPanel.
 // You only need to one instance of this somewhere in your application.
