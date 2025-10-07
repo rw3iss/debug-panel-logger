@@ -1,4 +1,5 @@
 import * as jsondiffpatch from 'jsondiffpatch';
+import { COLLAPSED_INDICATOR, EXPANDED_INDICATOR } from '../constants';
 
 export type JsonViewOptions = {
 	expandAll?: boolean;
@@ -35,7 +36,7 @@ export class JsonView {
 		const isCollapsed = childNode.classList.contains('collapsed');
 		childNode.classList.toggle('collapsed', !isCollapsed);
 		this.viewStates[keyPath] = !isCollapsed;
-		if (toggleButton) toggleButton.textContent = isCollapsed ? '[-]' : '[+]';
+		if (toggleButton) toggleButton.textContent = isCollapsed ? COLLAPSED_INDICATOR : EXPANDED_INDICATOR;
 	}
 
 	private drawJsonNode(jsonObj: any, currPath: string = ''): HTMLElement {
@@ -78,7 +79,7 @@ export class JsonView {
 					//console.log(`KP`, keyPath)
 
 					if (this.options.expandAll) {
-						toggleButton.textContent = '[-]';
+						toggleButton.textContent = EXPANDED_INDICATOR;
 					} else {
 						let expand = false;
 						// expand empty objects by default:
@@ -97,9 +98,9 @@ export class JsonView {
 						}
 
 						if (expand) {
-							toggleButton.textContent = '[-]';
+							toggleButton.textContent = EXPANDED_INDICATOR;
 						} else {
-							toggleButton.textContent = '[+]';
+							toggleButton.textContent = COLLAPSED_INDICATOR;
 							childNode.classList.add('collapsed'); // Start collapsed
 						}
 					}
@@ -225,13 +226,13 @@ export class JsonView {
 			const wasExpanded = this.viewStates[keyPath];
 			if (typeof wasExpanded !== 'undefined') {
 				if (wasExpanded) {
-					toggleButton.textContent = '[-]';
+					toggleButton.textContent = EXPANDED_INDICATOR;
 				} else {
-					toggleButton.textContent = '[+]';
+					toggleButton.textContent = COLLAPSED_INDICATOR;
 					childNode.classList.add('collapsed');
 				}
 			} else {
-				toggleButton.textContent = '[+]';
+				toggleButton.textContent = COLLAPSED_INDICATOR;
 				childNode.classList.add('collapsed');
 			}
 
@@ -297,7 +298,7 @@ export class JsonView {
 
 			const toggleButton = document.createElement('button');
 			toggleButton.classList.add('json-toggle');
-			toggleButton.textContent = '[+]';
+			toggleButton.textContent = COLLAPSED_INDICATOR;
 
 			const childNode = this.drawJsonNode(value, keyPath + '/');
 			childNode.classList.add('collapsed');
@@ -315,4 +316,4 @@ export class JsonView {
 		propertyRow.appendChild(valueContainer);
 		parentContainer.appendChild(propertyRow);
 	}
-} 
+}

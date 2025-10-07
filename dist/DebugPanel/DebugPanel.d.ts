@@ -34,6 +34,7 @@ export declare class DebugPanel {
     private debugStates;
     private activeTab;
     private options;
+    private resizeThrottleTimer;
     constructor(options?: DebugPanelOptions);
     private createContainer;
     private createTabContainer;
@@ -44,12 +45,16 @@ export declare class DebugPanel {
     private setupDraggable;
     private setupPosition;
     private setupKeyboardShortcut;
+    private setupWindowResizeListener;
+    private repositionOnWindowResize;
     private restoreSettings;
     private loadSettings;
     private saveSettings;
     debug(idOrState: any, state?: any): void;
     private updateDebugState;
     private addDebugState;
+    private copyDebugStateToClipboard;
+    private removeDebugState;
     private addTab;
     private clearCurrentTab;
     private clearTab;

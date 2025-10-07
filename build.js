@@ -37,6 +37,9 @@ const scssPlugin = {
   }
 };
 
+// Check for watch mode
+const watchMode = process.argv.includes('--watch');
+
 async function build() {
   try {
     // Create dist directory
@@ -52,36 +55,37 @@ async function build() {
       format: 'esm',
       target: 'es2020',
       sourcemap: true,
-      minify: true,
+      minify: !watchMode, // Don't minify in watch mode for faster builds
       external: ['eventbusjs', 'jsondiffpatch', 'safe-stringify'],
       plugins: [scssPlugin],
       define: {
-        'process.env.NODE_ENV': '"production"'
+        'process.env.NODE_ENV': watchMode ? '"development"' : '"production"'
       }
     };
 
-    // Build ESM version
-    await esbuild.build({
-      ...buildConfig,
-      outExtension: { '.js': '.esm.js' }
-    });
+    if (watchMode) {
+      console.log('👀 Watch mode enabled - monitoring for changes...\n');
 
-    // Build CommonJS version
-    await esbuild.build({
-      ...buildConfig,
-      format: 'cjs',
-      outExtension: { '.js': '.cjs.js' }
-    });
+      // Create contexts for watch mode
+      const esmContext = await esbuild.context({
+        ...buildConfig,
+        outExtension: { '.js': '.esm.js' }
+      });
 
-    // Build UMD version for browser (IIFE with global exports)
-    await esbuild.build({
-      ...buildConfig,
-      format: 'iife',
-      globalName: 'DevDebugPanel',
-      outExtension: { '.js': '.umd.js' },
-      external: [], // Bundle all dependencies for UMD
-      footer: {
-        js: `
+      const cjsContext = await esbuild.context({
+        ...buildConfig,
+        format: 'cjs',
+        outExtension: { '.js': '.cjs.js' }
+      });
+
+      const umdContext = await esbuild.context({
+        ...buildConfig,
+        format: 'iife',
+        globalName: 'DevDebugPanel',
+        outExtension: { '.js': '.umd.js' },
+        external: [],
+        footer: {
+          js: `
 // Export to global window object for easier access
 if (typeof window !== 'undefined') {
   window.DebugPanel = DevDebugPanel.DebugPanel;
@@ -90,18 +94,70 @@ if (typeof window !== 'undefined') {
   window.ScreenPosition = DevDebugPanel.ScreenPosition;
 }
 `.trim()
-      }
-    });
+        }
+      });
 
-    console.log('✅ Build completed successfully!');
-    console.log('📦 Generated files:');
-    console.log('  - dist/index.esm.js (ES modules)');
-    console.log('  - dist/index.cjs.js (CommonJS)');
-    console.log('  - dist/index.umd.js (UMD/Browser)');
+      // Watch all contexts
+      await Promise.all([
+        esmContext.watch(),
+        cjsContext.watch(),
+        umdContext.watch()
+      ]);
+
+      console.log('✅ Initial build completed!');
+      console.log('📦 Watching for changes...');
+      console.log('  - dist/index.esm.js (ES modules)');
+      console.log('  - dist/index.cjs.js (CommonJS)');
+      console.log('  - dist/index.umd.js (UMD/Browser)');
+      console.log('\nPress Ctrl+C to stop watching.');
+
+    } else {
+      // Standard build (non-watch mode)
+      // Build ESM version
+      await esbuild.build({
+        ...buildConfig,
+        outExtension: { '.js': '.esm.js' }
+      });
+
+      // Build CommonJS version
+      await esbuild.build({
+        ...buildConfig,
+        format: 'cjs',
+        outExtension: { '.js': '.cjs.js' }
+      });
+
+      // Build UMD version for browser (IIFE with global exports)
+      await esbuild.build({
+        ...buildConfig,
+        format: 'iife',
+        globalName: 'DevDebugPanel',
+        outExtension: { '.js': '.umd.js' },
+        external: [], // Bundle all dependencies for UMD
+        footer: {
+          js: `
+// Export to global window object for easier access
+if (typeof window !== 'undefined') {
+  window.DebugPanel = DevDebugPanel.DebugPanel;
+  window.debug = DevDebugPanel.debug;
+  window.JsonView = DevDebugPanel.JsonView;
+  window.ScreenPosition = DevDebugPanel.ScreenPosition;
+}
+`.trim()
+        }
+      });
+
+      console.log('✅ Build completed successfully!');
+      console.log('📦 Generated files:');
+      console.log('  - dist/index.esm.js (ES modules)');
+      console.log('  - dist/index.cjs.js (CommonJS)');
+      console.log('  - dist/index.umd.js (UMD/Browser)');
+    }
 
   } catch (error) {
     console.error('❌ Build failed:', error);
-    process.exit(1);
+    if (!watchMode) {
+      process.exit(1);
+    }
   }
 }
 

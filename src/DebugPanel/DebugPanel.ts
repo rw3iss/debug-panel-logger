@@ -2,6 +2,7 @@ import EventBus from 'eventbusjs';
 import safeStringify from 'fast-safe-stringify';
 import { JsonView } from '../JsonView/JsonView';
 import { getWindowSize, makeResizable, makeDraggable } from '../utils/domUtils';
+import { COLLAPSED_INDICATOR, EXPANDED_INDICATOR } from '../constants';
 
 const DEBUG_STATE_NAMESPACE = 'objects';
 
@@ -78,6 +79,7 @@ export class DebugPanel {
 	private debugStates: { [id: string]: DebugState } = {};
 	private activeTab: string = 'global';
 	private options: DebugPanelOptions;
+	private resizeThrottleTimer: number | null = null;
 
 	constructor(options: DebugPanelOptions = {}) {
 		this.options = {
@@ -110,6 +112,7 @@ export class DebugPanel {
 		this.setupDraggable();
 		this.setupEventListeners();
 		this.setupKeyboardShortcut();
+		this.setupWindowResizeListener();
 
 		// Only show if explicitly requested in options AND no saved settings exist
 		if (options.show && !this.loadSettings()) {
@@ -292,6 +295,77 @@ export class DebugPanel {
 		});
 	}
 
+	private setupWindowResizeListener(): void {
+		window.addEventListener('resize', () => {
+			// Throttle resize events to 50ms
+			if (this.resizeThrottleTimer !== null) {
+				return;
+			}
+
+			this.resizeThrottleTimer = window.setTimeout(() => {
+				this.resizeThrottleTimer = null;
+				this.repositionOnWindowResize();
+			}, 50);
+		});
+	}
+
+	private repositionOnWindowResize(): void {
+		const { width: windowWidth, height: windowHeight } = getWindowSize();
+		const panelWidth = this.container.offsetWidth;
+		const panelHeight = this.container.offsetHeight;
+
+		const currentLeft = parseInt(this.container.style.left) || this.container.offsetLeft;
+		const currentTop = parseInt(this.container.style.top) || this.container.offsetTop;
+
+		// Calculate distances to each edge
+		const distanceToLeft = currentLeft;
+		const distanceToRight = windowWidth - (currentLeft + panelWidth);
+		const distanceToTop = currentTop;
+		const distanceToBottom = windowHeight - (currentTop + panelHeight);
+
+		// Determine which edges the panel was snapped to before resize
+		const snapThreshold = 50; // If within 50px of an edge, consider it "snapped"
+		const wasSnappedLeft = distanceToLeft < snapThreshold;
+		const wasSnappedRight = distanceToRight < snapThreshold;
+		const wasSnappedTop = distanceToTop < snapThreshold;
+		const wasSnappedBottom = distanceToBottom < snapThreshold;
+
+		let newLeft = currentLeft;
+		let newTop = currentTop;
+
+		// Snap to the edge(s) the panel was closest to
+		if (wasSnappedRight) {
+			// Keep panel snapped to right edge
+			newLeft = windowWidth - panelWidth;
+		} else if (wasSnappedLeft) {
+			// Keep panel snapped to left edge
+			newLeft = 0;
+		} else {
+			// Not snapped horizontally, ensure it stays in bounds
+			newLeft = Math.max(0, Math.min(windowWidth - panelWidth, currentLeft));
+		}
+
+		if (wasSnappedBottom) {
+			// Keep panel snapped to bottom edge
+			newTop = windowHeight - panelHeight;
+		} else if (wasSnappedTop) {
+			// Keep panel snapped to top edge
+			newTop = 0;
+		} else {
+			// Not snapped vertically, ensure it stays in bounds
+			newTop = Math.max(0, Math.min(windowHeight - panelHeight, currentTop));
+		}
+
+		// Final bounds check to ensure panel is fully visible
+		newLeft = Math.max(0, Math.min(windowWidth - panelWidth, newLeft));
+		newTop = Math.max(0, Math.min(windowHeight - panelHeight, newTop));
+
+		this.container.style.left = `${newLeft}px`;
+		this.container.style.top = `${newTop}px`;
+
+		this.saveSettings();
+	}
+
 	// Settings management
 
 	private restoreSettings(): void {
@@ -415,12 +489,12 @@ export class DebugPanel {
 			const isExpanded = this.debugStates[id].isExpanded;
 			this.debugStates[id].isExpanded = !isExpanded;
 			debugWrapper.classList.toggle('collapsed', isExpanded);
-			toggleButton.textContent = isExpanded ? '[+]' : '[-]';
+			toggleButton.textContent = isExpanded ? COLLAPSED_INDICATOR : EXPANDED_INDICATOR;
 		}
 
 		const toggleButton = document.createElement('button');
 		toggleButton.classList.add('json-toggle');
-		toggleButton.textContent = '[-]';
+		toggleButton.textContent = EXPANDED_INDICATOR;
 		toggleButton.onclick = toggleObjectOpen;
 		debugWrapper.appendChild(toggleButton);
 
@@ -434,9 +508,32 @@ export class DebugPanel {
 		jsonWrapper.classList.add('json-wrapper');
 		debugWrapper.appendChild(jsonWrapper);
 
+		// Create JsonView first (it will render and may clear the container)
 		const jsonView = new JsonView(state, jsonWrapper as HTMLElement, {
 			//expandObjs: [/children/, /children\/(.*)/, /entry/]
 		});
+
+		// Add hover actions AFTER JsonView has rendered (so they don't get cleared)
+		const hoverActions = document.createElement('div');
+		hoverActions.classList.add('debug-state-hover-actions');
+
+		// Copy button
+		const copyButton = document.createElement('button');
+		copyButton.classList.add('debug-state-action-button', 'debug-state-copy-button');
+		copyButton.innerHTML = '📋';
+		copyButton.title = 'Copy JSON to clipboard';
+		copyButton.onclick = () => this.copyDebugStateToClipboard(id, state, copyButton);
+		hoverActions.appendChild(copyButton);
+
+		// Delete button
+		const deleteButton = document.createElement('button');
+		deleteButton.classList.add('debug-state-action-button', 'debug-state-delete-button');
+		deleteButton.innerHTML = '🗑️';
+		deleteButton.title = 'Delete this object';
+		deleteButton.onclick = () => this.removeDebugState(id);
+		hoverActions.appendChild(deleteButton);
+
+		jsonWrapper.appendChild(hoverActions);
 
 		this.debugStates[id] = {
 			state,
@@ -445,6 +542,36 @@ export class DebugPanel {
 		};
 
 		content.appendChild(debugWrapper);
+	}
+
+	private copyDebugStateToClipboard(id: string, state: any, button: HTMLElement): void {
+		try {
+			const jsonString = JSON.stringify(state, null, 2);
+			navigator.clipboard.writeText(jsonString).then(() => {
+				// Change icon to checkmark
+				const originalContent = button.innerHTML;
+				button.innerHTML = '✓';
+				button.style.background = 'rgba(40, 167, 69, 0.8)';
+
+				// Revert after 2 seconds
+				setTimeout(() => {
+					button.innerHTML = originalContent;
+					button.style.background = '';
+				}, 2000);
+			}).catch((err) => {
+				console.error('Failed to copy to clipboard:', err);
+			});
+		} catch (error) {
+			console.error('Failed to stringify state:', error);
+		}
+	}
+
+	private removeDebugState(id: string): void {
+		const debugWrapper = document.getElementById(`debug-state-${id}`);
+		if (debugWrapper) {
+			debugWrapper.remove();
+		}
+		delete this.debugStates[id];
 	}
 
 	// Tab controls
@@ -660,4 +787,4 @@ export class DebugPanel {
 // Utility function to send state to debug panel
 export function debug(idOrState: string, state?: any): void {
 	EventBus.dispatch('debug', { id: idOrState, state });
-} 
+}
