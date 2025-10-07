@@ -1,6 +1,6 @@
 {
 	"name": "dev-debug-panel",
-	"version": "1.0.5",
+	"version": "1.0.6",
 	"description": "A draggable, resizable debug panel for logging and state inspection in web applications",
 	"license": "ISC",
 	"homepage": "https://github.com/rw3iss/dev-debug-panel#readme",
@@ -58,6 +58,7 @@
 		"jsondiffpatch": "^0.7.3"
 	},
 	"devDependencies": {
+		"@types/eventbusjs": "^0.2.0",
 		"esbuild": "^0.21.5",
 		"sass": "^1.93.2",
 		"typescript": "^5.0.0"
