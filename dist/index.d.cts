@@ -1,4 +1,4 @@
-export declare enum ScreenPosition {
+declare enum ScreenPosition {
     TopLeft = "topLeft",
     Top = "top",
     TopRight = "topRight",
@@ -8,7 +8,7 @@ export declare enum ScreenPosition {
     BottomLeft = "bottomLeft",
     Left = "left"
 }
-export interface DebugPanelSettings {
+interface DebugPanelSettings {
     left: number;
     top: number;
     width: number;
@@ -16,7 +16,7 @@ export interface DebugPanelSettings {
     visible: boolean;
     opacity: number;
 }
-export interface DebugPanelOptions {
+interface DebugPanelOptions {
     show?: boolean;
     position?: ScreenPosition;
     width?: number;
@@ -24,7 +24,7 @@ export interface DebugPanelOptions {
     snap?: boolean;
     snapPadding?: number;
 }
-export declare class DebugPanel {
+declare class DebugPanel {
     private container;
     private tabContainer;
     private contentContainer;
@@ -70,5 +70,50 @@ export declare class DebugPanel {
     hide(): void;
     toggle(): void;
 }
-export declare function debug(idOrState: string, state?: any): void;
-//# sourceMappingURL=DebugPanel.d.ts.map
+declare function debug(idOrState: string, state?: any): void;
+
+type JsonViewOptions = {
+    expandAll?: boolean;
+    expandObjs?: Array<string | RegExp>;
+    useViewState?: boolean;
+};
+declare class JsonView {
+    private json;
+    private parentContainer;
+    private options;
+    private viewStates;
+    constructor(json: any, parentContainer: HTMLElement, options?: JsonViewOptions);
+    private render;
+    private toggleExpandNode;
+    private drawJsonNode;
+    updateJson(newJson: any): void;
+    private patchDOM;
+    private getValueAtPath;
+    private updateValueNode;
+    private addPropertyNode;
+}
+
+type ResizeOptions = {
+    handles?: ('top' | 'left' | 'right' | 'bottom' | 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right')[];
+    maxWidth?: number;
+    maxHeight?: number;
+    minWidth?: number;
+    minHeight?: number;
+    onResize?: (width: number, height: number) => void;
+};
+declare function makeResizable(container: HTMLElement, options?: ResizeOptions): void;
+type DragOptions = {
+    onDragStart?: (e: MouseEvent) => void;
+    onDrag?: (x: number, y: number) => void | {
+        x?: number;
+        y?: number;
+    };
+    onDragEnd?: () => void;
+};
+declare function makeDraggable(element: HTMLElement, handleElement?: HTMLElement, options?: DragOptions): () => void;
+declare function getWindowSize(): {
+    width: number;
+    height: number;
+};
+
+export { DebugPanel, type DebugPanelOptions, type DebugPanelSettings, type DragOptions, JsonView, type JsonViewOptions, type ResizeOptions, ScreenPosition, debug, DebugPanel as default, getWindowSize, makeDraggable, makeResizable };

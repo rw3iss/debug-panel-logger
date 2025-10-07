@@ -34,7 +34,6 @@ export class JsonView {
 
 	private toggleExpandNode(childNode: HTMLElement, keyPath: string, toggleButton?: HTMLElement) {
 		const isCollapsed = childNode.classList.contains('collapsed');
-		console.log(`collapsed?`, isCollapsed)
 		childNode.classList.toggle('collapsed', !isCollapsed);
 		this.viewStates[keyPath] = !isCollapsed;
 		if (toggleButton) toggleButton.textContent = !isCollapsed ? COLLAPSED_INDICATOR : EXPANDED_INDICATOR;
@@ -63,7 +62,6 @@ export class JsonView {
 				const value = jsonObj[key];
 				const isObject = typeof value === 'object' && value !== null;
 				const isArray = Array.isArray(value);
-				//console.log(`value:`, value, 'obj?', isObject, 'array?', isArray);
 
 				if (isObject) {
 					label.classList.add('clickable');
@@ -77,16 +75,13 @@ export class JsonView {
 
 					// Recursive call to render child object
 					const childNode = this.drawJsonNode(value, keyPath + '/');
-					//console.log(`KP`, keyPath)
 
 					if (this.options.expandAll) {
-						console.log(`expand all`)
 						toggleButton.textContent = EXPANDED_INDICATOR;
 					} else {
 						let expand = false;
 						// expand empty objects by default:
 						if (isArray && hasChildren) {
-							//console.log(`no children`, keyPath)
 							expand = true;
 						} else {
 							this.options.expandObjs?.forEach((e) => {
@@ -100,12 +95,10 @@ export class JsonView {
 						}
 
 						if (expand) {
-							console.log(`EXPANDING`)
 							toggleButton.textContent = EXPANDED_INDICATOR;
 						} else {
 							toggleButton.textContent = COLLAPSED_INDICATOR;
 							childNode.classList.add('collapsed'); // Start collapsed
-							console.log(`start collapsed`, childNode)
 
 						}
 					}
@@ -134,14 +127,16 @@ export class JsonView {
 		const delta = jsondiffpatch.diff(this.json, newJson);
 		if (!delta) return; // No changes
 
-		// Apply patch to the JSON data
-		jsondiffpatch.patch(this.json, delta);
+		// Update only the changed DOM nodes, passing newJson so getValueAtPath can use it
+		this.patchDOM(delta, '', newJson);
 
-		// Update only the changed DOM nodes
-		this.patchDOM(delta);
+		// Update the reference to the new JSON data
+		this.json = newJson;
 	}
 
-	private patchDOM(delta: any, currentPath: string = ''): void {
+	private patchDOM(delta: any, currentPath: string = '', newJson?: any): void {
+		const sourceJson = newJson || this.json;
+
 		for (const key in delta) {
 			if (!Object.prototype.hasOwnProperty.call(delta, key)) continue;
 
@@ -159,7 +154,8 @@ export class JsonView {
 			if (Array.isArray(change)) {
 				// Simple value change: [oldValue, newValue]
 				if (change.length === 2) {
-					this.updateValueNode(propertyNode, keyPath, this.getValueAtPath(this.json, keyPath));
+					const newValue = this.getValueAtPath(sourceJson, keyPath);
+					this.updateValueNode(propertyNode, keyPath, newValue);
 				}
 				// Deleted value: [oldValue, 0, 0]
 				else if (change.length === 3 && change[1] === 0 && change[2] === 0) {
@@ -171,7 +167,7 @@ export class JsonView {
 				}
 			} else if (typeof change === 'object') {
 				// Nested object changes - recurse
-				this.patchDOM(change, keyPath + '/');
+				this.patchDOM(change, keyPath + '/', sourceJson);
 			}
 		}
 	}

@@ -1,8 +1,8 @@
 import EventBus from 'eventbusjs';
 import safeStringify from 'fast-safe-stringify';
-import { JsonView } from '../JsonView/JsonView';
-import { getWindowSize, makeResizable, makeDraggable } from '../utils/domUtils';
 import { COLLAPSED_INDICATOR, EXPANDED_INDICATOR } from '../constants';
+import { JsonView } from '../JsonView/JsonView';
+import { getWindowSize, makeDraggable, makeResizable } from '../utils/domUtils';
 
 const DEBUG_STATE_NAMESPACE = 'objects';
 
@@ -469,9 +469,12 @@ export class DebugPanel {
 			return;
 		}
 
-		jsonWrapper.innerHTML = '';
-		this.debugStates[id].state = state;
-		this.debugStates[id].jsonView.updateJson(state);
+		// Clone the state to avoid reference issues when comparing
+		const clonedState = JSON.parse(JSON.stringify(state));
+
+		// Don't clear innerHTML - JsonView.updateJson needs the existing DOM to patch
+		this.debugStates[id].jsonView.updateJson(clonedState);
+		this.debugStates[id].state = clonedState;
 	}
 
 	private addDebugState(id: string, state: any): void {
@@ -480,6 +483,9 @@ export class DebugPanel {
 			console.error('No content for debug namespace.');
 			return;
 		}
+
+		// Clone the state to avoid reference issues
+		const clonedState = JSON.parse(JSON.stringify(state));
 
 		const debugWrapper = document.createElement('div');
 		debugWrapper.classList.add('debug-state');
@@ -509,7 +515,7 @@ export class DebugPanel {
 		debugWrapper.appendChild(jsonWrapper);
 
 		// Create JsonView first (it will render and may clear the container)
-		const jsonView = new JsonView(state, jsonWrapper as HTMLElement, {
+		const jsonView = new JsonView(clonedState, jsonWrapper as HTMLElement, {
 			//expandObjs: [/children/, /children\/(.*)/, /entry/]
 		});
 
@@ -522,7 +528,7 @@ export class DebugPanel {
 		copyButton.classList.add('debug-state-action-button', 'debug-state-copy-button');
 		copyButton.innerHTML = '📋';
 		copyButton.title = 'Copy JSON to clipboard';
-		copyButton.onclick = () => this.copyDebugStateToClipboard(id, state, copyButton);
+		copyButton.onclick = () => this.copyDebugStateToClipboard(id, this.debugStates[id].state, copyButton);
 		hoverActions.appendChild(copyButton);
 
 		// Delete button
@@ -536,7 +542,7 @@ export class DebugPanel {
 		jsonWrapper.appendChild(hoverActions);
 
 		this.debugStates[id] = {
-			state,
+			state: clonedState,
 			jsonView,
 			isExpanded: true
 		};

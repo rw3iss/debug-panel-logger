@@ -1,223 +1,3 @@
-var __create = Object.create;
-var __defProp = Object.defineProperty;
-var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
-var __getOwnPropNames = Object.getOwnPropertyNames;
-var __getProtoOf = Object.getPrototypeOf;
-var __hasOwnProp = Object.prototype.hasOwnProperty;
-var __commonJS = (cb, mod) => function __require() {
-  return mod || (0, cb[__getOwnPropNames(cb)[0]])((mod = { exports: {} }).exports, mod), mod.exports;
-};
-var __copyProps = (to, from, except, desc) => {
-  if (from && typeof from === "object" || typeof from === "function") {
-    for (let key of __getOwnPropNames(from))
-      if (!__hasOwnProp.call(to, key) && key !== except)
-        __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
-  }
-  return to;
-};
-var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
-  // If the importer is in node compatibility mode or this is not an ESM
-  // file that has been converted to a CommonJS file using a Babel-
-  // compatible transform (i.e. "__esModule" has not been set), then set
-  // "default" to the CommonJS "module.exports" for node compatibility.
-  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
-  mod
-));
-
-// node_modules/fast-safe-stringify/index.js
-var require_fast_safe_stringify = __commonJS({
-  "node_modules/fast-safe-stringify/index.js"(exports, module) {
-    module.exports = stringify;
-    stringify.default = stringify;
-    stringify.stable = deterministicStringify;
-    stringify.stableStringify = deterministicStringify;
-    var LIMIT_REPLACE_NODE = "[...]";
-    var CIRCULAR_REPLACE_NODE = "[Circular]";
-    var arr = [];
-    var replacerStack = [];
-    function defaultOptions() {
-      return {
-        depthLimit: Number.MAX_SAFE_INTEGER,
-        edgesLimit: Number.MAX_SAFE_INTEGER
-      };
-    }
-    function stringify(obj, replacer, spacer, options) {
-      if (typeof options === "undefined") {
-        options = defaultOptions();
-      }
-      decirc(obj, "", 0, [], void 0, 0, options);
-      var res;
-      try {
-        if (replacerStack.length === 0) {
-          res = JSON.stringify(obj, replacer, spacer);
-        } else {
-          res = JSON.stringify(obj, replaceGetterValues(replacer), spacer);
-        }
-      } catch (_) {
-        return JSON.stringify("[unable to serialize, circular reference is too complex to analyze]");
-      } finally {
-        while (arr.length !== 0) {
-          var part = arr.pop();
-          if (part.length === 4) {
-            Object.defineProperty(part[0], part[1], part[3]);
-          } else {
-            part[0][part[1]] = part[2];
-          }
-        }
-      }
-      return res;
-    }
-    function setReplace(replace, val, k, parent) {
-      var propertyDescriptor = Object.getOwnPropertyDescriptor(parent, k);
-      if (propertyDescriptor.get !== void 0) {
-        if (propertyDescriptor.configurable) {
-          Object.defineProperty(parent, k, { value: replace });
-          arr.push([parent, k, val, propertyDescriptor]);
-        } else {
-          replacerStack.push([val, k, replace]);
-        }
-      } else {
-        parent[k] = replace;
-        arr.push([parent, k, val]);
-      }
-    }
-    function decirc(val, k, edgeIndex, stack, parent, depth, options) {
-      depth += 1;
-      var i;
-      if (typeof val === "object" && val !== null) {
-        for (i = 0; i < stack.length; i++) {
-          if (stack[i] === val) {
-            setReplace(CIRCULAR_REPLACE_NODE, val, k, parent);
-            return;
-          }
-        }
-        if (typeof options.depthLimit !== "undefined" && depth > options.depthLimit) {
-          setReplace(LIMIT_REPLACE_NODE, val, k, parent);
-          return;
-        }
-        if (typeof options.edgesLimit !== "undefined" && edgeIndex + 1 > options.edgesLimit) {
-          setReplace(LIMIT_REPLACE_NODE, val, k, parent);
-          return;
-        }
-        stack.push(val);
-        if (Array.isArray(val)) {
-          for (i = 0; i < val.length; i++) {
-            decirc(val[i], i, i, stack, val, depth, options);
-          }
-        } else {
-          var keys = Object.keys(val);
-          for (i = 0; i < keys.length; i++) {
-            var key = keys[i];
-            decirc(val[key], key, i, stack, val, depth, options);
-          }
-        }
-        stack.pop();
-      }
-    }
-    function compareFunction(a, b) {
-      if (a < b) {
-        return -1;
-      }
-      if (a > b) {
-        return 1;
-      }
-      return 0;
-    }
-    function deterministicStringify(obj, replacer, spacer, options) {
-      if (typeof options === "undefined") {
-        options = defaultOptions();
-      }
-      var tmp = deterministicDecirc(obj, "", 0, [], void 0, 0, options) || obj;
-      var res;
-      try {
-        if (replacerStack.length === 0) {
-          res = JSON.stringify(tmp, replacer, spacer);
-        } else {
-          res = JSON.stringify(tmp, replaceGetterValues(replacer), spacer);
-        }
-      } catch (_) {
-        return JSON.stringify("[unable to serialize, circular reference is too complex to analyze]");
-      } finally {
-        while (arr.length !== 0) {
-          var part = arr.pop();
-          if (part.length === 4) {
-            Object.defineProperty(part[0], part[1], part[3]);
-          } else {
-            part[0][part[1]] = part[2];
-          }
-        }
-      }
-      return res;
-    }
-    function deterministicDecirc(val, k, edgeIndex, stack, parent, depth, options) {
-      depth += 1;
-      var i;
-      if (typeof val === "object" && val !== null) {
-        for (i = 0; i < stack.length; i++) {
-          if (stack[i] === val) {
-            setReplace(CIRCULAR_REPLACE_NODE, val, k, parent);
-            return;
-          }
-        }
-        try {
-          if (typeof val.toJSON === "function") {
-            return;
-          }
-        } catch (_) {
-          return;
-        }
-        if (typeof options.depthLimit !== "undefined" && depth > options.depthLimit) {
-          setReplace(LIMIT_REPLACE_NODE, val, k, parent);
-          return;
-        }
-        if (typeof options.edgesLimit !== "undefined" && edgeIndex + 1 > options.edgesLimit) {
-          setReplace(LIMIT_REPLACE_NODE, val, k, parent);
-          return;
-        }
-        stack.push(val);
-        if (Array.isArray(val)) {
-          for (i = 0; i < val.length; i++) {
-            deterministicDecirc(val[i], i, i, stack, val, depth, options);
-          }
-        } else {
-          var tmp = {};
-          var keys = Object.keys(val).sort(compareFunction);
-          for (i = 0; i < keys.length; i++) {
-            var key = keys[i];
-            deterministicDecirc(val[key], key, i, stack, val, depth, options);
-            tmp[key] = val[key];
-          }
-          if (typeof parent !== "undefined") {
-            arr.push([parent, k, val]);
-            parent[k] = tmp;
-          } else {
-            return tmp;
-          }
-        }
-        stack.pop();
-      }
-    }
-    function replaceGetterValues(replacer) {
-      replacer = typeof replacer !== "undefined" ? replacer : function(k, v) {
-        return v;
-      };
-      return function(key, val) {
-        if (replacerStack.length > 0) {
-          for (var i = 0; i < replacerStack.length; i++) {
-            var part = replacerStack[i];
-            if (part[1] === key && part[0] === val) {
-              val = part[2];
-              replacerStack.splice(i, 1);
-              break;
-            }
-          }
-        }
-        return replacer.call(this, key, val);
-      };
-    }
-  }
-});
-
 // src/DebugPanel/DebugPanel.scss
 var css = '.debug-panel{position:fixed;z-index:99999;background:#222;border-radius:8px;box-shadow:0 4px 10px rgba(0,0,0,.3);display:flex;flex-direction:column;overflow:hidden;font-family:Arial,sans-serif;color:#fff;transition:transform .2s ease-in-out,visibility .2s ease-in-out}.debug-panel.visible{visibility:visible;transform:translateY(0)}.debug-panel:not(.visible){visibility:hidden;transform:translateY(10px);pointer-events:none}.debug-panel .debug-panel-tabs{display:flex;flex-wrap:wrap;background:#1a1a1a;padding:6px 6px 0 6px;gap:3px;cursor:grab;user-select:none}.debug-panel .debug-panel-tabs:active{cursor:grabbing}.debug-panel .debug-panel-tabs .debug-tab{background:#2d2d2d;color:#888;padding:7px 8px;margin:0;border:none;border-top-left-radius:6px;border-top-right-radius:6px;cursor:pointer;position:relative;box-shadow:inset 0 -2px 4px rgba(0,0,0,.3);font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen,Ubuntu,Cantarell,"Open Sans","Helvetica Neue",sans-serif}.debug-panel .debug-panel-tabs .debug-tab:hover{background:#353535;color:#aaa}.debug-panel .debug-panel-tabs .debug-tab:focus{outline:none}.debug-panel .debug-panel-tabs .debug-tab.active{background:linear-gradient(to bottom, #3f6d9c, #24384d);color:#fff;box-shadow:0 -3px 8px rgba(0,102,204,.4),inset 0 1px 0 hsla(0,0%,100%,.2);z-index:1}.debug-panel .debug-panel-content{flex:1;display:flex;flex-direction:column;overflow-y:auto;padding:0px 15px;background:#0d0d0d}.debug-panel .debug-panel-content .debug-tab-content{display:none;flex-direction:column;flex:1;gap:5px}.debug-panel .debug-panel-content .debug-tab-content .debug-log-entry{background:#292929;color:#ddd;padding:5px 8px;border-radius:4px;font-size:12px;word-break:break-word;border-left:3px solid #007bff;position:relative;display:flex;align-items:center}.debug-panel .debug-panel-content .debug-tab-content .debug-log-entry:hover .debug-delete-button,.debug-panel .debug-panel-content .debug-tab-content .debug-log-entry:hover .debug-copy-button{opacity:1}.debug-panel .debug-panel-content .debug-tab-content .debug-log-entry .debug-log-entry-text{flex:1;padding-right:70px}.debug-panel .debug-panel-content .debug-tab-content .debug-log-entry .debug-action-button,.debug-panel .debug-panel-content .debug-tab-content .debug-log-entry .debug-delete-button,.debug-panel .debug-panel-content .debug-tab-content .debug-log-entry .debug-copy-button{position:absolute;top:50%;transform:translateY(-50%);background:rgba(100,100,100,.8);color:#fff;border:none;cursor:pointer;font-size:12px;font-weight:bold;width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .2s ease-in-out,background .2s ease-in-out}.debug-panel .debug-panel-content .debug-tab-content .debug-log-entry .debug-action-button:hover,.debug-panel .debug-panel-content .debug-tab-content .debug-log-entry .debug-delete-button:hover,.debug-panel .debug-panel-content .debug-tab-content .debug-log-entry .debug-copy-button:hover{background:#969696}.debug-panel .debug-panel-content .debug-tab-content .debug-log-entry .debug-copy-button{right:36px;background:rgba(85,170,255,.8)}.debug-panel .debug-panel-content .debug-tab-content .debug-log-entry .debug-copy-button:hover{background:#28f}.debug-panel .debug-panel-content .debug-tab-content .debug-log-entry .debug-delete-button{right:8px;background:rgba(223,161,152,.8)}.debug-panel .debug-panel-content .debug-tab-content .debug-log-entry .debug-delete-button:hover{background:#f22}.debug-panel .debug-toolbar{display:flex;box-sizing:border-box;width:100%;align-items:center;justify-content:flex-end;gap:2px;padding:8px;background:#111;border-top:1px solid hsla(0,0%,100%,.1);flex-wrap:wrap}.debug-panel .debug-toolbar .debug-keyboard-hint{margin-right:auto;color:#999;font-size:11px;white-space:nowrap}.debug-panel .debug-toolbar .debug-opacity-container{display:flex;align-items:center;gap:0px;max-width:100px;min-width:40px;flex-shrink:1;padding:4px 0}.debug-panel .debug-toolbar .debug-opacity-container .debug-opacity-label{font-size:11px;color:#999;white-space:nowrap}.debug-panel .debug-toolbar .debug-opacity-container .debug-opacity-slider{flex:1;min-width:40px;width:100%;max-width:100%;height:4px;background:#444;border-radius:2px;outline:none;-webkit-appearance:none;appearance:none}.debug-panel .debug-toolbar .debug-opacity-container .debug-opacity-slider::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:14px;height:14px;background:#007bff;cursor:pointer;border-radius:50%;position:relative;top:-4px;transition:background .2s}.debug-panel .debug-toolbar .debug-opacity-container .debug-opacity-slider::-webkit-slider-thumb:hover{background:#0056b3}.debug-panel .debug-toolbar .debug-opacity-container .debug-opacity-slider::-moz-range-thumb{width:14px;height:14px;background:#007bff;cursor:pointer;border-radius:50%;border:none;position:relative;top:-4px;transition:background .2s}.debug-panel .debug-toolbar .debug-opacity-container .debug-opacity-slider::-moz-range-thumb:hover{background:#0056b3}.debug-panel .debug-toolbar .debug-opacity-container .debug-opacity-slider::-webkit-slider-runnable-track{height:4px;background:#444;border-radius:2px}.debug-panel .debug-toolbar .debug-opacity-container .debug-opacity-slider::-moz-range-track{height:4px;background:#444;border-radius:2px}.debug-panel .debug-toolbar button{background:#ba6c38;color:#fff;border:none;padding:5px 10px;margin:2px;border-radius:4px;font-size:12px;cursor:pointer;transition:background .2s;white-space:nowrap;flex-shrink:0}.debug-panel .debug-toolbar button:hover{background:#c9302c}.debug-panel .debug-toolbar button:focus{outline:none}.debug-panel .debug-toolbar{container-type:inline-size}@container (max-width: 350px){.debug-panel .debug-toolbar{flex-direction:column;align-items:stretch}.debug-panel .debug-toolbar .debug-keyboard-hint{display:none}.debug-panel .debug-toolbar .debug-opacity-container{max-width:100%;justify-content:center}}.debug-panel.narrow-panel .debug-toolbar{flex-direction:column;align-items:stretch}.debug-panel.narrow-panel .debug-toolbar .debug-keyboard-hint{margin-right:0;text-align:center}.debug-panel.narrow-panel .debug-toolbar .debug-opacity-container{max-width:100%;justify-content:center}.debug-panel .resize-handle{position:absolute;background:hsla(0,0%,100%,.1);z-index:10;transition:background .2s}.debug-panel .resize-handle:hover{background:hsla(0,0%,100%,.3)}.debug-panel .resize-left,.debug-panel .resize-right{top:0;bottom:0;width:6px;cursor:ew-resize}.debug-panel .resize-left{left:-3px}.debug-panel .resize-right{right:-3px}.debug-panel .resize-top,.debug-panel .resize-bottom{left:0;right:0;height:6px;cursor:ns-resize}.debug-panel .resize-top{top:-3px}.debug-panel .resize-bottom{bottom:-3px}.debug-panel .resize-top-left,.debug-panel .resize-top-right,.debug-panel .resize-bottom-left,.debug-panel .resize-bottom-right{width:10px;height:10px}.debug-panel .resize-top-left{left:-3px;top:-3px;cursor:nwse-resize}.debug-panel .resize-top-right{right:-3px;top:-3px;cursor:nesw-resize}.debug-panel .resize-bottom-left{left:-3px;bottom:-3px;cursor:nesw-resize}.debug-panel .resize-bottom-right{right:-3px;bottom:-3px;cursor:nwse-resize}.debug-state{position:relative;flex:1 0 100%;display:flex;flex-direction:column;margin-bottom:5px;margin-left:10px}.debug-state .json-toggle{position:absolute;top:2px;left:-22px;margin:0 10px 0 0;border:none;background:none;cursor:pointer;color:#888;font-size:14px;padding:0;width:20px;height:20px;transition:color .2s}.debug-state .json-toggle:hover{color:#fff}.debug-state .json-toggle:focus{outline:none}.debug-state .debug-state-label{font-size:13px;font-weight:bold;padding:5px 0;color:#ccc}.debug-state .debug-state-label:hover{color:#fff;cursor:pointer;text-decoration:underline}.debug-state .json-wrapper{position:relative;padding:5px;margin-left:-15px;background:#292929;border-radius:4px;border-left:3px solid #28a745}.debug-state .json-wrapper .debug-state-hover-actions{position:absolute;top:4px;right:4px;display:flex;gap:6px;opacity:0;transition:opacity .2s ease-in-out;z-index:10}.debug-state .json-wrapper:hover .debug-state-hover-actions{opacity:1}.debug-state .json-wrapper .debug-state-action-button{background:rgba(100,100,100,.8);color:#fff;border:none;cursor:pointer;font-size:16px;width:28px;height:28px;border-radius:4px;display:flex;align-items:center;justify-content:center;padding:0;transition:background .2s ease-in-out,transform .1s ease-in-out}.debug-state .json-wrapper .debug-state-action-button:hover{transform:scale(1.1)}.debug-state .json-wrapper .debug-state-action-button:active{transform:scale(0.95)}.debug-state .json-wrapper .debug-state-action-button:focus{outline:none}.debug-state .json-wrapper .debug-state-copy-button{background:rgba(85,170,255,.8)}.debug-state .json-wrapper .debug-state-copy-button:hover{background:#28f}.debug-state .json-wrapper .debug-state-delete-button{background:rgba(255,85,85,.8)}.debug-state .json-wrapper .debug-state-delete-button:hover{background:#f22}.debug-state.collapsed .json-wrapper{display:none}';
 if (typeof document !== "undefined") {
@@ -235,17 +15,15 @@ if (typeof document !== "undefined") {
 }
 
 // src/DebugPanel/DebugPanel.ts
-var import_fast_safe_stringify = __toESM(require_fast_safe_stringify(), 1);
 import EventBus from "eventbusjs";
-
-// src/JsonView/JsonView.ts
-import * as jsondiffpatch from "jsondiffpatch";
+import safeStringify from "fast-safe-stringify";
 
 // src/constants.ts
 var COLLAPSED_INDICATOR = "\u25BA";
 var EXPANDED_INDICATOR = "\u25BC";
 
 // src/JsonView/JsonView.ts
+import * as jsondiffpatch from "jsondiffpatch";
 var DEFAULT_OPTIONS = () => ({
   expandAll: false,
   expandObjects: [],
@@ -267,7 +45,6 @@ var JsonView = class {
   }
   toggleExpandNode(childNode, keyPath, toggleButton) {
     const isCollapsed = childNode.classList.contains("collapsed");
-    console.log(`collapsed?`, isCollapsed);
     childNode.classList.toggle("collapsed", !isCollapsed);
     this.viewStates[keyPath] = !isCollapsed;
     if (toggleButton) toggleButton.textContent = !isCollapsed ? COLLAPSED_INDICATOR : EXPANDED_INDICATOR;
@@ -301,7 +78,6 @@ var JsonView = class {
           toggleButton.classList.add("json-toggle");
           const childNode = this.drawJsonNode(value, keyPath + "/");
           if (this.options.expandAll) {
-            console.log(`expand all`);
             toggleButton.textContent = EXPANDED_INDICATOR;
           } else {
             let expand = false;
@@ -316,12 +92,10 @@ var JsonView = class {
               if (typeof this.viewStates[keyPath] !== "undefined") expand = !this.viewStates[keyPath];
             }
             if (expand) {
-              console.log(`EXPANDING`);
               toggleButton.textContent = EXPANDED_INDICATOR;
             } else {
               toggleButton.textContent = COLLAPSED_INDICATOR;
               childNode.classList.add("collapsed");
-              console.log(`start collapsed`, childNode);
             }
           }
           toggleButton.onclick = () => this.toggleExpandNode(childNode, keyPath, toggleButton);
@@ -342,10 +116,11 @@ var JsonView = class {
   updateJson(newJson) {
     const delta = jsondiffpatch.diff(this.json, newJson);
     if (!delta) return;
-    jsondiffpatch.patch(this.json, delta);
-    this.patchDOM(delta);
+    this.patchDOM(delta, "", newJson);
+    this.json = newJson;
   }
-  patchDOM(delta, currentPath = "") {
+  patchDOM(delta, currentPath = "", newJson) {
+    const sourceJson = newJson || this.json;
     for (const key in delta) {
       if (!Object.prototype.hasOwnProperty.call(delta, key)) continue;
       const change = delta[key];
@@ -356,14 +131,15 @@ var JsonView = class {
       );
       if (Array.isArray(change)) {
         if (change.length === 2) {
-          this.updateValueNode(propertyNode, keyPath, this.getValueAtPath(this.json, keyPath));
+          const newValue = this.getValueAtPath(sourceJson, keyPath);
+          this.updateValueNode(propertyNode, keyPath, newValue);
         } else if (change.length === 3 && change[1] === 0 && change[2] === 0) {
           if (propertyNode) propertyNode.remove();
         } else if (change.length === 1) {
           this.addPropertyNode(keyPath, change[0]);
         }
       } else if (typeof change === "object") {
-        this.patchDOM(change, keyPath + "/");
+        this.patchDOM(change, keyPath + "/", sourceJson);
       }
     }
   }
@@ -950,9 +726,9 @@ var DebugPanel = class {
       console.error(`No json wrapper found for existing state ${id}`);
       return;
     }
-    jsonWrapper.innerHTML = "";
-    this.debugStates[id].state = state;
-    this.debugStates[id].jsonView.updateJson(state);
+    const clonedState = JSON.parse(JSON.stringify(state));
+    this.debugStates[id].jsonView.updateJson(clonedState);
+    this.debugStates[id].state = clonedState;
   }
   addDebugState(id, state) {
     const content = this.contentContainer.querySelector(`[data-namespace="${DEBUG_STATE_NAMESPACE}"]`);
@@ -960,6 +736,7 @@ var DebugPanel = class {
       console.error("No content for debug namespace.");
       return;
     }
+    const clonedState = JSON.parse(JSON.stringify(state));
     const debugWrapper = document.createElement("div");
     debugWrapper.classList.add("debug-state");
     debugWrapper.setAttribute("id", `debug-state-${id}`);
@@ -982,7 +759,7 @@ var DebugPanel = class {
     const jsonWrapper = document.createElement("div");
     jsonWrapper.classList.add("json-wrapper");
     debugWrapper.appendChild(jsonWrapper);
-    const jsonView = new JsonView(state, jsonWrapper, {
+    const jsonView = new JsonView(clonedState, jsonWrapper, {
       //expandObjs: [/children/, /children\/(.*)/, /entry/]
     });
     const hoverActions = document.createElement("div");
@@ -991,7 +768,7 @@ var DebugPanel = class {
     copyButton.classList.add("debug-state-action-button", "debug-state-copy-button");
     copyButton.innerHTML = "\u{1F4CB}";
     copyButton.title = "Copy JSON to clipboard";
-    copyButton.onclick = () => this.copyDebugStateToClipboard(id, state, copyButton);
+    copyButton.onclick = () => this.copyDebugStateToClipboard(id, this.debugStates[id].state, copyButton);
     hoverActions.appendChild(copyButton);
     const deleteButton = document.createElement("button");
     deleteButton.classList.add("debug-state-action-button", "debug-state-delete-button");
@@ -1001,7 +778,7 @@ var DebugPanel = class {
     hoverActions.appendChild(deleteButton);
     jsonWrapper.appendChild(hoverActions);
     this.debugStates[id] = {
-      state,
+      state: clonedState,
       jsonView,
       isExpanded: true
     };
@@ -1125,7 +902,7 @@ var DebugPanel = class {
       return message.join(" ");
     }
     if (typeof message === "object") {
-      return (0, import_fast_safe_stringify.default)(message);
+      return safeStringify(message);
     }
     return String(message);
   }

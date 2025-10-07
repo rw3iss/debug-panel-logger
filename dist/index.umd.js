@@ -34,6 +34,7 @@ var DevDebugPanel = (() => {
   // node_modules/eventbusjs/lib/eventbus.min.js
   var require_eventbus_min = __commonJS({
     "node_modules/eventbusjs/lib/eventbus.min.js"(exports, module) {
+      "use strict";
       (function(root, factory) {
         if (typeof exports === "object" && typeof module === "object") module.exports = factory();
         else if (typeof define === "function" && define.amd) define("EventBus", [], factory);
@@ -124,6 +125,7 @@ var DevDebugPanel = (() => {
   // node_modules/fast-safe-stringify/index.js
   var require_fast_safe_stringify = __commonJS({
     "node_modules/fast-safe-stringify/index.js"(exports, module) {
+      "use strict";
       module.exports = stringify;
       stringify.default = stringify;
       stringify.stable = deterministicStringify;
@@ -316,8 +318,8 @@ var DevDebugPanel = (() => {
   });
 
   // src/index.ts
-  var src_exports = {};
-  __export(src_exports, {
+  var index_exports = {};
+  __export(index_exports, {
     DebugPanel: () => DebugPanel,
     JsonView: () => JsonView,
     ScreenPosition: () => ScreenPosition,
@@ -347,6 +349,10 @@ var DevDebugPanel = (() => {
   // src/DebugPanel/DebugPanel.ts
   var import_eventbusjs = __toESM(require_eventbus_min(), 1);
   var import_fast_safe_stringify = __toESM(require_fast_safe_stringify(), 1);
+
+  // src/constants.ts
+  var COLLAPSED_INDICATOR = "\u25BA";
+  var EXPANDED_INDICATOR = "\u25BC";
 
   // node_modules/jsondiffpatch/lib/clone.js
   function cloneRegExp(re) {
@@ -1292,8 +1298,8 @@ var DevDebugPanel = (() => {
       }
       cachedDiffPatch = {
         diff: (txt1, txt2) => instance.patch_toText(instance.patch_make(txt1, txt2)),
-        patch: (txt1, patch2) => {
-          const results = instance.patch_apply(instance.patch_fromText(patch2), txt1);
+        patch: (txt1, patch) => {
+          const results = instance.patch_apply(instance.patch_fromText(patch), txt1);
           for (const resultOk of results[1]) {
             if (!resultOk) {
               const error = new Error("text patch failed");
@@ -1337,8 +1343,8 @@ var DevDebugPanel = (() => {
       return;
     }
     const textDiffDelta = nonNestedDelta;
-    const patch2 = getDiffMatchPatch(context.options, true).patch;
-    context.setResult(patch2(context.left, textDiffDelta[0])).exit();
+    const patch = getDiffMatchPatch(context.options, true).patch;
+    context.setResult(patch(context.left, textDiffDelta[0])).exit();
   };
   patchFilter3.filterName = "texts";
   var textDeltaReverse = (delta) => {
@@ -1522,16 +1528,6 @@ var DevDebugPanel = (() => {
     }
     return defaultInstance.diff(left, right);
   }
-  function patch(left, delta) {
-    if (!defaultInstance) {
-      defaultInstance = new diffpatcher_default();
-    }
-    return defaultInstance.patch(left, delta);
-  }
-
-  // src/constants.ts
-  var COLLAPSED_INDICATOR = "\u25BA";
-  var EXPANDED_INDICATOR = "\u25BC";
 
   // src/JsonView/JsonView.ts
   var DEFAULT_OPTIONS = () => ({
@@ -1555,7 +1551,6 @@ var DevDebugPanel = (() => {
     }
     toggleExpandNode(childNode, keyPath, toggleButton) {
       const isCollapsed = childNode.classList.contains("collapsed");
-      console.log(`collapsed?`, isCollapsed);
       childNode.classList.toggle("collapsed", !isCollapsed);
       this.viewStates[keyPath] = !isCollapsed;
       if (toggleButton) toggleButton.textContent = !isCollapsed ? COLLAPSED_INDICATOR : EXPANDED_INDICATOR;
@@ -1589,7 +1584,6 @@ var DevDebugPanel = (() => {
             toggleButton.classList.add("json-toggle");
             const childNode = this.drawJsonNode(value, keyPath + "/");
             if (this.options.expandAll) {
-              console.log(`expand all`);
               toggleButton.textContent = EXPANDED_INDICATOR;
             } else {
               let expand = false;
@@ -1604,12 +1598,10 @@ var DevDebugPanel = (() => {
                 if (typeof this.viewStates[keyPath] !== "undefined") expand = !this.viewStates[keyPath];
               }
               if (expand) {
-                console.log(`EXPANDING`);
                 toggleButton.textContent = EXPANDED_INDICATOR;
               } else {
                 toggleButton.textContent = COLLAPSED_INDICATOR;
                 childNode.classList.add("collapsed");
-                console.log(`start collapsed`, childNode);
               }
             }
             toggleButton.onclick = () => this.toggleExpandNode(childNode, keyPath, toggleButton);
@@ -1630,10 +1622,11 @@ var DevDebugPanel = (() => {
     updateJson(newJson) {
       const delta = diff(this.json, newJson);
       if (!delta) return;
-      patch(this.json, delta);
-      this.patchDOM(delta);
+      this.patchDOM(delta, "", newJson);
+      this.json = newJson;
     }
-    patchDOM(delta, currentPath = "") {
+    patchDOM(delta, currentPath = "", newJson) {
+      const sourceJson = newJson || this.json;
       for (const key in delta) {
         if (!Object.prototype.hasOwnProperty.call(delta, key)) continue;
         const change = delta[key];
@@ -1644,14 +1637,15 @@ var DevDebugPanel = (() => {
         );
         if (Array.isArray(change)) {
           if (change.length === 2) {
-            this.updateValueNode(propertyNode, keyPath, this.getValueAtPath(this.json, keyPath));
+            const newValue = this.getValueAtPath(sourceJson, keyPath);
+            this.updateValueNode(propertyNode, keyPath, newValue);
           } else if (change.length === 3 && change[1] === 0 && change[2] === 0) {
             if (propertyNode) propertyNode.remove();
           } else if (change.length === 1) {
             this.addPropertyNode(keyPath, change[0]);
           }
         } else if (typeof change === "object") {
-          this.patchDOM(change, keyPath + "/");
+          this.patchDOM(change, keyPath + "/", sourceJson);
         }
       }
     }
@@ -2238,9 +2232,9 @@ var DevDebugPanel = (() => {
         console.error(`No json wrapper found for existing state ${id}`);
         return;
       }
-      jsonWrapper.innerHTML = "";
-      this.debugStates[id].state = state;
-      this.debugStates[id].jsonView.updateJson(state);
+      const clonedState = JSON.parse(JSON.stringify(state));
+      this.debugStates[id].jsonView.updateJson(clonedState);
+      this.debugStates[id].state = clonedState;
     }
     addDebugState(id, state) {
       const content = this.contentContainer.querySelector(`[data-namespace="${DEBUG_STATE_NAMESPACE}"]`);
@@ -2248,6 +2242,7 @@ var DevDebugPanel = (() => {
         console.error("No content for debug namespace.");
         return;
       }
+      const clonedState = JSON.parse(JSON.stringify(state));
       const debugWrapper = document.createElement("div");
       debugWrapper.classList.add("debug-state");
       debugWrapper.setAttribute("id", `debug-state-${id}`);
@@ -2270,7 +2265,7 @@ var DevDebugPanel = (() => {
       const jsonWrapper = document.createElement("div");
       jsonWrapper.classList.add("json-wrapper");
       debugWrapper.appendChild(jsonWrapper);
-      const jsonView = new JsonView(state, jsonWrapper, {
+      const jsonView = new JsonView(clonedState, jsonWrapper, {
         //expandObjs: [/children/, /children\/(.*)/, /entry/]
       });
       const hoverActions = document.createElement("div");
@@ -2279,7 +2274,7 @@ var DevDebugPanel = (() => {
       copyButton.classList.add("debug-state-action-button", "debug-state-copy-button");
       copyButton.innerHTML = "\u{1F4CB}";
       copyButton.title = "Copy JSON to clipboard";
-      copyButton.onclick = () => this.copyDebugStateToClipboard(id, state, copyButton);
+      copyButton.onclick = () => this.copyDebugStateToClipboard(id, this.debugStates[id].state, copyButton);
       hoverActions.appendChild(copyButton);
       const deleteButton = document.createElement("button");
       deleteButton.classList.add("debug-state-action-button", "debug-state-delete-button");
@@ -2289,7 +2284,7 @@ var DevDebugPanel = (() => {
       hoverActions.appendChild(deleteButton);
       jsonWrapper.appendChild(hoverActions);
       this.debugStates[id] = {
-        state,
+        state: clonedState,
         jsonView,
         isExpanded: true
       };
@@ -2474,10 +2469,10 @@ var DevDebugPanel = (() => {
   function debug(idOrState, state) {
     import_eventbusjs.default.dispatch("debug", { id: idOrState, state });
   }
-  return __toCommonJS(src_exports);
+  return __toCommonJS(index_exports);
 })();
-// Export to global window object for easier access
-if (typeof window !== 'undefined') {
+// Export to global window object for easier access (IIFE only)
+if (typeof window !== 'undefined' && typeof DevDebugPanel !== 'undefined') {
   window.DebugPanel = DevDebugPanel.DebugPanel;
   window.debug = DevDebugPanel.debug;
   window.JsonView = DevDebugPanel.JsonView;

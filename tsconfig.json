@@ -11,7 +11,7 @@
 		"allowJs": true,
 		"declaration": true,
 		"declarationMap": true,
-		"emitDeclarationOnly": false,
+		"emitDeclarationOnly": true,
 		"outDir": "./dist",
 		"rootDir": "./src",
 		"strict": true,
@@ -29,7 +29,7 @@
 		"paths": {}
 	},
 	"include": [
-		"src/**/*"
+		"src/index.ts"
 	],
 	"exclude": [
 		"node_modules",
