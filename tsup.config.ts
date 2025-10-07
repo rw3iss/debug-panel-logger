@@ -44,7 +44,7 @@ export default defineConfig([
 		external: ['eventbusjs', 'jsondiffpatch', 'fast-safe-stringify'],
 		outExtension({ format }) {
 			return {
-				js: format === 'esm' ? '.esm.js' : '.cjs.js'
+				js: format === 'esm' ? '.js' : '.cjs'
 			};
 		},
 		esbuildPlugins: [scssPlugin as any]
