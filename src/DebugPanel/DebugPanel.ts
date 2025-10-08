@@ -470,7 +470,7 @@ export class DebugPanel {
 		}
 
 		// Clone the state to avoid reference issues when comparing
-		const clonedState = JSON.parse(JSON.stringify(state));
+		const clonedState = state ? JSON.parse(JSON.stringify(state)) : {}; // todo: handle undefined state better
 
 		// Don't clear innerHTML - JsonView.updateJson needs the existing DOM to patch
 		this.debugStates[id].jsonView.updateJson(clonedState);
@@ -485,7 +485,8 @@ export class DebugPanel {
 		}
 
 		// Clone the state to avoid reference issues
-		const clonedState = JSON.parse(JSON.stringify(state));
+		// Todo: find a way to do this without cloning?
+		const clonedState = state ? JSON.parse(JSON.stringify(state)) : {}; // todo: strategy for null objects
 
 		const debugWrapper = document.createElement('div');
 		debugWrapper.classList.add('debug-state');
@@ -517,6 +518,7 @@ export class DebugPanel {
 		// Create JsonView first (it will render and may clear the container)
 		const jsonView = new JsonView(clonedState, jsonWrapper as HTMLElement, {
 			//expandObjs: [/children/, /children\/(.*)/, /entry/]
+			// todo: pass options
 		});
 
 		// Add hover actions AFTER JsonView has rendered (so they don't get cleared)

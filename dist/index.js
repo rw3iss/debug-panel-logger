@@ -722,7 +722,7 @@ var DebugPanel = class {
       console.error(`No json wrapper found for existing state ${id}`);
       return;
     }
-    const clonedState = JSON.parse(JSON.stringify(state));
+    const clonedState = state ? JSON.parse(JSON.stringify(state)) : {};
     this.debugStates[id].jsonView.updateJson(clonedState);
     this.debugStates[id].state = clonedState;
   }
@@ -732,7 +732,7 @@ var DebugPanel = class {
       console.error("No content for debug namespace.");
       return;
     }
-    const clonedState = JSON.parse(JSON.stringify(state));
+    const clonedState = state ? JSON.parse(JSON.stringify(state)) : {};
     const debugWrapper = document.createElement("div");
     debugWrapper.classList.add("debug-state");
     debugWrapper.setAttribute("id", `debug-state-${id}`);
@@ -757,6 +757,7 @@ var DebugPanel = class {
     debugWrapper.appendChild(jsonWrapper);
     const jsonView = new JsonView(clonedState, jsonWrapper, {
       //expandObjs: [/children/, /children\/(.*)/, /entry/]
+      // todo: pass options
     });
     const hoverActions = document.createElement("div");
     hoverActions.classList.add("debug-state-hover-actions");
