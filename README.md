@@ -1,24 +1,30 @@
 # Debug Panel (dev-debug-panel)
 
-A lightweight draggable, resizable, and snappable multi-tab debug panel for development, utilizing json diffing to only update its view with changed properties. Maintains view state across object updates and page reloads to easily debug them. Works with any framework (see below for examples).
+A lightweight, draggable, resizable, and snappable multi-tab debug panel for development. Features efficient JSON diffing to update only changed properties, persistent view state across updates and page reloads, and framework-agnostic design.
 
 ## Features
 
-- 🎯 **Draggable & Resizable** - Drag and resize the panel as needed. Supports configurable snapping options and opacity controls. View settings are preserved across page reloads. Ctrl+Alt+D to hide and show the panel.
+- 🎯 **Draggable & Resizable** - Drag to reposition, resize from any edge or corner with 8-way handles. Smart edge snapping with configurable padding. All settings persist across page reloads.
 
-- 📊 **State Inspection** - View and track object states with JSON tree visualization. If you update an object, the view will remember it's state, allowing easier debugging.
+- 📊 **State Inspection** - View and track object states with expandable JSON tree visualization. Objects are efficiently updated using jsondiffpatch - only changed nodes are re-rendered. View state (expanded/collapsed nodes) is preserved across updates.
 
-- 📝 **Multi-tab Logging** - Organize logs by namespace/category in a tabbed scrollable view for each. Copy or delete entries easily.
+- 📝 **Multi-tab Logging** - Organize logs by namespace in separate tabs. Global tab shows all logs combined. Copy or delete individual entries with ease.
 
-- 🎨 **Auto-injected Styles** - SCSS styles are bundled and injected automatically
+- 🎨 **Auto-injected Styles** - SCSS styles are compiled and bundled automatically - no manual CSS imports needed
 
-- 🚀 **Framework Agnostic** - Works with any web framework or vanilla JS
+- 🚀 **Framework Agnostic** - Works with React, Vue, Angular, or vanilla JS
 
-- 📦 **TypeScript Support** - Full type definitions included
+- 📦 **TypeScript Support** - Full type definitions and type-safe API
+
+- 👁️ **Object Visibility** - Hide/show individual debug objects in a separate tab for cleaner organization
+
+- 🔲 **Layout Modes** - Switch between row (vertical) and column (horizontal) layouts for debug objects
+
+- 🎚️ **Opacity Control** - Adjust panel transparency from the settings panel
 
 
 ### Looks like this:
-<img src="./images/debug-panel-screenshot.png" style="width: 500px;"/>
+<img src="./images/debug-panel-screenshot.png" style="width: 800px;"/>
 
 ## Installation
 
@@ -51,10 +57,8 @@ You can pass an optional string id for the first argument, to show on the panel:
 ```typescript
 debug('config', { theme: 'dark', api: 'https://api.example.com' });
 
-// You can also use the instance itself:
+// You can also use the instance itself, and regular logs:
 panel.debug('user', { id: 1, name: 'John', active: true });
-
-// And add regular logs
 panel.log('api', 'Fetching user data...');
 panel.log('ui', 'Button clicked', { buttonId: 'submit' });
 ```
@@ -63,7 +67,7 @@ See [examples/DebugPanelLogModule.ts](../examples/DebugPanelLogModule.ts) for an
 ### Example: React Integration
 
 ```tsx
-import { DebugPanel, debugState } from 'dev-debug-panel';
+import { DebugPanel, debug } from 'dev-debug-panel';
 import { useEffect, useRef } from 'react';
 
 function App() {
@@ -80,7 +84,7 @@ function App() {
   }, []);
 
   const handleStateUpdate = () => {
-    debugState('component-state', {
+    debug('component-state', {
       timestamp: Date.now(),
       userCount: 42,
       features: ['dark-mode', 'auto-save']
@@ -145,20 +149,23 @@ Main class for creating and managing the debug panel.
 import { DebugPanel, ScreenPosition } from 'dev-debug-panel';
 
 const panel = new DebugPanel({
-  show?: boolean;          // Show panel immediately (default: false)
-  position?: ScreenPosition; // Initial position (default: 'bottomRight')
-  width?: number;          // Initial width in pixels (default: 600)
-  height?: number;         // Initial height in pixels (default: 400)
-  snap?: boolean;          // Enable edge snapping when dragging (default: false)
-  snapPadding?: number;    // Snap distance in pixels (default: 20)
+  show?: boolean;              // Show panel immediately (default: false)
+  position?: ScreenPosition;   // Initial position (default: BottomRight)
+  width?: number;              // Initial width in pixels (default: 600)
+  height?: number;             // Initial height in pixels (default: 400)
+  snap?: boolean;              // Enable edge snapping (default: true)
+  snapPadding?: number;        // Snap distance in pixels (default: 20)
+  logToConsole?: boolean;      // Also log to browser console (default: false)
+  clearOnHide?: boolean;       // Clear current tab when hiding (default: false)
+  expandByDefault?: boolean;   // Expand new objects by default (default: false)
 });
 
 // Methods
-panel.show();           // Show the panel
-panel.hide();           // Hide the panel
-panel.toggle();         // Toggle visibility
-panel.addLog(namespace, message);    // Add log entry
-panel.debugState(id, state);        // Update state view
+panel.show();                          // Show the panel
+panel.hide();                          // Hide the panel
+panel.toggle();                        // Toggle visibility
+panel.log(namespace, message);         // Add log entry to namespace tab
+panel.debug(id, state);                // Add/update object in debug view
 ```
 
 ### ScreenPosition
@@ -178,14 +185,14 @@ enum ScreenPosition {
 }
 ```
 
-### debugState Function
+### debug Function
 
 Utility function to send state updates to the debug panel from anywhere:
 
 ```typescript
-import { debugState } from 'dev-debug-panel';
+import { debug } from 'dev-debug-panel';
 
-debugState('unique-id', anyObject);
+debug('unique-id', anyObject);
 ```
 
 ### JsonView
@@ -208,28 +215,45 @@ jsonView.updateJson(newData);       	// Update via diffing with new data
 
 ## Keyboard Shortcuts
 
-- **Ctrl+Alt+D** - Toggle debug panel visibility
+- **Ctrl+Alt+D** (Windows/Linux) or **Cmd+D** (Mac) - Toggle debug panel visibility
+- **Ctrl+Alt+R** (Windows/Linux) or **Cmd+Ctrl+R** (Mac) - Reposition panel to default position
+- **Double-click** title bar - Stretch/unstretch panel along snapped edge
 
 ## Features in Detail
 
 ### State Inspection
 - View complex objects in an expandable JSON tree
-- Real-time updates when state changes
-- Collapsible sections with memory of view state
-- Syntax highlighting for better readability
+- Efficient updates using jsondiffpatch - only changed nodes re-render
+- Expand/collapse individual nodes with state preservation
+- Syntax highlighting for different data types
+- Copy objects to clipboard as formatted JSON
+- Hide/show individual objects (moved to "hidden" tab)
+- Delete objects from the view
+- Toggle expand/collapse all objects with one click
+- Auto-expand patterns for specific object paths
 
 ### Multi-tab Logging
 - Automatic namespace-based tab creation
 - Global tab shows all logs combined
+- Objects tab for debug state visualization
+- Hidden tab for temporarily hidden objects
 - Per-tab clearing functionality
-- Copy individual log entries
+- Copy individual log entries to clipboard
+- Delete individual log entries
+- Timestamp for each log entry
 
 ### Panel Interaction
 - Drag to reposition anywhere on screen
-- Resize from any edge or corner
-- Adjustable opacity slider
-- Persistent settings saved to localStorage
+- Resize from any edge or corner (8-way resize handles)
+- Smart edge snapping when dragging or resizing
+- Double-click title bar to stretch/unstretch along snapped edge
+- Stretch button to toggle full height/width stretch
+- Layout toggle between row and column modes
+- Adjustable opacity slider (20-100%)
+- Settings panel with multiple options
+- All settings persist to localStorage
 - Responsive layout for narrow panels
+- Window resize handling maintains panel position
 
 ## Browser Support
 
@@ -250,6 +274,23 @@ import type {
   DragOptions
 } from 'dev-debug-panel';
 ```
+
+## Contributing
+
+Issues and pull requests are welcome! Please visit the [GitHub repository](https://github.com/rw3iss/dev-debug-panel).
+
+## Feedback & Support
+
+- **Report Issues**: [GitHub Issues](https://github.com/rw3iss/dev-debug-panel/issues)
+- **Feature Requests**: [GitHub Discussions](https://github.com/rw3iss/dev-debug-panel/discussions)
+- **Email**: rw3iss@gmail.com
+
+## Author
+
+**Ryan Weiss**
+- Website: [www.ryanweiss.net](https://www.ryanweiss.net)
+- Email: rw3iss@gmail.com
+- ☕ [Buy Me a Coffee](https://www.buymeacoffee.com/ryanweiss)
 
 ## License
 

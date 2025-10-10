@@ -18,6 +18,8 @@ export enum ScreenPosition {
 }
 
 const MIN_WIDTH = 280;
+const UNSNAP_SHRINK_PADDING = 20; // Pixels to shrink from each side when unsnapping from stretched
+const SNAP_ANIMATION_DURATION = 150; // milliseconds for snap/unsnap animations
 
 type LogEntry = {
 	id: string;
@@ -53,6 +55,7 @@ export interface DebugPanelSettings {
 	logToConsole?: boolean;
 	clearOnHide?: boolean;
 	expandByDefault?: boolean;
+	hiddenObjects?: string[];
 }
 
 export interface DebugPanelOptions {
@@ -102,6 +105,8 @@ export class DebugPanel {
 	private logToConsole: boolean = false;
 	private clearOnHide: boolean = false;
 	private expandByDefault: boolean = false;
+	private hiddenObjects: Set<string> = new Set();
+	private hiddenTab!: HTMLElement;
 
 	constructor(options: DebugPanelOptions = {}) {
 		this.options = {
@@ -134,6 +139,7 @@ export class DebugPanel {
 
 		this.addTab(DEBUG_STATE_NAMESPACE);
 		this.addTab('global');
+		this.addHiddenTab();
 
 		// Restore settings first (including visibility) before setting up interactions
 		this.restoreSettings();
@@ -156,6 +162,7 @@ export class DebugPanel {
 		container.style.height = `${this.options.height}px`;
 		container.style.position = 'fixed';
 		container.style.opacity = '1'; // Set default opacity
+		container.style.transition = `left ${SNAP_ANIMATION_DURATION}ms ease-out, top ${SNAP_ANIMATION_DURATION}ms ease-out, width ${SNAP_ANIMATION_DURATION}ms ease-out, height ${SNAP_ANIMATION_DURATION}ms ease-out`;
 		return container;
 	}
 
@@ -371,10 +378,24 @@ export class DebugPanel {
 		expandByDefaultRow.appendChild(this.expandByDefaultCheckbox);
 		expandByDefaultRow.appendChild(expandByDefaultLabel);
 
+		// Reposition button
+		const repositionButton = document.createElement('button');
+		repositionButton.textContent = 'Reposition (Ctrl+Alt+R)';
+		repositionButton.style.marginTop = '10px';
+		repositionButton.onclick = () => this.repositionToDefault();
+
+		// Reset all settings button
+		const resetSettingsButton = document.createElement('button');
+		resetSettingsButton.textContent = 'Reset All Settings';
+		resetSettingsButton.style.marginTop = '5px';
+		resetSettingsButton.onclick = () => this.resetAllSettings();
+
 		panel.appendChild(opacityRow);
 		panel.appendChild(logToConsoleRow);
 		panel.appendChild(clearOnHideRow);
 		panel.appendChild(expandByDefaultRow);
+		panel.appendChild(repositionButton);
+		panel.appendChild(resetSettingsButton);
 
 		return panel;
 	}
@@ -407,9 +428,18 @@ export class DebugPanel {
 			minWidth: 200,
 			minHeight: 150,
 			snapPadding: this.options.snapPadding || 20,
-			onResize: (newWidth: number) => {
+			onResizeStart: () => {
+				// Disable transitions during resize
+				this.container.style.transition = 'none';
+			},
+			onResize: (newWidth: number, newHeight: number) => {
+				this.handleResizeSnapping();
 				this.updateToolbarLayout(newWidth);
 				this.saveSettings();
+			},
+			onResizeEnd: () => {
+				// Re-enable transitions after resize
+				this.container.style.transition = `left ${SNAP_ANIMATION_DURATION}ms ease-out, top ${SNAP_ANIMATION_DURATION}ms ease-out, width ${SNAP_ANIMATION_DURATION}ms ease-out, height ${SNAP_ANIMATION_DURATION}ms ease-out`;
 			}
 		});
 	}
@@ -417,12 +447,15 @@ export class DebugPanel {
 	private setupDraggable(): void {
 		if (this.options.snap) {
 			makeDraggable(this.container, this.tabContainer, {
+				onDragStart: () => this.handleDragStart(),
 				onDrag: (x: number, y: number) => this.handleSnapWhileDragging(x, y),
-				onDragEnd: () => this.saveSettings()
+				onDragEnd: () => this.handleDragEnd(),
+				allowResize: true
 			});
 		} else {
 			makeDraggable(this.container, this.tabContainer, {
-				onDragEnd: () => this.saveSettings()
+				onDragEnd: () => this.handleDragEnd(),
+				allowResize: true
 			});
 		}
 	}
@@ -476,15 +509,115 @@ export class DebugPanel {
 
 	private setupKeyboardShortcut(): void {
 		document.addEventListener('keydown', (event: KeyboardEvent) => {
-			// Check for Ctrl+Alt+D (Windows/Linux) or Cmd+D (Mac)
+			// Check for Ctrl+Alt+D (Windows/Linux) or Cmd+D (Mac) - Toggle visibility
 			const isCtrlAltD = event.ctrlKey && event.altKey && event.key.toLowerCase() === 'd' && !event.metaKey;
 			const isCmdD = event.metaKey && event.key.toLowerCase() === 'd' && !event.ctrlKey;
 
 			if (isCtrlAltD || isCmdD) {
 				event.preventDefault();
 				this.toggle();
+				return;
+			}
+
+			// Only process other shortcuts if panel is visible
+			if (!this.container.classList.contains('visible')) return;
+
+			// Check for Ctrl+Alt+R (Windows/Linux) or Cmd+Ctrl+R (Mac) - Reposition to default
+			const isCtrlAltR = event.ctrlKey && event.altKey && event.key.toLowerCase() === 'r' && !event.metaKey;
+			const isCmdCtrlR = event.metaKey && event.ctrlKey && event.key.toLowerCase() === 'r';
+			if (isCtrlAltR || isCmdCtrlR) {
+				event.preventDefault();
+				this.repositionToDefault();
 			}
 		});
+	}
+
+	private repositionToDefault(): void {
+		const { width: windowWidth, height: windowHeight } = getWindowSize();
+		const defaultWidth = this.options.width || 280;
+		const defaultHeight = this.options.height || windowHeight * 0.5;
+		const position = this.options.position || ScreenPosition.BottomRight;
+
+		this.container.style.width = `${defaultWidth}px`;
+		this.container.style.height = `${defaultHeight}px`;
+
+		// Calculate position based on default
+		let left = 0;
+		let top = 0;
+
+		switch (position) {
+			case ScreenPosition.TopLeft:
+				left = 0;
+				top = 0;
+				break;
+			case ScreenPosition.Top:
+				left = (windowWidth - defaultWidth) / 2;
+				top = 0;
+				break;
+			case ScreenPosition.TopRight:
+				left = windowWidth - defaultWidth;
+				top = 0;
+				break;
+			case ScreenPosition.Right:
+				left = windowWidth - defaultWidth;
+				top = (windowHeight - defaultHeight) / 2;
+				break;
+			case ScreenPosition.BottomRight:
+				left = windowWidth - defaultWidth;
+				top = windowHeight - defaultHeight;
+				break;
+			case ScreenPosition.Bottom:
+				left = (windowWidth - defaultWidth) / 2;
+				top = windowHeight - defaultHeight;
+				break;
+			case ScreenPosition.BottomLeft:
+				left = 0;
+				top = windowHeight - defaultHeight;
+				break;
+			case ScreenPosition.Left:
+				left = 0;
+				top = (windowHeight - defaultHeight) / 2;
+				break;
+		}
+
+		this.container.style.left = `${left}px`;
+		this.container.style.top = `${top}px`;
+
+		this.updateToolbarLayout(defaultWidth);
+		this.saveSettings();
+	}
+
+	private resetAllSettings(): void {
+		if (!confirm('Are you sure you want to reset all settings? This will restore the panel to its default position and clear all preferences, but keep the current data.')) {
+			return;
+		}
+
+		// Clear localStorage
+		localStorage.removeItem('debugPanelSettings');
+
+		// Reset state variables
+		this.logToConsole = this.options.logToConsole || false;
+		this.clearOnHide = this.options.clearOnHide || false;
+		this.expandByDefault = this.options.expandByDefault || false;
+		this.hiddenObjects.clear();
+		this.snappedTo = null;
+		this.isStretched = false;
+		this.layoutMode = 'row';
+
+		// Reset UI controls
+		if (this.logToConsoleCheckbox) this.logToConsoleCheckbox.checked = this.logToConsole;
+		if (this.clearOnHideCheckbox) this.clearOnHideCheckbox.checked = this.clearOnHide;
+		if (this.expandByDefaultCheckbox) this.expandByDefaultCheckbox.checked = this.expandByDefault;
+		if (this.opacitySlider) {
+			this.opacitySlider.value = '100';
+			this.container.style.opacity = '1';
+		}
+
+		// Update hidden tab label
+		this.updateHiddenTabLabel();
+
+		// Reposition to default
+		this.repositionToDefault();
 	}
 
 	private showHelpOverlay(): void {
@@ -506,6 +639,7 @@ export class DebugPanel {
 					<h3>Keyboard Shortcuts</h3>
 					<ul>
 						<li><kbd>Ctrl+Alt+D</kbd> (Windows/Linux) or <kbd>Cmd+D</kbd> (Mac) - Toggle panel visibility</li>
+						<li><kbd>Ctrl+Alt+R</kbd> (Windows/Linux) or <kbd>Cmd+Ctrl+R</kbd> (Mac) - Reposition to default</li>
 						<li><kbd>Double-click</kbd> title bar - Stretch/unstretch panel</li>
 					</ul>
 				</section>
@@ -685,6 +819,12 @@ export class DebugPanel {
 				}
 			}
 
+			// Restore hidden objects
+			if (savedSettings.hiddenObjects) {
+				this.hiddenObjects = new Set(savedSettings.hiddenObjects);
+				this.updateHiddenTabLabel();
+			}
+
 			// Restore visibility state without triggering saveSettings
 			if (savedSettings.visible) {
 				this.container.classList.add('visible');
@@ -725,7 +865,8 @@ export class DebugPanel {
 				layoutMode: this.layoutMode,
 				logToConsole: this.logToConsole,
 				clearOnHide: this.clearOnHide,
-				expandByDefault: this.expandByDefault
+				expandByDefault: this.expandByDefault,
+				hiddenObjects: Array.from(this.hiddenObjects)
 			};
 			localStorage.setItem('debugPanelSettings', JSON.stringify(settings));
 		} catch (error) {
@@ -792,13 +933,18 @@ export class DebugPanel {
 	}
 
 	private updateDebugState(id: string, state: any): void {
-		const content = this.contentContainer.querySelector(`[data-namespace="${DEBUG_STATE_NAMESPACE}"]`);
-		if (!content) {
-			console.error('No content for debug namespace.');
-			return;
+		// Find which namespace the element currently exists in
+		let debugWrapper: HTMLElement | null = null;
+		const namespaces = [DEBUG_STATE_NAMESPACE, 'hidden'];
+
+		for (const ns of namespaces) {
+			const content = this.contentContainer.querySelector(`[data-namespace="${ns}"]`);
+			if (content) {
+				debugWrapper = content.querySelector(`#debug-state-${id}`);
+				if (debugWrapper) break;
+			}
 		}
 
-		const debugWrapper: HTMLElement | null = content.querySelector(`#debug-state-${id}`);
 		if (!debugWrapper) {
 			console.error(`No debug state found for ${id}.`);
 			return;
@@ -819,9 +965,11 @@ export class DebugPanel {
 	}
 
 	private addDebugState(id: string, state: any): void {
-		const content = this.contentContainer.querySelector(`[data-namespace="${DEBUG_STATE_NAMESPACE}"]`);
+		// Determine target namespace based on hidden state
+		const targetNamespace = this.hiddenObjects.has(id) ? 'hidden' : DEBUG_STATE_NAMESPACE;
+		const content = this.contentContainer.querySelector(`[data-namespace="${targetNamespace}"]`);
 		if (!content) {
-			console.error('No content for debug namespace.');
+			console.error(`No content for ${targetNamespace} namespace.`);
 			return;
 		}
 
@@ -865,6 +1013,17 @@ export class DebugPanel {
 			this.copyDebugStateToClipboard(id, state, copyButton);
 		};
 		hoverActions.appendChild(copyButton);
+
+		// Hide button
+		const hideButton = document.createElement('button');
+		hideButton.classList.add('debug-state-action-button', 'debug-state-hide-button');
+		hideButton.innerHTML = this.hiddenObjects.has(id) ? '👁️' : '🙈';
+		hideButton.title = this.hiddenObjects.has(id) ? 'Show this object' : 'Hide this object';
+		hideButton.onclick = (e) => {
+			e.stopPropagation();
+			this.toggleHideDebugState(id);
+		};
+		hoverActions.appendChild(hideButton);
 
 		// Delete button
 		const deleteButton = document.createElement('button');
@@ -923,6 +1082,11 @@ export class DebugPanel {
 		};
 
 		content.appendChild(debugWrapper);
+
+		// Update hidden tab label if this was added to hidden namespace
+		if (targetNamespace === 'hidden') {
+			this.updateHiddenTabLabel();
+		}
 	}
 
 	private copyDebugStateToClipboard(id: string, state: any, button: HTMLElement): void {
@@ -953,6 +1117,62 @@ export class DebugPanel {
 			debugWrapper.remove();
 		}
 		delete this.debugStates[id];
+		this.hiddenObjects.delete(id);
+		this.updateHiddenTabLabel();
+		this.saveSettings();
+	}
+
+	private toggleHideDebugState(id: string): void {
+		if (this.hiddenObjects.has(id)) {
+			this.hiddenObjects.delete(id);
+		} else {
+			this.hiddenObjects.add(id);
+		}
+
+		// Redraw both tabs to reflect the change
+		this.redrawDebugTabs();
+		this.updateHiddenTabLabel();
+		this.saveSettings();
+	}
+
+	private redrawDebugTabs(): void {
+		// Collect all debug wrappers first (before clearing)
+		const debugWrappers: { [id: string]: HTMLElement } = {};
+		Object.keys(this.debugStates).forEach(id => {
+			const wrapper = document.getElementById(`debug-state-${id}`);
+			if (wrapper) {
+				debugWrappers[id] = wrapper;
+			}
+		});
+
+		// Clear DOM for both tabs
+		const objectsContent = this.contentContainer.querySelector(`[data-namespace="${DEBUG_STATE_NAMESPACE}"]`) as HTMLElement;
+		const hiddenContent = this.contentContainer.querySelector(`[data-namespace="hidden"]`) as HTMLElement;
+
+		if (objectsContent) objectsContent.innerHTML = '';
+		if (hiddenContent) hiddenContent.innerHTML = '';
+
+		// Redraw all debug states in correct tabs based on hiddenObjects set
+		Object.keys(this.debugStates).forEach(id => {
+			const targetNamespace = this.hiddenObjects.has(id) ? 'hidden' : DEBUG_STATE_NAMESPACE;
+			const targetContent = this.contentContainer.querySelector(`[data-namespace="${targetNamespace}"]`);
+			if (!targetContent) return;
+
+			const debugWrapper = debugWrappers[id];
+			if (debugWrapper) {
+				// Update hide button
+				const hideButton = debugWrapper.querySelector('.debug-state-hide-button') as HTMLElement;
+				if (hideButton) {
+					hideButton.innerHTML = this.hiddenObjects.has(id) ? '👁️' : '🙈';
+					hideButton.title = this.hiddenObjects.has(id) ? 'Show this object' : 'Hide this object';
+				}
+
+				targetContent.appendChild(debugWrapper);
+			}
+		});
+
+		// Restore tab visibility after redraw
+		this.switchTab(this.activeTab);
 	}
 
 	// Tab controls
@@ -971,10 +1191,36 @@ export class DebugPanel {
 		const content = document.createElement('div');
 		content.classList.add('debug-tab-content');
 		content.dataset.namespace = namespace;
+		content.style.display = 'none'; // Start hidden
 		this.contentContainer.appendChild(content);
 
 		if (Object.keys(this.tabEntries).length === 1) {
 			this.switchTab(namespace);
+		}
+	}
+
+	private addHiddenTab(): void {
+		const namespace = 'hidden';
+		this.tabEntries[namespace] = [];
+
+		this.hiddenTab = document.createElement('button');
+		this.hiddenTab.classList.add('debug-tab', 'debug-tab-hidden');
+		this.updateHiddenTabLabel();
+		this.hiddenTab.onclick = () => this.switchTab(namespace);
+		this.tabContainer.appendChild(this.hiddenTab);
+
+		const content = document.createElement('div');
+		content.classList.add('debug-tab-content');
+		content.dataset.namespace = namespace;
+		content.style.display = 'none'; // Start hidden
+		this.contentContainer.appendChild(content);
+	}
+
+	private updateHiddenTabLabel(): void {
+		if (this.hiddenTab) {
+			// Count actual debug states that are in the hiddenObjects set
+			const hiddenCount = Object.keys(this.debugStates).filter(id => this.hiddenObjects.has(id)).length;
+			this.hiddenTab.textContent = `hidden (${hiddenCount})`;
 		}
 	}
 
@@ -1110,6 +1356,91 @@ export class DebugPanel {
 		this.saveSettings();
 	}
 
+	private handleDragStart(): void {
+		// Disable transitions during drag
+		this.container.style.transition = 'none';
+
+		// If panel is snapped and stretched, just unstretch
+		if (this.snappedTo && this.isStretched) {
+			this.isStretched = false;
+			this.updateStretchButton();
+		}
+
+		// Clear snap state when starting to drag
+		this.snappedTo = null;
+	}
+
+	private handleResizeSnapping(): void {
+		const { width: windowWidth, height: windowHeight } = getWindowSize();
+		const snapPadding = this.options.snapPadding || 20;
+		const rect = this.container.getBoundingClientRect();
+
+		const left = rect.left;
+		const right = windowWidth - rect.right;
+		const top = rect.top;
+		const bottom = windowHeight - rect.bottom;
+
+		// Check if edges are snapped to window edges
+		const leftSnapped = Math.abs(left) < snapPadding;
+		const rightSnapped = Math.abs(right) < snapPadding;
+		const topSnapped = Math.abs(top) < snapPadding;
+		const bottomSnapped = Math.abs(bottom) < snapPadding;
+
+		// Check if panel is stretched (full width or height)
+		const isFullWidth = leftSnapped && rightSnapped;
+		const isFullHeight = topSnapped && bottomSnapped;
+
+		// Update snap state based on which edges are snapped
+		if (isFullWidth && isFullHeight) {
+			// All edges snapped - fully stretched
+			this.snappedTo = 'topLeft';
+			this.isStretched = true;
+		} else if (leftSnapped && topSnapped) {
+			this.snappedTo = 'topLeft';
+			this.isStretched = isFullWidth || isFullHeight;
+		} else if (rightSnapped && topSnapped) {
+			this.snappedTo = 'topRight';
+			this.isStretched = isFullWidth || isFullHeight;
+		} else if (leftSnapped && bottomSnapped) {
+			this.snappedTo = 'bottomLeft';
+			this.isStretched = isFullWidth || isFullHeight;
+		} else if (rightSnapped && bottomSnapped) {
+			this.snappedTo = 'bottomRight';
+			this.isStretched = isFullWidth || isFullHeight;
+		} else if (leftSnapped && rightSnapped) {
+			// Stretched horizontally (full width)
+			this.snappedTo = 'left';
+			this.isStretched = true;
+		} else if (topSnapped && bottomSnapped) {
+			// Stretched vertically (full height)
+			this.snappedTo = 'top';
+			this.isStretched = true;
+		} else if (leftSnapped) {
+			this.snappedTo = 'left';
+			this.isStretched = false;
+		} else if (rightSnapped) {
+			this.snappedTo = 'right';
+			this.isStretched = false;
+		} else if (topSnapped) {
+			this.snappedTo = 'top';
+			this.isStretched = false;
+		} else if (bottomSnapped) {
+			this.snappedTo = 'bottom';
+			this.isStretched = false;
+		} else {
+			this.snappedTo = null;
+			this.isStretched = false;
+		}
+
+		this.updateStretchButton();
+	}
+
+	private handleDragEnd(): void {
+		// Re-enable transitions after drag
+		this.container.style.transition = `left ${SNAP_ANIMATION_DURATION}ms ease-out, top ${SNAP_ANIMATION_DURATION}ms ease-out, width ${SNAP_ANIMATION_DURATION}ms ease-out, height ${SNAP_ANIMATION_DURATION}ms ease-out`;
+		this.saveSettings();
+	}
+
 	private handleSnapWhileDragging(x: number, y: number): { x: number; y: number } {
 		const snapPadding = this.options.snapPadding || 20;
 		const { width: windowWidth, height: windowHeight } = getWindowSize();
@@ -1159,14 +1490,7 @@ export class DebugPanel {
 		// Update snapped position if changed
 		if (newSnappedTo !== this.snappedTo) {
 			this.snappedTo = newSnappedTo;
-
-			// Update stretch button icon
 			this.updateStretchButton();
-
-			// If stretch is enabled, apply stretch to new snap position
-			if (this.isStretched && newSnappedTo) {
-				setTimeout(() => this.applyStretch(), 0);
-			}
 		}
 
 		// Return the snapped coordinates
@@ -1195,70 +1519,55 @@ export class DebugPanel {
 	}
 
 	private toggleStretch(): void {
-		// If not snapped, snap to closest edge first
-		if (!this.snappedTo) {
-			const { width: windowWidth, height: windowHeight } = getWindowSize();
-			const panelRect = this.container.getBoundingClientRect();
-			const panelCenterX = panelRect.left + panelRect.width / 2;
-			const panelCenterY = panelRect.top + panelRect.height / 2;
+		const { width: windowWidth, height: windowHeight } = getWindowSize();
 
-			const distToLeft = panelCenterX;
-			const distToRight = windowWidth - panelCenterX;
-			const distToTop = panelCenterY;
-			const distToBottom = windowHeight - panelCenterY;
-
-			const minDist = Math.min(distToLeft, distToRight, distToTop, distToBottom);
-
-			if (minDist === distToLeft) {
-				this.snappedTo = 'left';
-				this.container.style.left = '0px';
-			} else if (minDist === distToRight) {
-				this.snappedTo = 'right';
-				this.container.style.left = `${windowWidth - panelRect.width}px`;
-			} else if (minDist === distToTop) {
-				this.snappedTo = 'top';
-				this.container.style.top = '0px';
-			} else {
-				this.snappedTo = 'bottom';
-				this.container.style.top = `${windowHeight - panelRect.height}px`;
-			}
-		}
-
-		this.isStretched = !this.isStretched;
-
+		// If already stretched, unstretch
 		if (this.isStretched) {
-			this.applyStretch();
-		} else {
-			// Return to 50% of viewport and center on the snapped edge
-			const { width: windowWidth, height: windowHeight } = getWindowSize();
+			this.isStretched = false;
 
-			if (this.snappedTo === 'left' || this.snappedTo === 'right') {
-				// Was stretched vertically, shrink to 50% height and center vertically
-				const newHeight = windowHeight * 0.5;
-				this.container.style.height = `${newHeight}px`;
-				this.container.style.top = `${(windowHeight - newHeight) / 2}px`;
-			} else if (this.snappedTo === 'top' || this.snappedTo === 'bottom') {
-				// Was stretched horizontally, shrink to 50% width and center horizontally
-				const newWidth = windowWidth * 0.5;
-				this.container.style.width = `${newWidth}px`;
-				this.container.style.left = `${(windowWidth - newWidth) / 2}px`;
-			} else if (this.snappedTo) {
-				// Corner snap - shrink to 50% in both dimensions
-				const newHeight = windowHeight * 0.5;
-				const newWidth = windowWidth * 0.5;
-				this.container.style.height = `${newHeight}px`;
-				this.container.style.width = `${newWidth}px`;
+			// Get current panel dimensions to determine what was stretched
+			const rect = this.container.getBoundingClientRect();
+			const isFullWidth = Math.abs(rect.width - windowWidth) < 10;
+			const isFullHeight = Math.abs(rect.height - windowHeight) < 10;
 
-				if (this.snappedTo.includes('top')) {
-					this.container.style.top = `${(windowHeight - newHeight) / 2}px`;
+			// Reduce dimensions to 50% of what was stretched and center
+			if (isFullWidth && isFullHeight) {
+				// Both dimensions stretched - reduce both to 50% and center
+				this.container.style.width = `${windowWidth * 0.5}px`;
+				this.container.style.height = `${windowHeight * 0.5}px`;
+				this.container.style.left = `${windowWidth * 0.25}px`;
+				this.container.style.top = `${windowHeight * 0.25}px`;
+			} else if (isFullHeight) {
+				// Only height stretched - reduce height to 50%
+				this.container.style.height = `${windowHeight * 0.5}px`;
+				this.container.style.top = `${windowHeight * 0.25}px`;
+			} else if (isFullWidth) {
+				// Only width stretched - reduce width to 50%
+				this.container.style.width = `${windowWidth * 0.5}px`;
+				this.container.style.left = `${windowWidth * 0.25}px`;
+			}
+
+			// Unsnap when unstretching
+			this.snappedTo = null;
+		}
+		// Not currently stretched - stretch it
+		else {
+			this.isStretched = true;
+
+			// If snapped to a side, stretch along that side's axis
+			if (this.snappedTo) {
+				this.applyStretch();
+			}
+			// If not snapped, stretch based on current layout mode
+			else {
+				if (this.layoutMode === 'row') {
+					// Row layout - stretch height (vertical)
+					this.container.style.height = `${windowHeight}px`;
+					this.container.style.top = '0px';
 				} else {
-					this.container.style.top = `${(windowHeight - newHeight) / 2}px`;
-				}
-
-				if (this.snappedTo.includes('Left')) {
-					this.container.style.left = `${(windowWidth - newWidth) / 2}px`;
-				} else {
-					this.container.style.left = `${(windowWidth - newWidth) / 2}px`;
+					// Column layout - stretch width (horizontal)
+					this.container.style.width = `${windowWidth}px`;
+					this.container.style.left = '0px';
 				}
 			}
 		}
@@ -1272,26 +1581,30 @@ export class DebugPanel {
 
 		const { width: windowWidth, height: windowHeight } = getWindowSize();
 
-		if (this.snappedTo === 'left') {
+		if (this.snappedTo === 'left' || this.snappedTo === 'right') {
+			// Left/right snaps stretch vertically (height)
 			this.container.style.height = `${windowHeight}px`;
 			this.container.style.top = '0px';
-			this.container.style.left = '0px';
-		} else if (this.snappedTo === 'right') {
-			this.container.style.height = `${windowHeight}px`;
-			this.container.style.top = '0px';
-			const panelWidth = this.container.offsetWidth;
-			this.container.style.left = `${windowWidth - panelWidth}px`;
-		} else if (this.snappedTo === 'top') {
+
+			if (this.snappedTo === 'left') {
+				this.container.style.left = '0px';
+			} else {
+				const panelWidth = this.container.offsetWidth;
+				this.container.style.left = `${windowWidth - panelWidth}px`;
+			}
+		} else if (this.snappedTo === 'top' || this.snappedTo === 'bottom') {
+			// Top/bottom snaps stretch horizontally (width)
 			this.container.style.width = `${windowWidth}px`;
 			this.container.style.left = '0px';
-			this.container.style.top = '0px';
-		} else if (this.snappedTo === 'bottom') {
-			this.container.style.width = `${windowWidth}px`;
-			this.container.style.left = '0px';
-			const panelHeight = this.container.offsetHeight;
-			this.container.style.top = `${windowHeight - panelHeight}px`;
+
+			if (this.snappedTo === 'top') {
+				this.container.style.top = '0px';
+			} else {
+				const panelHeight = this.container.offsetHeight;
+				this.container.style.top = `${windowHeight - panelHeight}px`;
+			}
 		} else if (this.snappedTo) {
-			// Corner snap - stretch to full height
+			// Corner snaps stretch vertically (height)
 			this.container.style.height = `${windowHeight}px`;
 
 			if (this.snappedTo.includes('top')) {
@@ -1318,15 +1631,24 @@ export class DebugPanel {
 	}
 
 	private applyLayoutMode(): void {
-		const content = this.contentContainer.querySelector(`[data-namespace="${this.activeTab}"]`)  as HTMLElement;
-		if (!content) return;
+		// Apply layout class to both objects and hidden tabs
+		const objectsContent = this.contentContainer.querySelector(`[data-namespace="${DEBUG_STATE_NAMESPACE}"]`) as HTMLElement;
+		const hiddenContent = this.contentContainer.querySelector(`[data-namespace="hidden"]`) as HTMLElement;
 
-		if (this.layoutMode === 'column') {
-			content.classList.add('layout-columns');
-			content.style.display = 'flex';
-		} else {
-			content.classList.remove('layout-columns');
-			content.style.display = 'block';
+		[objectsContent, hiddenContent].forEach(content => {
+			if (!content) return;
+
+			if (this.layoutMode === 'column') {
+				content.classList.add('layout-columns');
+			} else {
+				content.classList.remove('layout-columns');
+			}
+		});
+
+		// Update the active tab's display
+		const activeContent = this.contentContainer.querySelector(`[data-namespace="${this.activeTab}"]`) as HTMLElement;
+		if (activeContent) {
+			activeContent.style.display = activeContent.classList.contains('layout-columns') ? 'flex' : 'block';
 		}
 	}
 

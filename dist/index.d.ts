@@ -21,6 +21,7 @@ interface DebugPanelSettings {
     logToConsole?: boolean;
     clearOnHide?: boolean;
     expandByDefault?: boolean;
+    hiddenObjects?: string[];
 }
 interface DebugPanelOptions {
     show?: boolean;
@@ -57,6 +58,8 @@ declare class DebugPanel {
     private logToConsole;
     private clearOnHide;
     private expandByDefault;
+    private hiddenObjects;
+    private hiddenTab;
     constructor(options?: DebugPanelOptions);
     private createContainer;
     private createTabContainer;
@@ -71,6 +74,8 @@ declare class DebugPanel {
     private setupDraggable;
     private setupPosition;
     private setupKeyboardShortcut;
+    private repositionToDefault;
+    private resetAllSettings;
     private showHelpOverlay;
     private setupWindowResizeListener;
     private repositionOnWindowResize;
@@ -83,7 +88,11 @@ declare class DebugPanel {
     private addDebugState;
     private copyDebugStateToClipboard;
     private removeDebugState;
+    private toggleHideDebugState;
+    private redrawDebugTabs;
     private addTab;
+    private addHiddenTab;
+    private updateHiddenTabLabel;
     private clearCurrentTab;
     private clearTab;
     private switchTab;
@@ -93,6 +102,9 @@ declare class DebugPanel {
     private renderLogEntry;
     private updateToolbarLayout;
     private handleOpacityChange;
+    private handleDragStart;
+    private handleResizeSnapping;
+    private handleDragEnd;
     private handleSnapWhileDragging;
     private toggleExpandAll;
     private toggleStretch;
@@ -133,7 +145,9 @@ type ResizeOptions = {
     minWidth?: number;
     minHeight?: number;
     snapPadding?: number;
+    onResizeStart?: () => void;
     onResize?: (width: number, height: number) => void;
+    onResizeEnd?: () => void;
 };
 declare function makeResizable(container: HTMLElement, options?: ResizeOptions): void;
 type DragOptions = {
@@ -143,6 +157,7 @@ type DragOptions = {
         y?: number;
     };
     onDragEnd?: () => void;
+    allowResize?: boolean;
 };
 declare function makeDraggable(element: HTMLElement, handleElement?: HTMLElement, options?: DragOptions): () => void;
 declare function getWindowSize(): {

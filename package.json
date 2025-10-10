@@ -1,7 +1,7 @@
 {
 	"name": "dev-debug-panel",
-	"version": "1.2.0",
-	"description": "A draggable, resizable debug panel for logging and state inspection in web applications",
+	"version": "1.2.1",
+	"description": "A draggable, resizable debug panel for logging and state inspection in web applications that preserves view state",
 	"license": "ISC",
 	"homepage": "https://github.com/rw3iss/dev-debug-panel#readme",
 	"bugs": {

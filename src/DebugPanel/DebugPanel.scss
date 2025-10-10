@@ -143,6 +143,10 @@ $minObjectColumnWidth: 150px;
 				border-bottom-left-radius: 0;
 				border-bottom-right-radius: 0;
 			}
+
+			&.debug-tab-hidden {
+				margin-left: auto;
+			}
 		}
 	}
 
@@ -626,6 +630,10 @@ $minObjectColumnWidth: 150px;
 			.debug-state-hover-actions {
 				opacity: 1;
 			}
+
+			.json-toggle {
+				color: $colorText;
+			}
 		}
 
 		&:active {
@@ -656,7 +664,7 @@ $minObjectColumnWidth: 150px;
 			display: flex;
 			gap: 4px;
 			opacity: 0;
-			margin-right: 10px;
+			margin-right: 5px;
 			transition: opacity $animTime ease-in-out;
 			flex-shrink: 0;
 		}
@@ -672,6 +680,14 @@ $minObjectColumnWidth: 150px;
 
 			&:hover {
 				background: $colorCopy;
+			}
+		}
+
+		.debug-state-hide-button {
+			@extend .debug-state-action-button;
+
+			&:hover {
+				background: rgba(100, 100, 200, 0.8);
 			}
 		}
 
