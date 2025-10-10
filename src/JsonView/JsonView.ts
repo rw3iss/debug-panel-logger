@@ -89,6 +89,21 @@ export class JsonView {
 		});
 	}
 
+	private copyPropertyToClipboard(key: string, value: any): void {
+		try {
+			let formattedValue: string;
+			if (typeof value === 'object' && value !== null) {
+				formattedValue = JSON.stringify(value, null, 2);
+			} else {
+				formattedValue = String(value);
+			}
+			const textToCopy = `${key}: ${formattedValue}`;
+			navigator.clipboard.writeText(textToCopy);
+		} catch (error) {
+			console.error('Failed to copy to clipboard:', error);
+		}
+	}
+
 	private drawJsonNode(jsonObj: any, currPath: string = ''): HTMLElement {
 		const nodeContainer = document.createElement('div');
 		nodeContainer.classList.add('json-node');
@@ -124,6 +139,15 @@ export class JsonView {
 					// Add expand all/collapse all buttons
 					const actions = document.createElement('div');
 					actions.classList.add('json-expand-collapse-actions');
+
+					const copyBtn = document.createElement('button');
+					copyBtn.textContent = '📋';
+					copyBtn.title = 'Copy property and value to clipboard';
+					copyBtn.onclick = (e) => {
+						e.stopPropagation();
+						this.copyPropertyToClipboard(key, value);
+					};
+					actions.appendChild(copyBtn);
 
 					const expandAllBtn = document.createElement('button');
 					expandAllBtn.textContent = '▼';
@@ -299,8 +323,17 @@ export class JsonView {
 				const actions = document.createElement('div');
 				actions.classList.add('json-expand-collapse-actions');
 
+				const copyBtn = document.createElement('button');
+				copyBtn.textContent = '📋';
+				copyBtn.title = 'Copy property and value to clipboard';
+				copyBtn.onclick = (e) => {
+					e.stopPropagation();
+					this.copyPropertyToClipboard(key, newValue);
+				};
+				actions.appendChild(copyBtn);
+
 				const expandAllBtn = document.createElement('button');
-				expandAllBtn.textContent = '▼▼';
+				expandAllBtn.textContent = '▼';
 				expandAllBtn.title = 'Expand all children';
 				expandAllBtn.onclick = (e) => {
 					e.stopPropagation();
@@ -309,7 +342,7 @@ export class JsonView {
 				actions.appendChild(expandAllBtn);
 
 				const collapseAllBtn = document.createElement('button');
-				collapseAllBtn.textContent = '▲▲';
+				collapseAllBtn.textContent = '▲';
 				collapseAllBtn.title = 'Collapse all children';
 				collapseAllBtn.onclick = (e) => {
 					e.stopPropagation();
@@ -411,8 +444,17 @@ export class JsonView {
 			const actions = document.createElement('div');
 			actions.classList.add('json-expand-collapse-actions');
 
+			const copyBtn = document.createElement('button');
+			copyBtn.textContent = '📋';
+			copyBtn.title = 'Copy property and value to clipboard';
+			copyBtn.onclick = (e) => {
+				e.stopPropagation();
+				this.copyPropertyToClipboard(key, value);
+			};
+			actions.appendChild(copyBtn);
+
 			const expandAllBtn = document.createElement('button');
-			expandAllBtn.textContent = '▼▼';
+			expandAllBtn.textContent = '▼';
 			expandAllBtn.title = 'Expand all children';
 			expandAllBtn.onclick = (e) => {
 				e.stopPropagation();
@@ -421,7 +463,7 @@ export class JsonView {
 			actions.appendChild(expandAllBtn);
 
 			const collapseAllBtn = document.createElement('button');
-			collapseAllBtn.textContent = '▲▲';
+			collapseAllBtn.textContent = '▲';
 			collapseAllBtn.title = 'Collapse all children';
 			collapseAllBtn.onclick = (e) => {
 				e.stopPropagation();

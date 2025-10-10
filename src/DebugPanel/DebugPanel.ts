@@ -55,6 +55,7 @@ export interface DebugPanelSettings {
 	logToConsole?: boolean;
 	clearOnHide?: boolean;
 	expandByDefault?: boolean;
+	clearOnUrlChange?: boolean;
 	hiddenObjects?: string[];
 }
 
@@ -91,6 +92,7 @@ export class DebugPanel {
 	private logToConsoleCheckbox!: HTMLInputElement;
 	private clearOnHideCheckbox!: HTMLInputElement;
 	private expandByDefaultCheckbox!: HTMLInputElement;
+	private clearOnUrlChangeCheckbox!: HTMLInputElement;
 	private collapseAllButton!: HTMLButtonElement;
 	private stretchButton!: HTMLButtonElement;
 	private layoutButton!: HTMLButtonElement;
@@ -105,8 +107,11 @@ export class DebugPanel {
 	private logToConsole: boolean = false;
 	private clearOnHide: boolean = false;
 	private expandByDefault: boolean = false;
+	private clearOnUrlChange: boolean = false;
 	private hiddenObjects: Set<string> = new Set();
 	private hiddenTab!: HTMLElement;
+	private urlChangeListener: (() => void) | null = null;
+	private lastPathname: string = '';
 
 	constructor(options: DebugPanelOptions = {}) {
 		this.options = {
@@ -124,6 +129,8 @@ export class DebugPanel {
 		this.logToConsole = this.options.logToConsole || false;
 		this.clearOnHide = this.options.clearOnHide || false;
 		this.expandByDefault = this.options.expandByDefault || false;
+		this.clearOnUrlChange = false;
+		this.lastPathname = window.location.pathname;
 
 		this.container = this.createContainer();
 		this.tabContainer = this.createTabContainer();
@@ -378,6 +385,27 @@ export class DebugPanel {
 		expandByDefaultRow.appendChild(this.expandByDefaultCheckbox);
 		expandByDefaultRow.appendChild(expandByDefaultLabel);
 
+		// Clear on URL change checkbox
+		const clearOnUrlChangeRow = document.createElement('div');
+		clearOnUrlChangeRow.classList.add('settings-row');
+
+		this.clearOnUrlChangeCheckbox = document.createElement('input');
+		this.clearOnUrlChangeCheckbox.type = 'checkbox';
+		this.clearOnUrlChangeCheckbox.id = 'clearOnUrlChange';
+		this.clearOnUrlChangeCheckbox.checked = this.clearOnUrlChange;
+		this.clearOnUrlChangeCheckbox.onchange = () => {
+			this.clearOnUrlChange = this.clearOnUrlChangeCheckbox!.checked;
+			this.handleUrlChangeOptionToggle();
+			this.saveSettings();
+		};
+
+		const clearOnUrlChangeLabel = document.createElement('label');
+		clearOnUrlChangeLabel.htmlFor = 'clearOnUrlChange';
+		clearOnUrlChangeLabel.textContent = 'Clear data on URL change';
+
+		clearOnUrlChangeRow.appendChild(this.clearOnUrlChangeCheckbox);
+		clearOnUrlChangeRow.appendChild(clearOnUrlChangeLabel);
+
 		// Reposition button
 		const repositionButton = document.createElement('button');
 		repositionButton.textContent = 'Reposition (Ctrl+Alt+R)';
@@ -394,10 +422,50 @@ export class DebugPanel {
 		panel.appendChild(logToConsoleRow);
 		panel.appendChild(clearOnHideRow);
 		panel.appendChild(expandByDefaultRow);
+		panel.appendChild(clearOnUrlChangeRow);
 		panel.appendChild(repositionButton);
 		panel.appendChild(resetSettingsButton);
 
 		return panel;
+	}
+
+	private handleUrlChangeOptionToggle(): void {
+		if (this.clearOnUrlChange) {
+			// Enable URL change listener
+			if (!this.urlChangeListener) {
+				this.urlChangeListener = () => {
+					const currentPathname = window.location.pathname;
+					if (currentPathname !== this.lastPathname) {
+						this.lastPathname = currentPathname;
+						// Clear all tabs
+						Object.keys(this.tabEntries).forEach(namespace => {
+							this.clearTab(namespace);
+						});
+					}
+				};
+				window.addEventListener('popstate', this.urlChangeListener);
+
+				// Also listen for pushState/replaceState
+				const originalPushState = history.pushState;
+				const originalReplaceState = history.replaceState;
+
+				history.pushState = (...args) => {
+					originalPushState.apply(history, args);
+					if (this.urlChangeListener) this.urlChangeListener();
+				};
+
+				history.replaceState = (...args) => {
+					originalReplaceState.apply(history, args);
+					if (this.urlChangeListener) this.urlChangeListener();
+				};
+			}
+		} else {
+			// Disable URL change listener
+			if (this.urlChangeListener) {
+				window.removeEventListener('popstate', this.urlChangeListener);
+				this.urlChangeListener = null;
+			}
+		}
 	}
 
 	private setupEventListeners(): void {
@@ -599,6 +667,7 @@ export class DebugPanel {
 		this.logToConsole = this.options.logToConsole || false;
 		this.clearOnHide = this.options.clearOnHide || false;
 		this.expandByDefault = this.options.expandByDefault || false;
+		this.clearOnUrlChange = false;
 		this.hiddenObjects.clear();
 		this.snappedTo = null;
 		this.isStretched = false;
@@ -608,6 +677,8 @@ export class DebugPanel {
 		if (this.logToConsoleCheckbox) this.logToConsoleCheckbox.checked = this.logToConsole;
 		if (this.clearOnHideCheckbox) this.clearOnHideCheckbox.checked = this.clearOnHide;
 		if (this.expandByDefaultCheckbox) this.expandByDefaultCheckbox.checked = this.expandByDefault;
+		if (this.clearOnUrlChangeCheckbox) this.clearOnUrlChangeCheckbox.checked = this.clearOnUrlChange;
+		this.handleUrlChangeOptionToggle();
 		if (this.opacitySlider) {
 			this.opacitySlider.value = '100';
 			this.container.style.opacity = '1';
@@ -818,6 +889,13 @@ export class DebugPanel {
 					this.expandByDefaultCheckbox.checked = this.expandByDefault;
 				}
 			}
+			if (savedSettings.clearOnUrlChange !== undefined) {
+				this.clearOnUrlChange = savedSettings.clearOnUrlChange;
+				if (this.clearOnUrlChangeCheckbox) {
+					this.clearOnUrlChangeCheckbox.checked = this.clearOnUrlChange;
+				}
+				this.handleUrlChangeOptionToggle();
+			}
 
 			// Restore hidden objects
 			if (savedSettings.hiddenObjects) {
@@ -866,6 +944,7 @@ export class DebugPanel {
 				logToConsole: this.logToConsole,
 				clearOnHide: this.clearOnHide,
 				expandByDefault: this.expandByDefault,
+				clearOnUrlChange: this.clearOnUrlChange,
 				hiddenObjects: Array.from(this.hiddenObjects)
 			};
 			localStorage.setItem('debugPanelSettings', JSON.stringify(settings));

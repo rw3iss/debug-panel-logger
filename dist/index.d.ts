@@ -21,6 +21,7 @@ interface DebugPanelSettings {
     logToConsole?: boolean;
     clearOnHide?: boolean;
     expandByDefault?: boolean;
+    clearOnUrlChange?: boolean;
     hiddenObjects?: string[];
 }
 interface DebugPanelOptions {
@@ -44,6 +45,7 @@ declare class DebugPanel {
     private logToConsoleCheckbox;
     private clearOnHideCheckbox;
     private expandByDefaultCheckbox;
+    private clearOnUrlChangeCheckbox;
     private collapseAllButton;
     private stretchButton;
     private layoutButton;
@@ -58,8 +60,11 @@ declare class DebugPanel {
     private logToConsole;
     private clearOnHide;
     private expandByDefault;
+    private clearOnUrlChange;
     private hiddenObjects;
     private hiddenTab;
+    private urlChangeListener;
+    private lastPathname;
     constructor(options?: DebugPanelOptions);
     private createContainer;
     private createTabContainer;
@@ -69,6 +74,7 @@ declare class DebugPanel {
     private updateStretchButton;
     private updateLayoutButtonTooltip;
     private createSettingsPanel;
+    private handleUrlChangeOptionToggle;
     private setupEventListeners;
     private setupResizable;
     private setupDraggable;
@@ -132,6 +138,7 @@ declare class JsonView {
     private toggleExpandNode;
     private expandAllChildren;
     private collapseAllChildren;
+    private copyPropertyToClipboard;
     private drawJsonNode;
     updateJson(newJson: any): void;
     private patchDOM;

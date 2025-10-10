@@ -126,6 +126,20 @@ var JsonView = class {
       }
     });
   }
+  copyPropertyToClipboard(key, value) {
+    try {
+      let formattedValue;
+      if (typeof value === "object" && value !== null) {
+        formattedValue = JSON.stringify(value, null, 2);
+      } else {
+        formattedValue = String(value);
+      }
+      const textToCopy = `${key}: ${formattedValue}`;
+      navigator.clipboard.writeText(textToCopy);
+    } catch (error) {
+      console.error("Failed to copy to clipboard:", error);
+    }
+  }
   drawJsonNode(jsonObj, currPath = "") {
     const nodeContainer = document.createElement("div");
     nodeContainer.classList.add("json-node");
@@ -152,6 +166,14 @@ var JsonView = class {
           label.appendChild(keyText);
           const actions = document.createElement("div");
           actions.classList.add("json-expand-collapse-actions");
+          const copyBtn = document.createElement("button");
+          copyBtn.textContent = "\u{1F4CB}";
+          copyBtn.title = "Copy property and value to clipboard";
+          copyBtn.onclick = (e) => {
+            e.stopPropagation();
+            this.copyPropertyToClipboard(key, value);
+          };
+          actions.appendChild(copyBtn);
           const expandAllBtn = document.createElement("button");
           expandAllBtn.textContent = "\u25BC";
           expandAllBtn.title = "Expand all children";
@@ -274,8 +296,16 @@ var JsonView = class {
         label.appendChild(keyText);
         const actions = document.createElement("div");
         actions.classList.add("json-expand-collapse-actions");
+        const copyBtn = document.createElement("button");
+        copyBtn.textContent = "\u{1F4CB}";
+        copyBtn.title = "Copy property and value to clipboard";
+        copyBtn.onclick = (e) => {
+          e.stopPropagation();
+          this.copyPropertyToClipboard(key, newValue);
+        };
+        actions.appendChild(copyBtn);
         const expandAllBtn = document.createElement("button");
-        expandAllBtn.textContent = "\u25BC\u25BC";
+        expandAllBtn.textContent = "\u25BC";
         expandAllBtn.title = "Expand all children";
         expandAllBtn.onclick = (e) => {
           e.stopPropagation();
@@ -283,7 +313,7 @@ var JsonView = class {
         };
         actions.appendChild(expandAllBtn);
         const collapseAllBtn = document.createElement("button");
-        collapseAllBtn.textContent = "\u25B2\u25B2";
+        collapseAllBtn.textContent = "\u25B2";
         collapseAllBtn.title = "Collapse all children";
         collapseAllBtn.onclick = (e) => {
           e.stopPropagation();
@@ -359,8 +389,16 @@ var JsonView = class {
       label.appendChild(keyText);
       const actions = document.createElement("div");
       actions.classList.add("json-expand-collapse-actions");
+      const copyBtn = document.createElement("button");
+      copyBtn.textContent = "\u{1F4CB}";
+      copyBtn.title = "Copy property and value to clipboard";
+      copyBtn.onclick = (e) => {
+        e.stopPropagation();
+        this.copyPropertyToClipboard(key, value);
+      };
+      actions.appendChild(copyBtn);
       const expandAllBtn = document.createElement("button");
-      expandAllBtn.textContent = "\u25BC\u25BC";
+      expandAllBtn.textContent = "\u25BC";
       expandAllBtn.title = "Expand all children";
       expandAllBtn.onclick = (e) => {
         e.stopPropagation();
@@ -368,7 +406,7 @@ var JsonView = class {
       };
       actions.appendChild(expandAllBtn);
       const collapseAllBtn = document.createElement("button");
-      collapseAllBtn.textContent = "\u25B2\u25B2";
+      collapseAllBtn.textContent = "\u25B2";
       collapseAllBtn.title = "Collapse all children";
       collapseAllBtn.onclick = (e) => {
         e.stopPropagation();
@@ -663,7 +701,10 @@ var DebugPanel = class {
     this.logToConsole = false;
     this.clearOnHide = false;
     this.expandByDefault = false;
+    this.clearOnUrlChange = false;
     this.hiddenObjects = /* @__PURE__ */ new Set();
+    this.urlChangeListener = null;
+    this.lastPathname = "";
     this.options = {
       position: "bottomRight" /* BottomRight */,
       width: 600,
@@ -678,6 +719,8 @@ var DebugPanel = class {
     this.logToConsole = this.options.logToConsole || false;
     this.clearOnHide = this.options.clearOnHide || false;
     this.expandByDefault = this.options.expandByDefault || false;
+    this.clearOnUrlChange = false;
+    this.lastPathname = window.location.pathname;
     this.container = this.createContainer();
     this.tabContainer = this.createTabContainer();
     this.contentContainer = this.createContentContainer();
@@ -857,6 +900,22 @@ var DebugPanel = class {
     expandByDefaultLabel.textContent = "Expand new objects by default";
     expandByDefaultRow.appendChild(this.expandByDefaultCheckbox);
     expandByDefaultRow.appendChild(expandByDefaultLabel);
+    const clearOnUrlChangeRow = document.createElement("div");
+    clearOnUrlChangeRow.classList.add("settings-row");
+    this.clearOnUrlChangeCheckbox = document.createElement("input");
+    this.clearOnUrlChangeCheckbox.type = "checkbox";
+    this.clearOnUrlChangeCheckbox.id = "clearOnUrlChange";
+    this.clearOnUrlChangeCheckbox.checked = this.clearOnUrlChange;
+    this.clearOnUrlChangeCheckbox.onchange = () => {
+      this.clearOnUrlChange = this.clearOnUrlChangeCheckbox.checked;
+      this.handleUrlChangeOptionToggle();
+      this.saveSettings();
+    };
+    const clearOnUrlChangeLabel = document.createElement("label");
+    clearOnUrlChangeLabel.htmlFor = "clearOnUrlChange";
+    clearOnUrlChangeLabel.textContent = "Clear data on URL change";
+    clearOnUrlChangeRow.appendChild(this.clearOnUrlChangeCheckbox);
+    clearOnUrlChangeRow.appendChild(clearOnUrlChangeLabel);
     const repositionButton = document.createElement("button");
     repositionButton.textContent = "Reposition (Ctrl+Alt+R)";
     repositionButton.style.marginTop = "10px";
@@ -869,9 +928,41 @@ var DebugPanel = class {
     panel.appendChild(logToConsoleRow);
     panel.appendChild(clearOnHideRow);
     panel.appendChild(expandByDefaultRow);
+    panel.appendChild(clearOnUrlChangeRow);
     panel.appendChild(repositionButton);
     panel.appendChild(resetSettingsButton);
     return panel;
+  }
+  handleUrlChangeOptionToggle() {
+    if (this.clearOnUrlChange) {
+      if (!this.urlChangeListener) {
+        this.urlChangeListener = () => {
+          const currentPathname = window.location.pathname;
+          if (currentPathname !== this.lastPathname) {
+            this.lastPathname = currentPathname;
+            Object.keys(this.tabEntries).forEach((namespace) => {
+              this.clearTab(namespace);
+            });
+          }
+        };
+        window.addEventListener("popstate", this.urlChangeListener);
+        const originalPushState = history.pushState;
+        const originalReplaceState = history.replaceState;
+        history.pushState = (...args) => {
+          originalPushState.apply(history, args);
+          if (this.urlChangeListener) this.urlChangeListener();
+        };
+        history.replaceState = (...args) => {
+          originalReplaceState.apply(history, args);
+          if (this.urlChangeListener) this.urlChangeListener();
+        };
+      }
+    } else {
+      if (this.urlChangeListener) {
+        window.removeEventListener("popstate", this.urlChangeListener);
+        this.urlChangeListener = null;
+      }
+    }
   }
   setupEventListeners() {
     import_eventbusjs.default.addEventListener("log", (event) => {
@@ -1037,6 +1128,7 @@ var DebugPanel = class {
     this.logToConsole = this.options.logToConsole || false;
     this.clearOnHide = this.options.clearOnHide || false;
     this.expandByDefault = this.options.expandByDefault || false;
+    this.clearOnUrlChange = false;
     this.hiddenObjects.clear();
     this.snappedTo = null;
     this.isStretched = false;
@@ -1044,6 +1136,8 @@ var DebugPanel = class {
     if (this.logToConsoleCheckbox) this.logToConsoleCheckbox.checked = this.logToConsole;
     if (this.clearOnHideCheckbox) this.clearOnHideCheckbox.checked = this.clearOnHide;
     if (this.expandByDefaultCheckbox) this.expandByDefaultCheckbox.checked = this.expandByDefault;
+    if (this.clearOnUrlChangeCheckbox) this.clearOnUrlChangeCheckbox.checked = this.clearOnUrlChange;
+    this.handleUrlChangeOptionToggle();
     if (this.opacitySlider) {
       this.opacitySlider.value = "100";
       this.container.style.opacity = "1";
@@ -1208,6 +1302,13 @@ var DebugPanel = class {
           this.expandByDefaultCheckbox.checked = this.expandByDefault;
         }
       }
+      if (savedSettings.clearOnUrlChange !== void 0) {
+        this.clearOnUrlChange = savedSettings.clearOnUrlChange;
+        if (this.clearOnUrlChangeCheckbox) {
+          this.clearOnUrlChangeCheckbox.checked = this.clearOnUrlChange;
+        }
+        this.handleUrlChangeOptionToggle();
+      }
       if (savedSettings.hiddenObjects) {
         this.hiddenObjects = new Set(savedSettings.hiddenObjects);
         this.updateHiddenTabLabel();
@@ -1248,6 +1349,7 @@ var DebugPanel = class {
         logToConsole: this.logToConsole,
         clearOnHide: this.clearOnHide,
         expandByDefault: this.expandByDefault,
+        clearOnUrlChange: this.clearOnUrlChange,
         hiddenObjects: Array.from(this.hiddenObjects)
       };
       localStorage.setItem("debugPanelSettings", JSON.stringify(settings));
