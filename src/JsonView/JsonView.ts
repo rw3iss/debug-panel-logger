@@ -39,6 +39,56 @@ export class JsonView {
 		if (toggleButton) toggleButton.textContent = !isCollapsed ? COLLAPSED_INDICATOR : EXPANDED_INDICATOR;
 	}
 
+	private expandAllChildren(parentPath: string): void {
+		// Find all child nodes under this path
+		const properties = this.parentContainer.querySelectorAll(`.json-property[data-path^="${parentPath}/"]`);
+		properties.forEach((prop) => {
+			const path = prop.getAttribute('data-path');
+			if (!path) return;
+
+			const valueContainer = prop.querySelector('.json-value');
+			if (!valueContainer) return;
+
+			const childNode = valueContainer.querySelector('.json-node');
+			if (!childNode) return;
+
+			// Expand this node
+			childNode.classList.remove('collapsed');
+			this.viewStates[path] = false;
+
+			// Update toggle button
+			const toggleButton = prop.querySelector('.json-toggle') as HTMLElement;
+			if (toggleButton) {
+				toggleButton.textContent = EXPANDED_INDICATOR;
+			}
+		});
+	}
+
+	private collapseAllChildren(parentPath: string): void {
+		// Find all child nodes under this path
+		const properties = this.parentContainer.querySelectorAll(`.json-property[data-path^="${parentPath}/"]`);
+		properties.forEach((prop) => {
+			const path = prop.getAttribute('data-path');
+			if (!path) return;
+
+			const valueContainer = prop.querySelector('.json-value');
+			if (!valueContainer) return;
+
+			const childNode = valueContainer.querySelector('.json-node');
+			if (!childNode) return;
+
+			// Collapse this node
+			childNode.classList.add('collapsed');
+			this.viewStates[path] = true;
+
+			// Update toggle button
+			const toggleButton = prop.querySelector('.json-toggle') as HTMLElement;
+			if (toggleButton) {
+				toggleButton.textContent = COLLAPSED_INDICATOR;
+			}
+		});
+	}
+
 	private drawJsonNode(jsonObj: any, currPath: string = ''): HTMLElement {
 		const nodeContainer = document.createElement('div');
 		nodeContainer.classList.add('json-node');
@@ -54,7 +104,6 @@ export class JsonView {
 
 				const label = document.createElement('span');
 				label.classList.add('json-key');
-				label.textContent = key + ': ';
 
 				const valueContainer = document.createElement('div');
 				valueContainer.classList.add('json-value');
@@ -65,8 +114,36 @@ export class JsonView {
 
 				if (isObject) {
 					label.classList.add('clickable');
-					if (isArray) label.textContent = `${key} (${value.length})`;
-					else label.textContent = key;
+
+					// Create key text span
+					const keyText = document.createElement('span');
+					if (isArray) keyText.textContent = `${key} (${value.length})`;
+					else keyText.textContent = key;
+					label.appendChild(keyText);
+
+					// Add expand all/collapse all buttons
+					const actions = document.createElement('div');
+					actions.classList.add('json-expand-collapse-actions');
+
+					const expandAllBtn = document.createElement('button');
+					expandAllBtn.textContent = '▼';
+					expandAllBtn.title = 'Expand all children';
+					expandAllBtn.onclick = (e) => {
+						e.stopPropagation();
+						this.expandAllChildren(keyPath);
+					};
+					actions.appendChild(expandAllBtn);
+
+					const collapseAllBtn = document.createElement('button');
+					collapseAllBtn.textContent = '▲';
+					collapseAllBtn.title = 'Collapse all children';
+					collapseAllBtn.onclick = (e) => {
+						e.stopPropagation();
+						this.collapseAllChildren(keyPath);
+					};
+					actions.appendChild(collapseAllBtn);
+
+					label.appendChild(actions);
 					const hasChildren = isArray && value.length > 0 ? true : Object.keys(value).length > 0;
 					propertyRow.classList.add('object');
 					// Create expandable/collapsible toggle button
@@ -110,6 +187,8 @@ export class JsonView {
 					propertyRow.appendChild(toggleButton);
 					valueContainer.appendChild(childNode);
 				} else {
+					// Simple value - add colon suffix
+					label.textContent = key + ': ';
 					valueContainer.textContent = String(value);
 				}
 
@@ -205,11 +284,40 @@ export class JsonView {
 
 			if (label) {
 				label.classList.add('clickable');
+				label.innerHTML = ''; // Clear existing content
+
+				// Create key text span
+				const keyText = document.createElement('span');
 				if (isArray) {
-					label.textContent = `${key} (${newValue.length})`;
+					keyText.textContent = `${key} (${newValue.length})`;
 				} else {
-					label.textContent = key;
+					keyText.textContent = key;
 				}
+				label.appendChild(keyText);
+
+				// Add expand all/collapse all buttons
+				const actions = document.createElement('div');
+				actions.classList.add('json-expand-collapse-actions');
+
+				const expandAllBtn = document.createElement('button');
+				expandAllBtn.textContent = '▼▼';
+				expandAllBtn.title = 'Expand all children';
+				expandAllBtn.onclick = (e) => {
+					e.stopPropagation();
+					this.expandAllChildren(keyPath);
+				};
+				actions.appendChild(expandAllBtn);
+
+				const collapseAllBtn = document.createElement('button');
+				collapseAllBtn.textContent = '▲▲';
+				collapseAllBtn.title = 'Collapse all children';
+				collapseAllBtn.onclick = (e) => {
+					e.stopPropagation();
+					this.collapseAllChildren(keyPath);
+				};
+				actions.appendChild(collapseAllBtn);
+
+				label.appendChild(actions);
 			}
 
 			// Check if toggle button already exists
@@ -283,7 +391,6 @@ export class JsonView {
 
 		const label = document.createElement('span');
 		label.classList.add('json-key');
-		label.textContent = key + ': ';
 
 		const valueContainer = document.createElement('div');
 		valueContainer.classList.add('json-value');
@@ -293,8 +400,36 @@ export class JsonView {
 
 		if (isObject) {
 			label.classList.add('clickable');
-			if (isArray) label.textContent = `${key} (${value.length})`;
-			else label.textContent = key;
+
+			// Create key text span
+			const keyText = document.createElement('span');
+			if (isArray) keyText.textContent = `${key} (${value.length})`;
+			else keyText.textContent = key;
+			label.appendChild(keyText);
+
+			// Add expand all/collapse all buttons
+			const actions = document.createElement('div');
+			actions.classList.add('json-expand-collapse-actions');
+
+			const expandAllBtn = document.createElement('button');
+			expandAllBtn.textContent = '▼▼';
+			expandAllBtn.title = 'Expand all children';
+			expandAllBtn.onclick = (e) => {
+				e.stopPropagation();
+				this.expandAllChildren(keyPath);
+			};
+			actions.appendChild(expandAllBtn);
+
+			const collapseAllBtn = document.createElement('button');
+			collapseAllBtn.textContent = '▲▲';
+			collapseAllBtn.title = 'Collapse all children';
+			collapseAllBtn.onclick = (e) => {
+				e.stopPropagation();
+				this.collapseAllChildren(keyPath);
+			};
+			actions.appendChild(collapseAllBtn);
+
+			label.appendChild(actions);
 			propertyRow.classList.add('object');
 
 			const toggleButton = document.createElement('button');
@@ -310,6 +445,8 @@ export class JsonView {
 			propertyRow.appendChild(toggleButton);
 			valueContainer.appendChild(childNode);
 		} else {
+			// Simple value - add colon suffix
+			label.textContent = key + ': ';
 			valueContainer.textContent = String(value);
 		}
 

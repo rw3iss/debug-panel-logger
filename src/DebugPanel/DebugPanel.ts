@@ -2,7 +2,7 @@ import EventBus from 'eventbusjs';
 import safeStringify from 'fast-safe-stringify';
 import { COLLAPSED_INDICATOR, EXPANDED_INDICATOR } from '../constants';
 import { JsonView } from '../JsonView/JsonView';
-import { getWindowSize, makeDraggable, makeResizable } from '../utils/domUtils';
+import { getWindowSize, getScrollbarWidth, makeDraggable, makeResizable } from '../utils/domUtils';
 
 const DEBUG_STATE_NAMESPACE = 'objects';
 
@@ -1444,6 +1444,7 @@ export class DebugPanel {
 	private handleSnapWhileDragging(x: number, y: number): { x: number; y: number } {
 		const snapPadding = this.options.snapPadding || 20;
 		const { width: windowWidth, height: windowHeight } = getWindowSize();
+		const scrollbarWidth = document.body.scrollHeight > windowHeight ? getScrollbarWidth() : 0;
 		const panelWidth = this.container.offsetWidth;
 		const panelHeight = this.container.offsetHeight;
 
@@ -1452,7 +1453,7 @@ export class DebugPanel {
 		let newSnappedTo: 'left' | 'right' | 'top' | 'bottom' | 'topLeft' | 'topRight' | 'bottomLeft' | 'bottomRight' | null = null;
 
 		const snappedLeft = x < snapPadding;
-		const snappedRight = x + panelWidth > windowWidth - snapPadding;
+		const snappedRight = x + panelWidth > windowWidth - scrollbarWidth - snapPadding;
 		const snappedTop = y < snapPadding;
 		const snappedBottom = y + panelHeight > windowHeight - snapPadding;
 
@@ -1462,7 +1463,7 @@ export class DebugPanel {
 			snappedY = 0;
 			newSnappedTo = 'topLeft';
 		} else if (snappedRight && snappedTop) {
-			snappedX = windowWidth - panelWidth;
+			snappedX = windowWidth - panelWidth - scrollbarWidth;
 			snappedY = 0;
 			newSnappedTo = 'topRight';
 		} else if (snappedLeft && snappedBottom) {
@@ -1470,14 +1471,14 @@ export class DebugPanel {
 			snappedY = windowHeight - panelHeight;
 			newSnappedTo = 'bottomLeft';
 		} else if (snappedRight && snappedBottom) {
-			snappedX = windowWidth - panelWidth;
+			snappedX = windowWidth - panelWidth - scrollbarWidth;
 			snappedY = windowHeight - panelHeight;
 			newSnappedTo = 'bottomRight';
 		} else if (snappedLeft) {
 			snappedX = 0;
 			newSnappedTo = 'left';
 		} else if (snappedRight) {
-			snappedX = windowWidth - panelWidth;
+			snappedX = windowWidth - panelWidth - scrollbarWidth;
 			newSnappedTo = 'right';
 		} else if (snappedTop) {
 			snappedY = 0;
@@ -1580,6 +1581,7 @@ export class DebugPanel {
 		if (!this.snappedTo) return;
 
 		const { width: windowWidth, height: windowHeight } = getWindowSize();
+		const scrollbarWidth = document.body.scrollHeight > windowHeight ? getScrollbarWidth() : 0;
 
 		if (this.snappedTo === 'left' || this.snappedTo === 'right') {
 			// Left/right snaps stretch vertically (height)
@@ -1590,11 +1592,11 @@ export class DebugPanel {
 				this.container.style.left = '0px';
 			} else {
 				const panelWidth = this.container.offsetWidth;
-				this.container.style.left = `${windowWidth - panelWidth}px`;
+				this.container.style.left = `${windowWidth - panelWidth - scrollbarWidth}px`;
 			}
 		} else if (this.snappedTo === 'top' || this.snappedTo === 'bottom') {
 			// Top/bottom snaps stretch horizontally (width)
-			this.container.style.width = `${windowWidth}px`;
+			this.container.style.width = `${windowWidth - scrollbarWidth}px`;
 			this.container.style.left = '0px';
 
 			if (this.snappedTo === 'top') {
@@ -1618,7 +1620,7 @@ export class DebugPanel {
 				this.container.style.left = '0px';
 			} else {
 				const panelWidth = this.container.offsetWidth;
-				this.container.style.left = `${windowWidth - panelWidth}px`;
+				this.container.style.left = `${windowWidth - panelWidth - scrollbarWidth}px`;
 			}
 		}
 	}

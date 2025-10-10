@@ -42,7 +42,7 @@ __export(index_exports, {
 module.exports = __toCommonJS(index_exports);
 
 // src/DebugPanel/DebugPanel.scss
-var css = '.debug-panel{position:fixed;z-index:99999;background:#222;border-radius:8px;box-shadow:0 4px 10px rgba(0,0,0,.3);display:flex;flex-direction:column;overflow:hidden;font-family:Arial,sans-serif;color:#fff;transition:transform .1s ease-in-out,visibility .1s ease-in-out}.debug-panel.visible{visibility:visible;transform:translateY(0)}.debug-panel:not(.visible){visibility:hidden;transform:translateY(10px);pointer-events:none}.debug-panel .debug-panel-tabs{display:flex;flex-wrap:wrap;background:#1a1a1a;padding:6px 6px 0 6px;gap:3px;cursor:grab;user-select:none}.debug-panel .debug-panel-tabs:active{cursor:grabbing}.debug-panel .debug-panel-tabs .debug-tab{background:#2d2d2d;color:#888;padding:5px 6px 7px;margin:0;border:none;border-top-left-radius:6px;border-top-right-radius:6px;cursor:pointer;position:relative;box-shadow:inset 0 -2px 4px rgba(0,0,0,.3);font-size:12px;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen,Ubuntu,Cantarell,"Open Sans","Helvetica Neue",sans-serif}.debug-panel .debug-panel-tabs .debug-tab:hover{background:#353535;color:#aaa}.debug-panel .debug-panel-tabs .debug-tab:focus{outline:none}.debug-panel .debug-panel-tabs .debug-tab.active{background:linear-gradient(to bottom, #3f6d9c, #324f6e, #121b25);color:#fff;box-shadow:0 -3px 8px rgba(0,102,204,.4),inset 0 1px 0 hsla(0,0%,100%,.2);z-index:1;border-bottom-left-radius:0;border-bottom-right-radius:0}.debug-panel .debug-panel-tabs .debug-tab.debug-tab-hidden{margin-left:auto}.debug-panel .debug-panel-content{flex:1;display:flex;flex-direction:column;overflow-y:auto;padding:0;background:#0d0d0d;overscroll-behavior:contain}.debug-panel .debug-panel-content .debug-tab-content{display:none;flex-direction:column;flex:1;gap:2px;padding:5px 0}.debug-panel .debug-panel-content .debug-tab-content.layout-columns{display:flex;flex-direction:row;overflow-x:auto;overflow-y:hidden}.debug-panel .debug-panel-content .debug-tab-content.layout-columns .debug-state{min-width:150px;flex:1 1 0;padding:0 2px}.debug-panel .debug-panel-content .debug-tab-content .debug-log-entry{background:#292929;color:#ddd;padding:5px 8px;border-radius:4px;font-size:12px;word-break:break-word;border-left:3px solid #007bff;position:relative;display:flex;align-items:center}.debug-panel .debug-panel-content .debug-tab-content .debug-log-entry:hover .debug-delete-button,.debug-panel .debug-panel-content .debug-tab-content .debug-log-entry:hover .debug-copy-button{opacity:1}.debug-panel .debug-panel-content .debug-tab-content .debug-log-entry .debug-log-entry-text{flex:1;padding-right:70px}.debug-panel .debug-panel-content .debug-tab-content .debug-log-entry .debug-action-button,.debug-panel .debug-panel-content .debug-tab-content .debug-log-entry .debug-delete-button,.debug-panel .debug-panel-content .debug-tab-content .debug-log-entry .debug-copy-button{position:absolute;top:50%;transform:translateY(-50%);background:rgba(100,100,100,.8);border:none;cursor:pointer;transition:background .1s}.debug-panel .debug-panel-content .debug-tab-content .debug-log-entry .debug-action-button:focus,.debug-panel .debug-panel-content .debug-tab-content .debug-log-entry .debug-delete-button:focus,.debug-panel .debug-panel-content .debug-tab-content .debug-log-entry .debug-copy-button:focus{outline:none}.debug-panel .debug-panel-content .debug-tab-content .debug-log-entry .debug-action-button,.debug-panel .debug-panel-content .debug-tab-content .debug-log-entry .debug-delete-button,.debug-panel .debug-panel-content .debug-tab-content .debug-log-entry .debug-copy-button{color:#fff;display:flex;align-items:center;justify-content:center;padding:0;margin:0;font-size:14px;width:20px;height:20px;border-radius:3px;transition:background .1s,transform .1s}.debug-panel .debug-panel-content .debug-tab-content .debug-log-entry .debug-action-button:hover,.debug-panel .debug-panel-content .debug-tab-content .debug-log-entry .debug-delete-button:hover,.debug-panel .debug-panel-content .debug-tab-content .debug-log-entry .debug-copy-button:hover{transform:scale(1.1)}.debug-panel .debug-panel-content .debug-tab-content .debug-log-entry .debug-action-button:active,.debug-panel .debug-panel-content .debug-tab-content .debug-log-entry .debug-delete-button:active,.debug-panel .debug-panel-content .debug-tab-content .debug-log-entry .debug-copy-button:active{transform:scale(0.95)}.debug-panel .debug-panel-content .debug-tab-content .debug-log-entry .debug-action-button,.debug-panel .debug-panel-content .debug-tab-content .debug-log-entry .debug-delete-button,.debug-panel .debug-panel-content .debug-tab-content .debug-log-entry .debug-copy-button{border-radius:50%;opacity:0;transition:opacity .1s,background .1s}.debug-panel .debug-panel-content .debug-tab-content .debug-log-entry .debug-action-button:hover,.debug-panel .debug-panel-content .debug-tab-content .debug-log-entry .debug-delete-button:hover,.debug-panel .debug-panel-content .debug-tab-content .debug-log-entry .debug-copy-button:hover{background:#969696}.debug-panel .debug-panel-content .debug-tab-content .debug-log-entry .debug-copy-button{right:36px;opacity:.7}.debug-panel .debug-panel-content .debug-tab-content .debug-log-entry .debug-copy-button:hover{opacity:1}.debug-panel .debug-panel-content .debug-tab-content .debug-log-entry .debug-delete-button{right:8px;opacity:.7}.debug-panel .debug-panel-content .debug-tab-content .debug-log-entry .debug-delete-button:hover{opacity:1}.debug-panel .debug-toolbar{display:flex;box-sizing:border-box;width:100%;align-items:center;gap:2px;padding:2px;background:#111;border-top:1px solid hsla(0,0%,100%,.1);flex-wrap:wrap;position:relative}.debug-panel .debug-toolbar .debug-opacity-container{display:flex;align-items:center;gap:0;max-width:100px;min-width:40px;flex-shrink:1;padding:4px 0}.debug-panel .debug-toolbar .debug-opacity-container .debug-opacity-label{font-size:11px;color:#999;white-space:nowrap}.debug-panel .debug-toolbar .debug-opacity-container .debug-opacity-slider{flex:1;min-width:40px;width:100%;height:4px;background:#444;border-radius:2px;outline:none;-webkit-appearance:none;appearance:none}.debug-panel .debug-toolbar .debug-opacity-container .debug-opacity-slider::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:14px;height:14px;background:#007bff;cursor:pointer;border-radius:50%;position:relative;top:-4px;transition:background .1s}.debug-panel .debug-toolbar .debug-opacity-container .debug-opacity-slider::-webkit-slider-thumb:hover{background:#0056b3}.debug-panel .debug-toolbar .debug-opacity-container .debug-opacity-slider::-moz-range-thumb{width:14px;height:14px;background:#007bff;cursor:pointer;border-radius:50%;border:none;position:relative;top:-4px;transition:background .1s}.debug-panel .debug-toolbar .debug-opacity-container .debug-opacity-slider::-moz-range-thumb:hover{background:#0056b3}.debug-panel .debug-toolbar .debug-opacity-container .debug-opacity-slider::-webkit-slider-runnable-track,.debug-panel .debug-toolbar .debug-opacity-container .debug-opacity-slider::-moz-range-track{height:4px;background:#444;border-radius:2px}.debug-panel .debug-toolbar button{border:none;cursor:pointer;transition:background .1s}.debug-panel .debug-toolbar button:focus{outline:none}.debug-panel .debug-toolbar button{background:#ba6c38;color:#fff;padding:4px 6px;margin:2px;border-radius:4px;font-size:12px;white-space:nowrap;flex-shrink:0}.debug-panel .debug-toolbar button:hover{background:#c9302c}.debug-panel .debug-toolbar button.debug-icon-button{font-size:13px;padding:3px 5px;background:#555}.debug-panel .debug-toolbar button.debug-icon-button:hover{background:#666}.debug-panel .debug-toolbar .debug-settings-panel{position:absolute;bottom:100%;right:0;background:#1a1a1a;border:1px solid #444;border-radius:6px;padding:12px;margin-bottom:8px;box-shadow:0 4px 12px rgba(0,0,0,.5);min-width:200px;display:none;flex-direction:column;gap:10px;z-index:1000}.debug-panel .debug-toolbar .debug-settings-panel.visible{display:flex}.debug-panel .debug-toolbar .debug-settings-panel::before{content:"";position:absolute;top:-20px;left:-20px;right:-20px;bottom:-20px;z-index:-1}.debug-panel .debug-toolbar .debug-settings-panel .settings-row{display:flex;align-items:center;gap:8px;font-size:12px;color:#ccc}.debug-panel .debug-toolbar .debug-settings-panel .settings-row label{flex:1;cursor:pointer;user-select:none}.debug-panel .debug-toolbar .debug-settings-panel .settings-row input[type=checkbox]{cursor:pointer}.debug-panel .debug-toolbar .debug-settings-panel .settings-row .debug-opacity-slider{flex:1;min-width:100px}.debug-panel .resize-handle{position:absolute;background:hsla(0,0%,100%,.1);z-index:10;transition:background .1s}.debug-panel .resize-handle:hover{background:hsla(0,0%,100%,.3)}.debug-panel .resize-left,.debug-panel .resize-right{top:0;bottom:0;width:6px;cursor:ew-resize}.debug-panel .resize-left{left:-3px}.debug-panel .resize-right{right:-3px}.debug-panel .resize-top,.debug-panel .resize-bottom{left:0;right:0;height:6px;cursor:ns-resize}.debug-panel .resize-top{top:-3px}.debug-panel .resize-bottom{bottom:-3px}.debug-panel .resize-top-left,.debug-panel .resize-top-right,.debug-panel .resize-bottom-left,.debug-panel .resize-bottom-right{width:10px;height:10px}.debug-panel .resize-top-left{left:-3px;top:-3px;cursor:nwse-resize}.debug-panel .resize-top-right{right:-3px;top:-3px;cursor:nesw-resize}.debug-panel .resize-bottom-left{left:-3px;bottom:-3px;cursor:nesw-resize}.debug-panel .resize-bottom-right{right:-3px;bottom:-3px;cursor:nwse-resize}.debug-panel .debug-help-overlay{position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.95);z-index:1000;display:flex;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto;cursor:pointer;box-sizing:border-box}.debug-panel .debug-help-overlay .debug-help-content{background:linear-gradient(to bottom, #2a2a2a, #1a1a1a);border-radius:8px;padding:30px;max-width:500px;width:100%;box-shadow:0 8px 32px rgba(0,0,0,.5);border:1px solid #444;margin-top:auto;margin-bottom:auto;box-sizing:border-box}.debug-panel .debug-help-overlay .debug-help-content h2{margin:0 0 20px 0;color:#fff;font-size:24px;font-weight:bold;text-align:center;border-bottom:2px solid #007bff;padding-bottom:10px}.debug-panel .debug-help-overlay .debug-help-content .help-section{margin-bottom:25px}.debug-panel .debug-help-overlay .debug-help-content .help-section h3{color:#9cdcfe;font-size:16px;margin:0 0 10px 0;font-weight:bold}.debug-panel .debug-help-overlay .debug-help-content .help-section ul{list-style:none;padding:0;margin:0}.debug-panel .debug-help-overlay .debug-help-content .help-section ul li{padding:6px 0;color:#ddd;font-size:13px;line-height:1.5}.debug-panel .debug-help-overlay .debug-help-content .help-section ul li kbd{background:#333;border:1px solid #555;border-radius:3px;padding:2px 6px;font-family:monospace;font-size:12px;color:#9cdcfe}.debug-panel .debug-help-overlay .debug-help-content .help-section ul li strong{color:#fff}.debug-panel .debug-help-overlay .debug-help-content .help-section .help-links a{color:#4fc3f7;text-decoration:none;display:inline-flex;align-items:center;gap:6px;transition:color .1s}.debug-panel .debug-help-overlay .debug-help-content .help-section .help-links a:hover{color:#81d4fa;text-decoration:underline}.debug-panel .debug-help-overlay .debug-help-content .help-section .help-links a svg{vertical-align:middle}.debug-panel .debug-help-overlay .debug-help-content .help-close-hint{text-align:center;color:#888;font-size:12px;margin:20px 0 0 0;font-style:italic}.debug-state{position:relative;flex:1 1 100%;display:flex;flex-direction:column;margin-bottom:5px;width:100%}.debug-state .debug-state-label{font-size:13px;font-weight:bold;padding:5px 2px 5px 3px;margin-bottom:0;color:#fff;background:linear-gradient(to bottom, #3a3a3a, #2d2d2d);border-top-left-radius:4px;border-top-right-radius:4px;box-shadow:0 1px 3px rgba(0,0,0,.3);transition:all .1s ease-in-out;display:flex;align-items:center;gap:2px;width:100%;box-sizing:border-box;position:relative}.debug-state .debug-state-label:hover{background:linear-gradient(to bottom, #4a4a4a, #3d3d3d);cursor:pointer;box-shadow:0 2px 5px rgba(0,0,0,.4)}.debug-state .debug-state-label:hover .debug-state-hover-actions{opacity:1}.debug-state .debug-state-label:hover .json-toggle{color:#fff}.debug-state .debug-state-label:active{box-shadow:0 1px 2px rgba(0,0,0,.3)}.debug-state .debug-state-label .json-toggle{border:none;cursor:pointer;transition:background .1s}.debug-state .debug-state-label .json-toggle:focus{outline:none}.debug-state .debug-state-label .json-toggle{background:none;color:#888;font-size:12px;padding:0;width:20px;height:16px;transition:color .1s;flex-shrink:0}.debug-state .debug-state-label .json-toggle:hover{color:#fff}.debug-state .debug-state-label .debug-state-label-text{flex:1}.debug-state .debug-state-label .debug-state-hover-actions{display:flex;gap:4px;opacity:0;margin-right:5px;transition:opacity .1s ease-in-out;flex-shrink:0}.debug-state .debug-state-label .debug-state-action-button,.debug-state .debug-state-label .debug-state-delete-button,.debug-state .debug-state-label .debug-state-hide-button,.debug-state .debug-state-label .debug-state-copy-button{border:none;cursor:pointer;transition:background .1s}.debug-state .debug-state-label .debug-state-action-button:focus,.debug-state .debug-state-label .debug-state-delete-button:focus,.debug-state .debug-state-label .debug-state-hide-button:focus,.debug-state .debug-state-label .debug-state-copy-button:focus{outline:none}.debug-state .debug-state-label .debug-state-action-button,.debug-state .debug-state-label .debug-state-delete-button,.debug-state .debug-state-label .debug-state-hide-button,.debug-state .debug-state-label .debug-state-copy-button{color:#fff;display:flex;align-items:center;justify-content:center;padding:0;margin:0;font-size:14px;width:20px;height:20px;border-radius:3px;transition:background .1s,transform .1s}.debug-state .debug-state-label .debug-state-action-button:hover,.debug-state .debug-state-label .debug-state-delete-button:hover,.debug-state .debug-state-label .debug-state-hide-button:hover,.debug-state .debug-state-label .debug-state-copy-button:hover{transform:scale(1.1)}.debug-state .debug-state-label .debug-state-action-button:active,.debug-state .debug-state-label .debug-state-delete-button:active,.debug-state .debug-state-label .debug-state-hide-button:active,.debug-state .debug-state-label .debug-state-copy-button:active{transform:scale(0.95)}.debug-state .debug-state-label .debug-state-action-button,.debug-state .debug-state-label .debug-state-delete-button,.debug-state .debug-state-label .debug-state-hide-button,.debug-state .debug-state-label .debug-state-copy-button{background:rgba(100,100,100,.8)}.debug-state .debug-state-label .debug-state-copy-button:hover{background:rgba(34,166,120,.8)}.debug-state .debug-state-label .debug-state-hide-button:hover{background:rgba(100,100,200,.8)}.debug-state .debug-state-label .debug-state-delete-button:hover{background:rgba(198,62,41,.8)}.debug-state .json-wrapper{position:relative;padding:5px;background:#292929;max-height:400px;overflow-y:auto;overscroll-behavior:contain}.debug-state.collapsed .debug-state-label{border-radius:4px}.debug-state.collapsed .json-wrapper{display:none}';
+var css = '.debug-panel{position:fixed;z-index:99999;background:#222;border-radius:8px;box-shadow:0 4px 10px rgba(0,0,0,.3);display:flex;flex-direction:column;overflow:hidden;font-family:Arial,sans-serif;color:#fff;transition:transform .1s ease-in-out,visibility .1s ease-in-out}.debug-panel.visible{visibility:visible;transform:translateY(0)}.debug-panel:not(.visible){visibility:hidden;transform:translateY(10px);pointer-events:none}.debug-panel .debug-panel-tabs{display:flex;flex-wrap:wrap;background:#1a1a1a;padding:6px 6px 0 6px;gap:3px;cursor:grab;user-select:none}.debug-panel .debug-panel-tabs:active{cursor:grabbing}.debug-panel .debug-panel-tabs .debug-tab{background:#2d2d2d;color:#888;padding:5px 6px 7px;margin:0;border:none;border-top-left-radius:6px;border-top-right-radius:6px;cursor:pointer;position:relative;box-shadow:inset 0 -2px 4px rgba(0,0,0,.3);font-size:12px;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen,Ubuntu,Cantarell,"Open Sans","Helvetica Neue",sans-serif}.debug-panel .debug-panel-tabs .debug-tab:hover{background:#353535;color:#aaa}.debug-panel .debug-panel-tabs .debug-tab:focus{outline:none}.debug-panel .debug-panel-tabs .debug-tab.active{background:linear-gradient(to bottom, #3f6d9c, #324f6e, #121b25);color:#fff;box-shadow:0 -3px 8px rgba(0,102,204,.4),inset 0 1px 0 hsla(0,0%,100%,.2);z-index:1;border-bottom-left-radius:0;border-bottom-right-radius:0}.debug-panel .debug-panel-tabs .debug-tab.debug-tab-hidden{margin-left:auto}.debug-panel .debug-panel-content{flex:1;display:flex;flex-direction:column;overflow-y:auto;padding:0;background:#0d0d0d;overscroll-behavior:contain}.debug-panel .debug-panel-content .debug-tab-content{display:none;flex-direction:column;flex:1;gap:2px;padding:5px 0}.debug-panel .debug-panel-content .debug-tab-content.layout-columns{display:flex;flex-direction:row;overflow-x:auto;overflow-y:hidden}.debug-panel .debug-panel-content .debug-tab-content.layout-columns .debug-state{min-width:150px;flex:1 1 0;padding:0 2px}.debug-panel .debug-panel-content .debug-tab-content .debug-log-entry{background:#292929;color:#ddd;padding:5px 8px;border-radius:4px;font-size:12px;word-break:break-word;border-left:3px solid #007bff;position:relative;display:flex;align-items:center}.debug-panel .debug-panel-content .debug-tab-content .debug-log-entry:hover .debug-delete-button,.debug-panel .debug-panel-content .debug-tab-content .debug-log-entry:hover .debug-copy-button{opacity:1}.debug-panel .debug-panel-content .debug-tab-content .debug-log-entry .debug-log-entry-text{flex:1;padding-right:70px}.debug-panel .debug-panel-content .debug-tab-content .debug-log-entry .debug-action-button,.debug-panel .debug-panel-content .debug-tab-content .debug-log-entry .debug-delete-button,.debug-panel .debug-panel-content .debug-tab-content .debug-log-entry .debug-copy-button{position:absolute;top:50%;transform:translateY(-50%);background:rgba(100,100,100,.8);border:none;cursor:pointer;transition:background .1s}.debug-panel .debug-panel-content .debug-tab-content .debug-log-entry .debug-action-button:focus,.debug-panel .debug-panel-content .debug-tab-content .debug-log-entry .debug-delete-button:focus,.debug-panel .debug-panel-content .debug-tab-content .debug-log-entry .debug-copy-button:focus{outline:none}.debug-panel .debug-panel-content .debug-tab-content .debug-log-entry .debug-action-button,.debug-panel .debug-panel-content .debug-tab-content .debug-log-entry .debug-delete-button,.debug-panel .debug-panel-content .debug-tab-content .debug-log-entry .debug-copy-button{color:#fff;display:flex;align-items:center;justify-content:center;padding:0;margin:0;font-size:14px;width:20px;height:20px;border-radius:3px;transition:background .1s,transform .1s}.debug-panel .debug-panel-content .debug-tab-content .debug-log-entry .debug-action-button:hover,.debug-panel .debug-panel-content .debug-tab-content .debug-log-entry .debug-delete-button:hover,.debug-panel .debug-panel-content .debug-tab-content .debug-log-entry .debug-copy-button:hover{transform:scale(1.1)}.debug-panel .debug-panel-content .debug-tab-content .debug-log-entry .debug-action-button:active,.debug-panel .debug-panel-content .debug-tab-content .debug-log-entry .debug-delete-button:active,.debug-panel .debug-panel-content .debug-tab-content .debug-log-entry .debug-copy-button:active{transform:scale(0.95)}.debug-panel .debug-panel-content .debug-tab-content .debug-log-entry .debug-action-button,.debug-panel .debug-panel-content .debug-tab-content .debug-log-entry .debug-delete-button,.debug-panel .debug-panel-content .debug-tab-content .debug-log-entry .debug-copy-button{border-radius:50%;opacity:0;transition:opacity .1s,background .1s}.debug-panel .debug-panel-content .debug-tab-content .debug-log-entry .debug-action-button:hover,.debug-panel .debug-panel-content .debug-tab-content .debug-log-entry .debug-delete-button:hover,.debug-panel .debug-panel-content .debug-tab-content .debug-log-entry .debug-copy-button:hover{background:#969696}.debug-panel .debug-panel-content .debug-tab-content .debug-log-entry .debug-copy-button{right:36px;opacity:.7}.debug-panel .debug-panel-content .debug-tab-content .debug-log-entry .debug-copy-button:hover{opacity:1}.debug-panel .debug-panel-content .debug-tab-content .debug-log-entry .debug-delete-button{right:8px;opacity:.7}.debug-panel .debug-panel-content .debug-tab-content .debug-log-entry .debug-delete-button:hover{opacity:1}.debug-panel .debug-toolbar{display:flex;box-sizing:border-box;width:100%;align-items:center;gap:2px;padding:2px;background:#111;border-top:1px solid hsla(0,0%,100%,.1);flex-wrap:wrap;position:relative}.debug-panel .debug-toolbar .debug-opacity-container{display:flex;align-items:center;gap:0;max-width:100px;min-width:40px;flex-shrink:1;padding:4px 0}.debug-panel .debug-toolbar .debug-opacity-container .debug-opacity-label{font-size:11px;color:#999;white-space:nowrap}.debug-panel .debug-toolbar .debug-opacity-container .debug-opacity-slider{flex:1;min-width:40px;width:100%;height:4px;background:#444;border-radius:2px;outline:none;-webkit-appearance:none;appearance:none}.debug-panel .debug-toolbar .debug-opacity-container .debug-opacity-slider::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:14px;height:14px;background:#007bff;cursor:pointer;border-radius:50%;position:relative;top:-4px;transition:background .1s}.debug-panel .debug-toolbar .debug-opacity-container .debug-opacity-slider::-webkit-slider-thumb:hover{background:#0056b3}.debug-panel .debug-toolbar .debug-opacity-container .debug-opacity-slider::-moz-range-thumb{width:14px;height:14px;background:#007bff;cursor:pointer;border-radius:50%;border:none;position:relative;top:-4px;transition:background .1s}.debug-panel .debug-toolbar .debug-opacity-container .debug-opacity-slider::-moz-range-thumb:hover{background:#0056b3}.debug-panel .debug-toolbar .debug-opacity-container .debug-opacity-slider::-webkit-slider-runnable-track,.debug-panel .debug-toolbar .debug-opacity-container .debug-opacity-slider::-moz-range-track{height:4px;background:#444;border-radius:2px}.debug-panel .debug-toolbar button{border:none;cursor:pointer;transition:background .1s}.debug-panel .debug-toolbar button:focus{outline:none}.debug-panel .debug-toolbar button{background:#ba6c38;color:#fff;padding:4px 6px;margin:2px;border-radius:4px;font-size:12px;white-space:nowrap;flex-shrink:0}.debug-panel .debug-toolbar button:hover{background:#c9302c}.debug-panel .debug-toolbar button.debug-icon-button{font-size:13px;padding:3px 5px;background:#555}.debug-panel .debug-toolbar button.debug-icon-button:hover{background:#666}.debug-panel .debug-toolbar .debug-settings-panel{position:absolute;bottom:100%;right:0;background:#1a1a1a;border:1px solid #444;border-radius:6px;padding:12px;margin-bottom:8px;box-shadow:0 4px 12px rgba(0,0,0,.5);min-width:200px;display:none;flex-direction:column;gap:10px;z-index:1000}.debug-panel .debug-toolbar .debug-settings-panel.visible{display:flex}.debug-panel .debug-toolbar .debug-settings-panel::before{content:"";position:absolute;top:-20px;left:-20px;right:-20px;bottom:-20px;z-index:-1}.debug-panel .debug-toolbar .debug-settings-panel .settings-row{display:flex;align-items:center;gap:8px;font-size:12px;color:#ccc}.debug-panel .debug-toolbar .debug-settings-panel .settings-row label{flex:1;cursor:pointer;user-select:none}.debug-panel .debug-toolbar .debug-settings-panel .settings-row input[type=checkbox]{cursor:pointer}.debug-panel .debug-toolbar .debug-settings-panel .settings-row .debug-opacity-slider{flex:1;min-width:100px}.debug-panel .resize-handle{position:absolute;background:hsla(0,0%,100%,.1);z-index:10;transition:background .1s}.debug-panel .resize-handle:hover{background:hsla(0,0%,100%,.3)}.debug-panel .resize-left,.debug-panel .resize-right{top:0;bottom:0;width:6px;cursor:ew-resize}.debug-panel .resize-left{left:-3px}.debug-panel .resize-right{right:-3px}.debug-panel .resize-top,.debug-panel .resize-bottom{left:0;right:0;height:6px;cursor:ns-resize}.debug-panel .resize-top{top:-3px}.debug-panel .resize-bottom{bottom:-3px}.debug-panel .resize-top-left,.debug-panel .resize-top-right,.debug-panel .resize-bottom-left,.debug-panel .resize-bottom-right{width:10px;height:10px}.debug-panel .resize-top-left{left:-3px;top:-3px;cursor:nwse-resize}.debug-panel .resize-top-right{right:-3px;top:-3px;cursor:nesw-resize}.debug-panel .resize-bottom-left{left:-3px;bottom:-3px;cursor:nesw-resize}.debug-panel .resize-bottom-right{right:-3px;bottom:-3px;cursor:nwse-resize}.debug-panel .debug-help-overlay{position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.95);z-index:1000;display:flex;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto;cursor:pointer;box-sizing:border-box}.debug-panel .debug-help-overlay .debug-help-content{background:linear-gradient(to bottom, #2a2a2a, #1a1a1a);border-radius:8px;padding:30px;max-width:500px;width:100%;box-shadow:0 8px 32px rgba(0,0,0,.5);border:1px solid #444;margin-top:auto;margin-bottom:auto;box-sizing:border-box}.debug-panel .debug-help-overlay .debug-help-content h2{margin:0 0 20px 0;color:#fff;font-size:24px;font-weight:bold;text-align:center;border-bottom:2px solid #007bff;padding-bottom:10px}.debug-panel .debug-help-overlay .debug-help-content .help-section{margin-bottom:25px}.debug-panel .debug-help-overlay .debug-help-content .help-section h3{color:#9cdcfe;font-size:16px;margin:0 0 10px 0;font-weight:bold}.debug-panel .debug-help-overlay .debug-help-content .help-section ul{list-style:none;padding:0;margin:0}.debug-panel .debug-help-overlay .debug-help-content .help-section ul li{padding:6px 0;color:#ddd;font-size:13px;line-height:1.5}.debug-panel .debug-help-overlay .debug-help-content .help-section ul li kbd{background:#333;border:1px solid #555;border-radius:3px;padding:2px 6px;font-family:monospace;font-size:12px;color:#9cdcfe}.debug-panel .debug-help-overlay .debug-help-content .help-section ul li strong{color:#fff}.debug-panel .debug-help-overlay .debug-help-content .help-section .help-links a{color:#4fc3f7;text-decoration:none;display:inline-flex;align-items:center;gap:6px;transition:color .1s}.debug-panel .debug-help-overlay .debug-help-content .help-section .help-links a:hover{color:#81d4fa;text-decoration:underline}.debug-panel .debug-help-overlay .debug-help-content .help-section .help-links a svg{vertical-align:middle}.debug-panel .debug-help-overlay .debug-help-content .help-close-hint{text-align:center;color:#888;font-size:12px;margin:20px 0 0 0;font-style:italic}.debug-state{position:relative;flex:1 1 100%;display:flex;flex-direction:column;margin-bottom:5px;width:100%}.debug-state .debug-state-label{font-size:13px;font-weight:bold;padding:5px 2px 5px 3px;margin-bottom:0;color:#fff;background:linear-gradient(to bottom, #3a3a3a, #2d2d2d);border-top-left-radius:4px;border-top-right-radius:4px;box-shadow:0 1px 3px rgba(0,0,0,.3);transition:all .1s ease-in-out;display:flex;align-items:center;gap:2px;width:100%;box-sizing:border-box;position:relative}.debug-state .debug-state-label:hover{background:linear-gradient(to bottom, #4a4a4a, #3d3d3d);cursor:pointer;box-shadow:0 2px 5px rgba(0,0,0,.4)}.debug-state .debug-state-label:hover .debug-state-hover-actions{opacity:1}.debug-state .debug-state-label:hover .json-toggle{color:#fff}.debug-state .debug-state-label:active{box-shadow:0 1px 2px rgba(0,0,0,.3)}.debug-state .debug-state-label .json-toggle{border:none;cursor:pointer;transition:background .1s}.debug-state .debug-state-label .json-toggle:focus{outline:none}.debug-state .debug-state-label .json-toggle{background:none;color:#888;font-size:12px;padding:0;width:20px;height:16px;transition:color .1s;flex-shrink:0}.debug-state .debug-state-label .json-toggle:hover{color:#fff}.debug-state .debug-state-label .debug-state-label-text{flex:1}.debug-state .debug-state-label .debug-state-hover-actions{display:flex;gap:4px;opacity:0;margin-right:5px;transition:opacity .1s ease-in-out;flex-shrink:0}.debug-state .debug-state-label .debug-state-action-button,.debug-state .debug-state-label .debug-state-delete-button,.debug-state .debug-state-label .debug-state-hide-button,.debug-state .debug-state-label .debug-state-copy-button{border:none;cursor:pointer;transition:background .1s}.debug-state .debug-state-label .debug-state-action-button:focus,.debug-state .debug-state-label .debug-state-delete-button:focus,.debug-state .debug-state-label .debug-state-hide-button:focus,.debug-state .debug-state-label .debug-state-copy-button:focus{outline:none}.debug-state .debug-state-label .debug-state-action-button,.debug-state .debug-state-label .debug-state-delete-button,.debug-state .debug-state-label .debug-state-hide-button,.debug-state .debug-state-label .debug-state-copy-button{color:#fff;display:flex;align-items:center;justify-content:center;padding:0;margin:0;font-size:14px;width:20px;height:20px;border-radius:3px;transition:background .1s,transform .1s}.debug-state .debug-state-label .debug-state-action-button:hover,.debug-state .debug-state-label .debug-state-delete-button:hover,.debug-state .debug-state-label .debug-state-hide-button:hover,.debug-state .debug-state-label .debug-state-copy-button:hover{transform:scale(1.1)}.debug-state .debug-state-label .debug-state-action-button:active,.debug-state .debug-state-label .debug-state-delete-button:active,.debug-state .debug-state-label .debug-state-hide-button:active,.debug-state .debug-state-label .debug-state-copy-button:active{transform:scale(0.95)}.debug-state .debug-state-label .debug-state-action-button,.debug-state .debug-state-label .debug-state-delete-button,.debug-state .debug-state-label .debug-state-hide-button,.debug-state .debug-state-label .debug-state-copy-button{background:rgba(100,100,100,.8)}.debug-state .debug-state-label .debug-state-copy-button:hover{background:rgba(34,166,120,.8)}.debug-state .debug-state-label .debug-state-hide-button:hover{background:rgba(100,100,200,.8)}.debug-state .debug-state-label .debug-state-delete-button:hover{background:rgba(198,62,41,.8)}.debug-state .json-wrapper{position:relative;padding:5px;background:#292929;overflow-y:auto;overscroll-behavior:contain;flex:1}.debug-state.collapsed .debug-state-label{border-radius:4px}.debug-state.collapsed .json-wrapper{display:none}';
 if (typeof document !== "undefined") {
   const style = document.createElement("style");
   style.textContent = css;
@@ -50,7 +50,7 @@ if (typeof document !== "undefined") {
 }
 
 // src/JsonView/JsonView.scss
-var css2 = ".json-node{position:relative;margin-left:15px;padding-left:0;font-size:12px;line-height:1.2em}.json-node .json-properties{display:flex;flex-direction:column}.json-node .json-property{position:relative;display:flex;align-items:flex-start;padding:0}.json-node .json-property.object{flex-direction:column}.json-node .json-key{font-weight:bold;margin-right:5px;color:#9cdcfe;padding:2px 0;flex:0}.json-node .json-key.clickable{cursor:pointer;width:100%}.json-node .json-key.clickable+.json-value{width:100%}.json-node .json-key.clickable:hover{color:#4fc3f7;text-decoration:underline}.json-node .json-value{color:#ce9178;white-space:pre-wrap;padding:2px 0;flex:1}.json-node .json-toggle{position:absolute;left:-20px;border:none;background:none;cursor:pointer;color:#888;font-size:9px;padding:0;width:22px;height:20px;transition:color .1s}.json-node .json-toggle:hover{color:#fff}.json-node .json-toggle:focus{outline:none}.json-node .json-property:hover>.json-toggle{color:#fff}.json-node.collapsed .json-properties{display:none}";
+var css2 = ".json-node{position:relative;margin-left:15px;padding-left:0;font-size:12px;line-height:1.2em}.json-node .json-properties{display:flex;flex-direction:column}.json-node .json-property{position:relative;display:flex;align-items:flex-start;padding:0}.json-node .json-property.object{flex-direction:column}.json-node .json-key{font-weight:bold;margin-right:5px;color:#9cdcfe;padding:2px 0;flex:0;display:flex;align-items:center;gap:4px}.json-node .json-key.clickable{cursor:pointer;width:100%}.json-node .json-key.clickable+.json-value{width:100%}.json-node .json-key.clickable:hover{color:#4fc3f7;text-decoration:underline}.json-node .json-key.clickable:hover .json-expand-collapse-actions{opacity:1}.json-node .json-expand-collapse-actions{display:flex;gap:2px;opacity:0;transition:opacity .1s;margin-left:auto}.json-node .json-expand-collapse-actions button{background:rgba(100,100,100,.6);border:none;color:#fff;font-size:9px;padding:2px 4px;border-radius:2px;cursor:pointer;transition:background .1s}.json-node .json-expand-collapse-actions button:hover{background:rgba(120,120,120,.8)}.json-node .json-expand-collapse-actions button:focus{outline:none}.json-node .json-value{color:#ce9178;white-space:pre-wrap;padding:2px 0;flex:1}.json-node .json-toggle{position:absolute;left:-20px;border:none;background:none;cursor:pointer;color:#888;font-size:9px;padding:0;width:22px;height:20px;transition:color .1s}.json-node .json-toggle:hover{color:#fff}.json-node .json-toggle:focus{outline:none}.json-node .json-property:hover>.json-toggle{color:#fff}.json-node.collapsed .json-properties{display:none}";
 if (typeof document !== "undefined") {
   const style = document.createElement("style");
   style.textContent = css2;
@@ -92,6 +92,40 @@ var JsonView = class {
     this.viewStates[keyPath] = !isCollapsed;
     if (toggleButton) toggleButton.textContent = !isCollapsed ? COLLAPSED_INDICATOR : EXPANDED_INDICATOR;
   }
+  expandAllChildren(parentPath) {
+    const properties = this.parentContainer.querySelectorAll(`.json-property[data-path^="${parentPath}/"]`);
+    properties.forEach((prop) => {
+      const path = prop.getAttribute("data-path");
+      if (!path) return;
+      const valueContainer = prop.querySelector(".json-value");
+      if (!valueContainer) return;
+      const childNode = valueContainer.querySelector(".json-node");
+      if (!childNode) return;
+      childNode.classList.remove("collapsed");
+      this.viewStates[path] = false;
+      const toggleButton = prop.querySelector(".json-toggle");
+      if (toggleButton) {
+        toggleButton.textContent = EXPANDED_INDICATOR;
+      }
+    });
+  }
+  collapseAllChildren(parentPath) {
+    const properties = this.parentContainer.querySelectorAll(`.json-property[data-path^="${parentPath}/"]`);
+    properties.forEach((prop) => {
+      const path = prop.getAttribute("data-path");
+      if (!path) return;
+      const valueContainer = prop.querySelector(".json-value");
+      if (!valueContainer) return;
+      const childNode = valueContainer.querySelector(".json-node");
+      if (!childNode) return;
+      childNode.classList.add("collapsed");
+      this.viewStates[path] = true;
+      const toggleButton = prop.querySelector(".json-toggle");
+      if (toggleButton) {
+        toggleButton.textContent = COLLAPSED_INDICATOR;
+      }
+    });
+  }
   drawJsonNode(jsonObj, currPath = "") {
     const nodeContainer = document.createElement("div");
     nodeContainer.classList.add("json-node");
@@ -105,7 +139,6 @@ var JsonView = class {
         propertyRow.setAttribute("data-path", keyPath);
         const label = document.createElement("span");
         label.classList.add("json-key");
-        label.textContent = key + ": ";
         const valueContainer = document.createElement("div");
         valueContainer.classList.add("json-value");
         const value = jsonObj[key];
@@ -113,8 +146,29 @@ var JsonView = class {
         const isArray = Array.isArray(value);
         if (isObject) {
           label.classList.add("clickable");
-          if (isArray) label.textContent = `${key} (${value.length})`;
-          else label.textContent = key;
+          const keyText = document.createElement("span");
+          if (isArray) keyText.textContent = `${key} (${value.length})`;
+          else keyText.textContent = key;
+          label.appendChild(keyText);
+          const actions = document.createElement("div");
+          actions.classList.add("json-expand-collapse-actions");
+          const expandAllBtn = document.createElement("button");
+          expandAllBtn.textContent = "\u25BC";
+          expandAllBtn.title = "Expand all children";
+          expandAllBtn.onclick = (e) => {
+            e.stopPropagation();
+            this.expandAllChildren(keyPath);
+          };
+          actions.appendChild(expandAllBtn);
+          const collapseAllBtn = document.createElement("button");
+          collapseAllBtn.textContent = "\u25B2";
+          collapseAllBtn.title = "Collapse all children";
+          collapseAllBtn.onclick = (e) => {
+            e.stopPropagation();
+            this.collapseAllChildren(keyPath);
+          };
+          actions.appendChild(collapseAllBtn);
+          label.appendChild(actions);
           const hasChildren = isArray && value.length > 0 ? true : Object.keys(value).length > 0;
           propertyRow.classList.add("object");
           const toggleButton = document.createElement("button");
@@ -146,6 +200,7 @@ var JsonView = class {
           propertyRow.appendChild(toggleButton);
           valueContainer.appendChild(childNode);
         } else {
+          label.textContent = key + ": ";
           valueContainer.textContent = String(value);
         }
         propertyRow.appendChild(label);
@@ -209,11 +264,33 @@ var JsonView = class {
       const isArray = Array.isArray(newValue);
       if (label) {
         label.classList.add("clickable");
+        label.innerHTML = "";
+        const keyText = document.createElement("span");
         if (isArray) {
-          label.textContent = `${key} (${newValue.length})`;
+          keyText.textContent = `${key} (${newValue.length})`;
         } else {
-          label.textContent = key;
+          keyText.textContent = key;
         }
+        label.appendChild(keyText);
+        const actions = document.createElement("div");
+        actions.classList.add("json-expand-collapse-actions");
+        const expandAllBtn = document.createElement("button");
+        expandAllBtn.textContent = "\u25BC\u25BC";
+        expandAllBtn.title = "Expand all children";
+        expandAllBtn.onclick = (e) => {
+          e.stopPropagation();
+          this.expandAllChildren(keyPath);
+        };
+        actions.appendChild(expandAllBtn);
+        const collapseAllBtn = document.createElement("button");
+        collapseAllBtn.textContent = "\u25B2\u25B2";
+        collapseAllBtn.title = "Collapse all children";
+        collapseAllBtn.onclick = (e) => {
+          e.stopPropagation();
+          this.collapseAllChildren(keyPath);
+        };
+        actions.appendChild(collapseAllBtn);
+        label.appendChild(actions);
       }
       let toggleButton = propertyNode.querySelector(".json-toggle");
       if (!toggleButton) {
@@ -270,15 +347,35 @@ var JsonView = class {
     propertyRow.setAttribute("data-path", keyPath);
     const label = document.createElement("span");
     label.classList.add("json-key");
-    label.textContent = key + ": ";
     const valueContainer = document.createElement("div");
     valueContainer.classList.add("json-value");
     const isObject = typeof value === "object" && value !== null;
     const isArray = Array.isArray(value);
     if (isObject) {
       label.classList.add("clickable");
-      if (isArray) label.textContent = `${key} (${value.length})`;
-      else label.textContent = key;
+      const keyText = document.createElement("span");
+      if (isArray) keyText.textContent = `${key} (${value.length})`;
+      else keyText.textContent = key;
+      label.appendChild(keyText);
+      const actions = document.createElement("div");
+      actions.classList.add("json-expand-collapse-actions");
+      const expandAllBtn = document.createElement("button");
+      expandAllBtn.textContent = "\u25BC\u25BC";
+      expandAllBtn.title = "Expand all children";
+      expandAllBtn.onclick = (e) => {
+        e.stopPropagation();
+        this.expandAllChildren(keyPath);
+      };
+      actions.appendChild(expandAllBtn);
+      const collapseAllBtn = document.createElement("button");
+      collapseAllBtn.textContent = "\u25B2\u25B2";
+      collapseAllBtn.title = "Collapse all children";
+      collapseAllBtn.onclick = (e) => {
+        e.stopPropagation();
+        this.collapseAllChildren(keyPath);
+      };
+      actions.appendChild(collapseAllBtn);
+      label.appendChild(actions);
       propertyRow.classList.add("object");
       const toggleButton = document.createElement("button");
       toggleButton.classList.add("json-toggle");
@@ -290,6 +387,7 @@ var JsonView = class {
       propertyRow.appendChild(toggleButton);
       valueContainer.appendChild(childNode);
     } else {
+      label.textContent = key + ": ";
       valueContainer.textContent = String(value);
     }
     propertyRow.appendChild(label);
@@ -520,6 +618,17 @@ function makeDraggable(element, handleElement, options = {}) {
     document.removeEventListener("mousemove", drag);
     document.removeEventListener("mouseup", stopDragging);
   };
+}
+function getScrollbarWidth() {
+  const outer = document.createElement("div");
+  outer.style.visibility = "hidden";
+  outer.style.overflow = "scroll";
+  document.body.appendChild(outer);
+  const inner = document.createElement("div");
+  outer.appendChild(inner);
+  const scrollbarWidth = outer.offsetWidth - inner.offsetWidth;
+  document.body.removeChild(outer);
+  return scrollbarWidth;
 }
 function getWindowSize() {
   const width = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
@@ -1568,13 +1677,14 @@ var DebugPanel = class {
   handleSnapWhileDragging(x, y) {
     const snapPadding = this.options.snapPadding || 20;
     const { width: windowWidth, height: windowHeight } = getWindowSize();
+    const scrollbarWidth = document.body.scrollHeight > windowHeight ? getScrollbarWidth() : 0;
     const panelWidth = this.container.offsetWidth;
     const panelHeight = this.container.offsetHeight;
     let snappedX = x;
     let snappedY = y;
     let newSnappedTo = null;
     const snappedLeft = x < snapPadding;
-    const snappedRight = x + panelWidth > windowWidth - snapPadding;
+    const snappedRight = x + panelWidth > windowWidth - scrollbarWidth - snapPadding;
     const snappedTop = y < snapPadding;
     const snappedBottom = y + panelHeight > windowHeight - snapPadding;
     if (snappedLeft && snappedTop) {
@@ -1582,7 +1692,7 @@ var DebugPanel = class {
       snappedY = 0;
       newSnappedTo = "topLeft";
     } else if (snappedRight && snappedTop) {
-      snappedX = windowWidth - panelWidth;
+      snappedX = windowWidth - panelWidth - scrollbarWidth;
       snappedY = 0;
       newSnappedTo = "topRight";
     } else if (snappedLeft && snappedBottom) {
@@ -1590,14 +1700,14 @@ var DebugPanel = class {
       snappedY = windowHeight - panelHeight;
       newSnappedTo = "bottomLeft";
     } else if (snappedRight && snappedBottom) {
-      snappedX = windowWidth - panelWidth;
+      snappedX = windowWidth - panelWidth - scrollbarWidth;
       snappedY = windowHeight - panelHeight;
       newSnappedTo = "bottomRight";
     } else if (snappedLeft) {
       snappedX = 0;
       newSnappedTo = "left";
     } else if (snappedRight) {
-      snappedX = windowWidth - panelWidth;
+      snappedX = windowWidth - panelWidth - scrollbarWidth;
       newSnappedTo = "right";
     } else if (snappedTop) {
       snappedY = 0;
@@ -1667,6 +1777,7 @@ var DebugPanel = class {
   applyStretch() {
     if (!this.snappedTo) return;
     const { width: windowWidth, height: windowHeight } = getWindowSize();
+    const scrollbarWidth = document.body.scrollHeight > windowHeight ? getScrollbarWidth() : 0;
     if (this.snappedTo === "left" || this.snappedTo === "right") {
       this.container.style.height = `${windowHeight}px`;
       this.container.style.top = "0px";
@@ -1674,10 +1785,10 @@ var DebugPanel = class {
         this.container.style.left = "0px";
       } else {
         const panelWidth = this.container.offsetWidth;
-        this.container.style.left = `${windowWidth - panelWidth}px`;
+        this.container.style.left = `${windowWidth - panelWidth - scrollbarWidth}px`;
       }
     } else if (this.snappedTo === "top" || this.snappedTo === "bottom") {
-      this.container.style.width = `${windowWidth}px`;
+      this.container.style.width = `${windowWidth - scrollbarWidth}px`;
       this.container.style.left = "0px";
       if (this.snappedTo === "top") {
         this.container.style.top = "0px";
@@ -1697,7 +1808,7 @@ var DebugPanel = class {
         this.container.style.left = "0px";
       } else {
         const panelWidth = this.container.offsetWidth;
-        this.container.style.left = `${windowWidth - panelWidth}px`;
+        this.container.style.left = `${windowWidth - panelWidth - scrollbarWidth}px`;
       }
     }
   }

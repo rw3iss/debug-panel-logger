@@ -705,9 +705,9 @@ $minObjectColumnWidth: 150px;
 		position: relative;
 		padding: 5px;
 		background: $colorBgMedium;
-		max-height: 400px;
 		overflow-y: auto;
 		overscroll-behavior: contain;
+		flex: 1;
 	}
 
 	&.collapsed {

@@ -331,6 +331,22 @@ export function makeDraggable(
 	};
 }
 
+export function getScrollbarWidth(): number {
+	// Create temporary element to measure scrollbar
+	const outer = document.createElement('div');
+	outer.style.visibility = 'hidden';
+	outer.style.overflow = 'scroll';
+	document.body.appendChild(outer);
+
+	const inner = document.createElement('div');
+	outer.appendChild(inner);
+
+	const scrollbarWidth = outer.offsetWidth - inner.offsetWidth;
+	document.body.removeChild(outer);
+
+	return scrollbarWidth;
+}
+
 export function getWindowSize(): { width: number; height: number } {
 	const width = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
 	const height = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight;

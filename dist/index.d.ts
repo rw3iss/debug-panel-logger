@@ -130,6 +130,8 @@ declare class JsonView {
     constructor(json: any, parentContainer: HTMLElement, options?: JsonViewOptions);
     private render;
     private toggleExpandNode;
+    private expandAllChildren;
+    private collapseAllChildren;
     private drawJsonNode;
     updateJson(newJson: any): void;
     private patchDOM;

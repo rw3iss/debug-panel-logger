@@ -36,6 +36,9 @@ $colorToggleHover: #fff;
 		color: $colorKey;
 		padding: 2px 0;
 		flex: 0;
+		display: flex;
+		align-items: center;
+		gap: 4px;
 
 		&.clickable {
 			cursor: pointer;
@@ -49,9 +52,40 @@ $colorToggleHover: #fff;
 				color: $colorKeyHover;
 				text-decoration: underline;
 
+				.json-expand-collapse-actions {
+					opacity: 1;
+				}
+
 				// & + .json-toggle {
 				// 	color: $colorToggleHover;
 				// }
+			}
+		}
+	}
+
+	.json-expand-collapse-actions {
+		display: flex;
+		gap: 2px;
+		opacity: 0;
+		transition: opacity $animTime;
+		margin-left: auto;
+
+		button {
+			background: rgba(100, 100, 100, 0.6);
+			border: none;
+			color: white;
+			font-size: 9px;
+			padding: 2px 4px;
+			border-radius: 2px;
+			cursor: pointer;
+			transition: background $animTime;
+
+			&:hover {
+				background: rgba(120, 120, 120, 0.8);
+			}
+
+			&:focus {
+				outline: none;
 			}
 		}
 	}
