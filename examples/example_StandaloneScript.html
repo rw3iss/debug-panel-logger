@@ -22,7 +22,6 @@
         }
         button {
             padding: 10px 20px;
-            margin: 5px;
             background: #007bff;
             color: white;
             border: none;
@@ -47,6 +46,7 @@
 
     <div class="controls">
         <h2>Demo Controls</h2>
+        <button onclick="togglePanel()">Toggle Panel</button>
         <button onclick="showSimpleObject()">Show Simple Object</button>
         <button onclick="showNestedObject()">Show Nested Object</button>
         <button onclick="updateObject()">Update Object</button>
@@ -144,6 +144,10 @@
                 total: 51.49
             };
             debug('array', data);
+        }
+
+        function togglePanel() {
+            panel.toggle();
         }
 
         function clearPanel() {

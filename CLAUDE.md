@@ -94,3 +94,7 @@ See `examples/` for integration patterns:
 - `example_StandaloneScript.html` - UMD build usage
 - `example_DebugPanelComponent.tsx` - React integration
 - `example_DebugPanelLogModule.ts` - Integration with dev-loggers library
+
+
+## Special Notes for Claude Agent:
+- All of your verbal responses (not the code or analysis of it) should be very minimal, almost brief like bullet lists of what you did or are doing, so as to minimize token usage in the responses. You don't need to send all of the fluff or sensational messaging, or anything that is not absolutely necessary. Remember to use this rule always during any update or task now or in future sessions.

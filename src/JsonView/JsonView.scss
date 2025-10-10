@@ -1,7 +1,15 @@
+// Variables
+$animTime: 0.1s;
+$colorKey: #9cdcfe;
+$colorKeyHover: #4fc3f7;
+$colorValue: #ce9178;
+$colorToggle: #888;
+$colorToggleHover: #fff;
+
 // JSON Tree Styles
 .json-node {
 	position: relative;
-	margin-left: 20px;
+	margin-left: 14px;
 	padding-left: 0;
 	font-size: 12px;
 	line-height: 1.2em;
@@ -15,7 +23,7 @@
 		position: relative;
 		display: flex;
 		align-items: flex-start;
-		padding: 2px 0;
+		padding: 0;
 
 		&.object {
 			flex-direction: column;
@@ -25,41 +33,49 @@
 	.json-key {
 		font-weight: bold;
 		margin-right: 5px;
-		color: #9cdcfe;
+		color: $colorKey;
+		padding: 2px 0;
+		flex: 0;
 
 		&.clickable {
 			cursor: pointer;
+			width: 100%;
 
 			&:hover {
-				color: #4fc3f7;
+				color: $colorKeyHover;
 				text-decoration: underline;
+			}
+
+			& + .json-value {
+				width: 100%;
 			}
 		}
 	}
 
 	.json-value {
-		color: #ce9178;
+		color: $colorValue;
 		white-space: pre-wrap;
-		word-break: break-word;
+		//word-break: break-word;
+		padding: 2px 0;
 		flex: 1;
 	}
 
 	.json-toggle {
 		position: absolute;
-		top: 0px;
-		left: -22px;
+		top: -1px;
+		left: -20px;
 		border: none;
 		background: none;
 		cursor: pointer;
-		color: #888;
-		font-size: 12px;
+		color: $colorToggle;
+		font-size: 10px;
 		padding: 0;
-		width: 20px;
+		width: 24px;
 		height: 20px;
-		transition: color 0.2s;
+		transition: color $animTime;
 
 		&:hover {
-			color: #fff;
+			color: $colorToggleHover;
 		}
 
 		&:focus {
@@ -67,7 +83,7 @@
 		}
 	}
 
-	.collapsed {
+	&.collapsed {
 		.json-properties {
 			display: none;
 		}

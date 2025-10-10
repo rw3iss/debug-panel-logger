@@ -47,6 +47,12 @@ export interface DebugPanelSettings {
 	height: number;
 	visible: boolean;
 	opacity: number;
+	snappedTo?: 'left' | 'right' | 'top' | 'bottom' | 'topLeft' | 'topRight' | 'bottomLeft' | 'bottomRight' | null;
+	isStretched?: boolean;
+	layoutMode?: 'row' | 'column';
+	logToConsole?: boolean;
+	clearOnHide?: boolean;
+	expandByDefault?: boolean;
 }
 
 export interface DebugPanelOptions {
@@ -56,6 +62,9 @@ export interface DebugPanelOptions {
 	height?: number;
 	snap?: boolean;
 	snapPadding?: number;
+	logToConsole?: boolean;
+	clearOnHide?: boolean;
+	expandByDefault?: boolean;
 }
 
 /*
@@ -74,12 +83,25 @@ export class DebugPanel {
 	private tabContainer: HTMLElement;
 	private contentContainer: HTMLElement;
 	private toolbar: HTMLElement;
+	private settingsPanel!: HTMLElement;
 	private opacitySlider!: HTMLInputElement;
+	private logToConsoleCheckbox!: HTMLInputElement;
+	private clearOnHideCheckbox!: HTMLInputElement;
+	private expandByDefaultCheckbox!: HTMLInputElement;
+	private collapseAllButton!: HTMLButtonElement;
+	private stretchButton!: HTMLButtonElement;
+	private layoutButton!: HTMLButtonElement;
 	private tabEntries: TabEntries = {};
 	private debugStates: { [id: string]: DebugState } = {};
 	private activeTab: string = 'global';
 	private options: DebugPanelOptions;
 	private resizeThrottleTimer: number | null = null;
+	private snappedTo: 'left' | 'right' | 'top' | 'bottom' | 'topLeft' | 'topRight' | 'bottomLeft' | 'bottomRight' | null = null;
+	private isStretched: boolean = false;
+	private layoutMode: 'row' | 'column' = 'row';
+	private logToConsole: boolean = false;
+	private clearOnHide: boolean = false;
+	private expandByDefault: boolean = false;
 
 	constructor(options: DebugPanelOptions = {}) {
 		this.options = {
@@ -88,8 +110,15 @@ export class DebugPanel {
 			height: 400,
 			snap: true,
 			snapPadding: 20,
+			logToConsole: false,
+			clearOnHide: false,
+			expandByDefault: false,
 			...options
 		};
+
+		this.logToConsole = this.options.logToConsole || false;
+		this.clearOnHide = this.options.clearOnHide || false;
+		this.expandByDefault = this.options.expandByDefault || false;
 
 		this.container = this.createContainer();
 		this.tabContainer = this.createTabContainer();
@@ -133,6 +162,12 @@ export class DebugPanel {
 	private createTabContainer(): HTMLElement {
 		const tabContainer = document.createElement('div');
 		tabContainer.classList.add('debug-panel-tabs');
+
+		// Add double-click handler for stretch
+		tabContainer.addEventListener('dblclick', () => {
+			this.toggleStretch();
+		});
+
 		return tabContainer;
 	}
 
@@ -146,21 +181,124 @@ export class DebugPanel {
 		const toolbar = document.createElement('div');
 		toolbar.classList.add('debug-toolbar');
 
-		const hint = document.createElement('span');
-		hint.classList.add('debug-keyboard-hint');
-		hint.textContent = 'Ctrl+Alt+D to hide/show';
-		hint.style.color = '#999';
-		hint.style.fontSize = '11px';
+		// Help button
+		const helpButton = document.createElement('button');
+		helpButton.classList.add('debug-icon-button');
+		helpButton.innerHTML = '?';
+		helpButton.title = 'Help & Info';
+		helpButton.onclick = () => this.showHelpOverlay();
 
-		const opacityContainer = document.createElement('div');
-		opacityContainer.classList.add('debug-opacity-container');
+		// Hide button
+		const hideButton = document.createElement('button');
+		hideButton.classList.add('debug-hide-button');
+		hideButton.textContent = 'Hide';
+		hideButton.title = 'Hide panel (Ctrl+Alt+D)';
+		hideButton.onclick = () => this.hide();
+
+		// Clear button
+		const clearButton = document.createElement('button');
+		clearButton.classList.add('debug-clear-button');
+		clearButton.textContent = 'Clear';
+		clearButton.title = 'Clear current tab';
+		clearButton.onclick = () => this.clearCurrentTab();
+
+		// Collapse/Expand All button
+		this.collapseAllButton = document.createElement('button');
+		this.collapseAllButton.classList.add('debug-icon-button');
+		this.collapseAllButton.innerHTML = '{ }';
+		this.updateCollapseAllTooltip();
+		this.collapseAllButton.onclick = () => this.toggleExpandAll();
+
+		// Stretch button
+		this.stretchButton = document.createElement('button');
+		this.stretchButton.classList.add('debug-icon-button');
+		this.updateStretchButton();
+		this.stretchButton.onclick = () => this.toggleStretch();
+
+		// Layout mode button
+		this.layoutButton = document.createElement('button');
+		this.layoutButton.classList.add('debug-icon-button');
+		this.layoutButton.innerHTML = '⚏';
+		this.updateLayoutButtonTooltip();
+		this.layoutButton.onclick = () => this.toggleLayoutMode();
+
+		// Settings (cog) button
+		const settingsButton = document.createElement('button');
+		settingsButton.classList.add('debug-icon-button');
+		settingsButton.innerHTML = '⚙';
+		settingsButton.title = 'Settings';
+
+		// Create settings panel
+		this.settingsPanel = this.createSettingsPanel();
+
+		// Toggle settings panel on click
+		settingsButton.onclick = (e) => {
+			e.stopPropagation();
+			this.settingsPanel.classList.toggle('visible');
+		};
+
+		// Hide settings panel when clicking outside
+		document.addEventListener('click', (e) => {
+			if (!this.settingsPanel.contains(e.target as Node) &&
+				!settingsButton.contains(e.target as Node)) {
+				this.settingsPanel.classList.remove('visible');
+			}
+		});
+
+		// Left side buttons
+		toolbar.appendChild(helpButton);
+		toolbar.appendChild(hideButton);
+		toolbar.appendChild(clearButton);
+
+		// Spacer
+		const spacer = document.createElement('div');
+		spacer.style.flex = '1';
+		toolbar.appendChild(spacer);
+
+		// Right side buttons
+		toolbar.appendChild(this.collapseAllButton);
+		toolbar.appendChild(this.stretchButton);
+		toolbar.appendChild(this.layoutButton);
+		toolbar.appendChild(settingsButton);
+		toolbar.appendChild(this.settingsPanel);
+
+		return toolbar;
+	}
+
+	private updateCollapseAllTooltip(): void {
+		const allExpanded = Object.values(this.debugStates).every(state => state.isExpanded);
+		this.collapseAllButton.title = allExpanded ? 'Collapse all objects' : 'Expand all objects';
+	}
+
+	private updateStretchButton(): void {
+		// Determine icon based on snap direction
+		let icon = '↔';  // Default horizontal arrows
+		if (this.snappedTo === 'left' || this.snappedTo === 'right' ||
+			this.snappedTo === 'topLeft' || this.snappedTo === 'topRight' ||
+			this.snappedTo === 'bottomLeft' || this.snappedTo === 'bottomRight') {
+			icon = '⇵';  // Vertical arrows for left/right/corner snaps
+		}
+
+		this.stretchButton.innerHTML = icon;
+		this.stretchButton.title = this.isStretched ? 'Unstretch panel' : 'Stretch panel';
+	}
+
+	private updateLayoutButtonTooltip(): void {
+		this.layoutButton.title = this.layoutMode === 'row'
+			? 'Switch to column layout'
+			: 'Switch to row layout';
+	}
+
+	private createSettingsPanel(): HTMLElement {
+		const panel = document.createElement('div');
+		panel.classList.add('debug-settings-panel');
+
+		// Opacity setting
+		const opacityRow = document.createElement('div');
+		opacityRow.classList.add('settings-row');
 
 		const opacityLabel = document.createElement('label');
-		opacityLabel.classList.add('debug-opacity-label');
-		opacityLabel.textContent = 'O';
-		opacityLabel.style.fontSize = '11px';
-		opacityLabel.style.color = '#999';
-		opacityLabel.style.marginRight = '5px';
+		opacityLabel.textContent = 'Opacity';
 
 		this.opacitySlider = document.createElement('input');
 		this.opacitySlider.type = 'range';
@@ -170,25 +308,75 @@ export class DebugPanel {
 		this.opacitySlider.classList.add('debug-opacity-slider');
 		this.opacitySlider.oninput = () => this.handleOpacityChange();
 
-		//opacityContainer.appendChild(opacityLabel);
-		opacityContainer.appendChild(this.opacitySlider);
+		opacityRow.appendChild(opacityLabel);
+		opacityRow.appendChild(this.opacitySlider);
 
-		const clearButton = document.createElement('button');
-		clearButton.classList.add('debug-clear-button');
-		clearButton.textContent = 'Clear';
-		clearButton.onclick = () => this.clearCurrentTab();
+		// Log to console checkbox
+		const logToConsoleRow = document.createElement('div');
+		logToConsoleRow.classList.add('settings-row');
 
-		const hideButton = document.createElement('button');
-		hideButton.classList.add('debug-hide-button');
-		hideButton.textContent = 'Hide';
-		hideButton.onclick = () => this.hide();
+		this.logToConsoleCheckbox = document.createElement('input');
+		this.logToConsoleCheckbox.type = 'checkbox';
+		this.logToConsoleCheckbox.id = 'logToConsole';
+		this.logToConsoleCheckbox.checked = this.logToConsole;
+		this.logToConsoleCheckbox.onchange = () => {
+			this.logToConsole = this.logToConsoleCheckbox!.checked;
+			this.saveSettings();
+		};
 
-		toolbar.appendChild(hint);
-		toolbar.appendChild(opacityContainer);
-		toolbar.appendChild(clearButton);
-		toolbar.appendChild(hideButton);
+		const logToConsoleLabel = document.createElement('label');
+		logToConsoleLabel.htmlFor = 'logToConsole';
+		logToConsoleLabel.textContent = 'Log to console';
 
-		return toolbar;
+		logToConsoleRow.appendChild(this.logToConsoleCheckbox);
+		logToConsoleRow.appendChild(logToConsoleLabel);
+
+		// Clear on hide checkbox
+		const clearOnHideRow = document.createElement('div');
+		clearOnHideRow.classList.add('settings-row');
+
+		this.clearOnHideCheckbox = document.createElement('input');
+		this.clearOnHideCheckbox.type = 'checkbox';
+		this.clearOnHideCheckbox.id = 'clearOnHide';
+		this.clearOnHideCheckbox.checked = this.clearOnHide;
+		this.clearOnHideCheckbox.onchange = () => {
+			this.clearOnHide = this.clearOnHideCheckbox!.checked;
+			this.saveSettings();
+		};
+
+		const clearOnHideLabel = document.createElement('label');
+		clearOnHideLabel.htmlFor = 'clearOnHide';
+		clearOnHideLabel.textContent = 'Clear on hide';
+
+		clearOnHideRow.appendChild(this.clearOnHideCheckbox);
+		clearOnHideRow.appendChild(clearOnHideLabel);
+
+		// Expand by default checkbox
+		const expandByDefaultRow = document.createElement('div');
+		expandByDefaultRow.classList.add('settings-row');
+
+		this.expandByDefaultCheckbox = document.createElement('input');
+		this.expandByDefaultCheckbox.type = 'checkbox';
+		this.expandByDefaultCheckbox.id = 'expandByDefault';
+		this.expandByDefaultCheckbox.checked = this.expandByDefault;
+		this.expandByDefaultCheckbox.onchange = () => {
+			this.expandByDefault = this.expandByDefaultCheckbox!.checked;
+			this.saveSettings();
+		};
+
+		const expandByDefaultLabel = document.createElement('label');
+		expandByDefaultLabel.htmlFor = 'expandByDefault';
+		expandByDefaultLabel.textContent = 'Expand new objects by default';
+
+		expandByDefaultRow.appendChild(this.expandByDefaultCheckbox);
+		expandByDefaultRow.appendChild(expandByDefaultLabel);
+
+		panel.appendChild(opacityRow);
+		panel.appendChild(logToConsoleRow);
+		panel.appendChild(clearOnHideRow);
+		panel.appendChild(expandByDefaultRow);
+
+		return panel;
 	}
 
 	private setupEventListeners(): void {
@@ -218,6 +406,7 @@ export class DebugPanel {
 			maxHeight: height - 20,
 			minWidth: 200,
 			minHeight: 150,
+			snapPadding: this.options.snapPadding || 20,
 			onResize: (newWidth: number) => {
 				this.updateToolbarLayout(newWidth);
 				this.saveSettings();
@@ -287,12 +476,88 @@ export class DebugPanel {
 
 	private setupKeyboardShortcut(): void {
 		document.addEventListener('keydown', (event: KeyboardEvent) => {
-			// Check for Ctrl+Alt+D
-			if (event.ctrlKey && event.altKey && event.key.toLowerCase() === 'd') {
+			// Check for Ctrl+Alt+D (Windows/Linux) or Cmd+D (Mac)
+			const isCtrlAltD = event.ctrlKey && event.altKey && event.key.toLowerCase() === 'd' && !event.metaKey;
+			const isCmdD = event.metaKey && event.key.toLowerCase() === 'd' && !event.ctrlKey;
+
+			if (isCtrlAltD || isCmdD) {
 				event.preventDefault();
 				this.toggle();
 			}
 		});
+	}
+
+	private showHelpOverlay(): void {
+		// Remove existing overlay if present
+		const existingOverlay = this.contentContainer.querySelector('.debug-help-overlay');
+		if (existingOverlay) {
+			existingOverlay.remove();
+			return;
+		}
+
+		const overlay = document.createElement('div');
+		overlay.classList.add('debug-help-overlay');
+
+		overlay.innerHTML = `
+			<div class="debug-help-content">
+				<h2>Dev Debug Panel</h2>
+
+				<section class="help-section">
+					<h3>Keyboard Shortcuts</h3>
+					<ul>
+						<li><kbd>Ctrl+Alt+D</kbd> (Windows/Linux) or <kbd>Cmd+D</kbd> (Mac) - Toggle panel visibility</li>
+						<li><kbd>Double-click</kbd> title bar - Stretch/unstretch panel</li>
+					</ul>
+				</section>
+
+				<section class="help-section">
+					<h3>Library Info</h3>
+					<ul class="help-links">
+						<li>Version: <strong>1.1.1</strong></li>
+						<li>
+							<a href="https://github.com/rw3iss/dev-debug-panel" target="_blank" rel="noopener">
+								<svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+									<path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
+								</svg>
+								GitHub Repository
+							</a>
+						</li>
+						<li>
+							<a href="https://github.com/rw3iss/dev-debug-panel/issues" target="_blank" rel="noopener">
+								Report Issue / Feedback
+							</a>
+						</li>
+					</ul>
+				</section>
+
+				<section class="help-section">
+					<h3>Author</h3>
+					<ul class="help-links">
+						<li><strong>Ryan Weiss</strong></li>
+						<li>
+							<a href="mailto:rw3iss@gmail.com">rw3iss@gmail.com</a>
+						</li>
+						<li>
+							<a href="https://www.ryanweiss.net" target="_blank" rel="noopener">www.ryanweiss.net</a>
+						</li>
+						<li>
+							<a href="https://www.buymeacoffee.com/ryanweiss" target="_blank" rel="noopener">
+								☕ Buy Me a Coffee
+							</a>
+						</li>
+					</ul>
+				</section>
+
+				<p class="help-close-hint">Click anywhere to close</p>
+			</div>
+		`;
+
+		// Close on click anywhere
+		overlay.addEventListener('click', () => {
+			overlay.remove();
+		});
+
+		this.contentContainer.appendChild(overlay);
 	}
 
 	private setupWindowResizeListener(): void {
@@ -385,6 +650,41 @@ export class DebugPanel {
 				this.opacitySlider.value = String(Math.round(opacity * 100));
 			}
 
+			// Restore snap and stretch state
+			if (savedSettings.snappedTo) {
+				this.snappedTo = savedSettings.snappedTo;
+				if (savedSettings.isStretched) {
+					this.isStretched = true;
+					this.applyStretch();
+				}
+			}
+
+			// Restore layout mode
+			if (savedSettings.layoutMode) {
+				this.layoutMode = savedSettings.layoutMode;
+				this.applyLayoutMode();
+			}
+
+			// Restore boolean settings
+			if (savedSettings.logToConsole !== undefined) {
+				this.logToConsole = savedSettings.logToConsole;
+				if (this.logToConsoleCheckbox) {
+					this.logToConsoleCheckbox.checked = this.logToConsole;
+				}
+			}
+			if (savedSettings.clearOnHide !== undefined) {
+				this.clearOnHide = savedSettings.clearOnHide;
+				if (this.clearOnHideCheckbox) {
+					this.clearOnHideCheckbox.checked = this.clearOnHide;
+				}
+			}
+			if (savedSettings.expandByDefault !== undefined) {
+				this.expandByDefault = savedSettings.expandByDefault;
+				if (this.expandByDefaultCheckbox) {
+					this.expandByDefaultCheckbox.checked = this.expandByDefault;
+				}
+			}
+
 			// Restore visibility state without triggering saveSettings
 			if (savedSettings.visible) {
 				this.container.classList.add('visible');
@@ -419,7 +719,13 @@ export class DebugPanel {
 				width: this.container.offsetWidth,
 				height: this.container.offsetHeight,
 				visible: this.container.classList.contains('visible'),
-				opacity: opacity
+				opacity: opacity,
+				snappedTo: this.snappedTo,
+				isStretched: this.isStretched,
+				layoutMode: this.layoutMode,
+				logToConsole: this.logToConsole,
+				clearOnHide: this.clearOnHide,
+				expandByDefault: this.expandByDefault
 			};
 			localStorage.setItem('debugPanelSettings', JSON.stringify(settings));
 		} catch (error) {
@@ -430,24 +736,59 @@ export class DebugPanel {
 	// Debug objects
 
 	// Send any object to the DebugPanel for observation. Use a string id as first argument to label it.
-	public debug(idOrState: any, state?: any): void {
-		//if (typeof idOrState === 'string')
-		let _id = idOrState;
-		let _state = state;
-		if (!state && typeof idOrState == 'object') {
-			_id = 'object'; // todo: make object IDs?
-			_state = idOrState;
+	public debug(...args: any[]): void {
+		if (args.length === 0) return;
+
+		// Log to console if enabled
+		if (this.logToConsole) {
+			console.log(...args);
 		}
 
-		// todo: this is not efficient, but is how to deal with circular dependencies.
-		// const safeState = safeStringify(_state);
-		// const parsedState = JSON.parse(safeState);
+		let startIndex = 0;
+		let baseId: string | null = null;
 
-		if (this.debugStates[_id]) {
-			this.updateDebugState(_id, _state); // parsedState);
-		} else {
-			this.addDebugState(_id, _state);// parsedState);
+		// Check if first argument is a string (used as ID)
+		if (typeof args[0] === 'string' && args.length > 1) {
+			baseId = args[0];
+			startIndex = 1;
 		}
+
+		// Process each argument
+		for (let i = startIndex; i < args.length; i++) {
+			const value = args[i];
+			let id: string;
+
+			if (baseId && args.length === 2) {
+				// Single object with custom ID
+				id = baseId;
+			} else if (baseId) {
+				// Multiple objects with base ID
+				id = `${baseId}-${i - startIndex}`;
+			} else {
+				// Generate ID based on type
+				const typeId = this.generateTypeId(value);
+				id = typeId;
+			}
+
+			// Handle the value
+			if (this.debugStates[id]) {
+				this.updateDebugState(id, value);
+			} else {
+				this.addDebugState(id, value);
+			}
+		}
+	}
+
+	private generateTypeId(value: any): string {
+		const type = Array.isArray(value) ? 'array' : typeof value;
+
+		// Find next available index for this type
+		let index = 1;
+		while (this.debugStates[`${type}-${index}`]) {
+			index++;
+		}
+
+		return `${type}-${index}`;
 	}
 
 	private updateDebugState(id: string, state: any): void {
@@ -484,10 +825,6 @@ export class DebugPanel {
 			return;
 		}
 
-		// Clone the state to avoid reference issues
-		// Todo: find a way to do this without cloning?
-		const clonedState = state ? JSON.parse(JSON.stringify(state)) : {}; // todo: strategy for null objects
-
 		const debugWrapper = document.createElement('div');
 		debugWrapper.classList.add('debug-state');
 		debugWrapper.setAttribute('id', `debug-state-${id}`);
@@ -499,29 +836,22 @@ export class DebugPanel {
 			toggleButton.textContent = isExpanded ? COLLAPSED_INDICATOR : EXPANDED_INDICATOR;
 		}
 
+		const label = document.createElement('div');
+		label.classList.add('debug-state-label');
+
 		const toggleButton = document.createElement('button');
 		toggleButton.classList.add('json-toggle');
 		toggleButton.textContent = EXPANDED_INDICATOR;
 		toggleButton.onclick = toggleObjectOpen;
-		debugWrapper.appendChild(toggleButton);
+		label.appendChild(toggleButton);
 
-		const label = document.createElement('div');
-		label.classList.add('debug-state-label');
-		label.innerText = id || 'untitled';
-		label.onclick = toggleObjectOpen;
-		debugWrapper.appendChild(label);
+		const labelText = document.createElement('span');
+		labelText.classList.add('debug-state-label-text');
+		labelText.innerText = id || 'untitled';
+		labelText.onclick = toggleObjectOpen;
+		label.appendChild(labelText);
 
-		const jsonWrapper = document.createElement('div');
-		jsonWrapper.classList.add('json-wrapper');
-		debugWrapper.appendChild(jsonWrapper);
-
-		// Create JsonView first (it will render and may clear the container)
-		const jsonView = new JsonView(clonedState, jsonWrapper as HTMLElement, {
-			//expandObjs: [/children/, /children\/(.*)/, /entry/]
-			// todo: pass options
-		});
-
-		// Add hover actions AFTER JsonView has rendered (so they don't get cleared)
+		// Add hover actions to label
 		const hoverActions = document.createElement('div');
 		hoverActions.classList.add('debug-state-hover-actions');
 
@@ -530,7 +860,10 @@ export class DebugPanel {
 		copyButton.classList.add('debug-state-action-button', 'debug-state-copy-button');
 		copyButton.innerHTML = '📋';
 		copyButton.title = 'Copy JSON to clipboard';
-		copyButton.onclick = () => this.copyDebugStateToClipboard(id, this.debugStates[id].state, copyButton);
+		copyButton.onclick = (e) => {
+			e.stopPropagation();
+			this.copyDebugStateToClipboard(id, state, copyButton);
+		};
 		hoverActions.appendChild(copyButton);
 
 		// Delete button
@@ -538,10 +871,50 @@ export class DebugPanel {
 		deleteButton.classList.add('debug-state-action-button', 'debug-state-delete-button');
 		deleteButton.innerHTML = '🗑️';
 		deleteButton.title = 'Delete this object';
-		deleteButton.onclick = () => this.removeDebugState(id);
+		deleteButton.onclick = (e) => {
+			e.stopPropagation();
+			this.removeDebugState(id);
+		};
 		hoverActions.appendChild(deleteButton);
 
-		jsonWrapper.appendChild(hoverActions);
+		label.appendChild(hoverActions);
+
+		debugWrapper.appendChild(label);
+
+		const jsonWrapper = document.createElement('div');
+		jsonWrapper.classList.add('json-wrapper');
+		debugWrapper.appendChild(jsonWrapper);
+
+		// Handle primitives
+		const isPrimitive = state === null || state === undefined ||
+			typeof state === 'string' || typeof state === 'number' ||
+			typeof state === 'boolean';
+
+		let jsonView: JsonView;
+		let clonedState: any;
+
+		if (isPrimitive) {
+			// Display primitive value directly
+			const valueDiv = document.createElement('div');
+			valueDiv.style.padding = '8px';
+			valueDiv.style.color = '#ce9178';
+			valueDiv.textContent = String(state);
+			jsonWrapper.appendChild(valueDiv);
+
+			// Create a dummy JsonView for consistency
+			clonedState = { value: state };
+			jsonView = new JsonView(clonedState, document.createElement('div'), {
+				expandAll: this.expandByDefault
+			});
+		} else {
+			// Clone the state to avoid reference issues
+			clonedState = state ? JSON.parse(JSON.stringify(state)) : {};
+
+			// Create JsonView for objects/arrays
+			jsonView = new JsonView(clonedState, jsonWrapper as HTMLElement, {
+				expandAll: this.expandByDefault
+			});
+		}
 
 		this.debugStates[id] = {
 			state: clonedState,
@@ -643,7 +1016,7 @@ export class DebugPanel {
 
 		const activeContent = this.contentContainer.querySelector(`[data-namespace="${namespace}"]`) as HTMLElement;
 		if (activeContent) {
-			activeContent.style.display = 'block';
+			activeContent.style.display = activeContent.classList.contains('layout-columns') ? 'flex' : 'block';;
 		}
 	}
 
@@ -745,27 +1118,216 @@ export class DebugPanel {
 
 		let snappedX = x;
 		let snappedY = y;
+		let newSnappedTo: 'left' | 'right' | 'top' | 'bottom' | 'topLeft' | 'topRight' | 'bottomLeft' | 'bottomRight' | null = null;
 
-		// Snap to left edge
-		if (x < snapPadding) {
+		const snappedLeft = x < snapPadding;
+		const snappedRight = x + panelWidth > windowWidth - snapPadding;
+		const snappedTop = y < snapPadding;
+		const snappedBottom = y + panelHeight > windowHeight - snapPadding;
+
+		// Determine snap position
+		if (snappedLeft && snappedTop) {
 			snappedX = 0;
-		}
-		// Snap to right edge
-		else if (x + panelWidth > windowWidth - snapPadding) {
+			snappedY = 0;
+			newSnappedTo = 'topLeft';
+		} else if (snappedRight && snappedTop) {
 			snappedX = windowWidth - panelWidth;
+			snappedY = 0;
+			newSnappedTo = 'topRight';
+		} else if (snappedLeft && snappedBottom) {
+			snappedX = 0;
+			snappedY = windowHeight - panelHeight;
+			newSnappedTo = 'bottomLeft';
+		} else if (snappedRight && snappedBottom) {
+			snappedX = windowWidth - panelWidth;
+			snappedY = windowHeight - panelHeight;
+			newSnappedTo = 'bottomRight';
+		} else if (snappedLeft) {
+			snappedX = 0;
+			newSnappedTo = 'left';
+		} else if (snappedRight) {
+			snappedX = windowWidth - panelWidth;
+			newSnappedTo = 'right';
+		} else if (snappedTop) {
+			snappedY = 0;
+			newSnappedTo = 'top';
+		} else if (snappedBottom) {
+			snappedY = windowHeight - panelHeight;
+			newSnappedTo = 'bottom';
 		}
 
-		// Snap to top edge
-		if (y < snapPadding) {
-			snappedY = 0;
-		}
-		// Snap to bottom edge
-		else if (y + panelHeight > windowHeight - snapPadding) {
-			snappedY = windowHeight - panelHeight;
+		// Update snapped position if changed
+		if (newSnappedTo !== this.snappedTo) {
+			this.snappedTo = newSnappedTo;
+
+			// Update stretch button icon
+			this.updateStretchButton();
+
+			// If stretch is enabled, apply stretch to new snap position
+			if (this.isStretched && newSnappedTo) {
+				setTimeout(() => this.applyStretch(), 0);
+			}
 		}
 
 		// Return the snapped coordinates
 		return { x: snappedX, y: snappedY };
+	}
+
+	// Toggle Methods
+
+	private toggleExpandAll(): void {
+		const allExpanded = Object.values(this.debugStates).every(state => state.isExpanded);
+
+		Object.keys(this.debugStates).forEach(id => {
+			const debugWrapper = document.getElementById(`debug-state-${id}`);
+			if (!debugWrapper) return;
+
+			this.debugStates[id].isExpanded = !allExpanded;
+			debugWrapper.classList.toggle('collapsed', allExpanded);
+
+			const toggleButton = debugWrapper.querySelector('.json-toggle') as HTMLElement;
+			if (toggleButton) {
+				toggleButton.textContent = allExpanded ? COLLAPSED_INDICATOR : EXPANDED_INDICATOR;
+			}
+		});
+
+		this.updateCollapseAllTooltip();
+	}
+
+	private toggleStretch(): void {
+		// If not snapped, snap to closest edge first
+		if (!this.snappedTo) {
+			const { width: windowWidth, height: windowHeight } = getWindowSize();
+			const panelRect = this.container.getBoundingClientRect();
+			const panelCenterX = panelRect.left + panelRect.width / 2;
+			const panelCenterY = panelRect.top + panelRect.height / 2;
+
+			const distToLeft = panelCenterX;
+			const distToRight = windowWidth - panelCenterX;
+			const distToTop = panelCenterY;
+			const distToBottom = windowHeight - panelCenterY;
+
+			const minDist = Math.min(distToLeft, distToRight, distToTop, distToBottom);
+
+			if (minDist === distToLeft) {
+				this.snappedTo = 'left';
+				this.container.style.left = '0px';
+			} else if (minDist === distToRight) {
+				this.snappedTo = 'right';
+				this.container.style.left = `${windowWidth - panelRect.width}px`;
+			} else if (minDist === distToTop) {
+				this.snappedTo = 'top';
+				this.container.style.top = '0px';
+			} else {
+				this.snappedTo = 'bottom';
+				this.container.style.top = `${windowHeight - panelRect.height}px`;
+			}
+		}
+
+		this.isStretched = !this.isStretched;
+
+		if (this.isStretched) {
+			this.applyStretch();
+		} else {
+			// Return to 50% of viewport and center on the snapped edge
+			const { width: windowWidth, height: windowHeight } = getWindowSize();
+
+			if (this.snappedTo === 'left' || this.snappedTo === 'right') {
+				// Was stretched vertically, shrink to 50% height and center vertically
+				const newHeight = windowHeight * 0.5;
+				this.container.style.height = `${newHeight}px`;
+				this.container.style.top = `${(windowHeight - newHeight) / 2}px`;
+			} else if (this.snappedTo === 'top' || this.snappedTo === 'bottom') {
+				// Was stretched horizontally, shrink to 50% width and center horizontally
+				const newWidth = windowWidth * 0.5;
+				this.container.style.width = `${newWidth}px`;
+				this.container.style.left = `${(windowWidth - newWidth) / 2}px`;
+			} else if (this.snappedTo) {
+				// Corner snap - shrink to 50% in both dimensions
+				const newHeight = windowHeight * 0.5;
+				const newWidth = windowWidth * 0.5;
+				this.container.style.height = `${newHeight}px`;
+				this.container.style.width = `${newWidth}px`;
+
+				if (this.snappedTo.includes('top')) {
+					this.container.style.top = `${(windowHeight - newHeight) / 2}px`;
+				} else {
+					this.container.style.top = `${(windowHeight - newHeight) / 2}px`;
+				}
+
+				if (this.snappedTo.includes('Left')) {
+					this.container.style.left = `${(windowWidth - newWidth) / 2}px`;
+				} else {
+					this.container.style.left = `${(windowWidth - newWidth) / 2}px`;
+				}
+			}
+		}
+
+		this.updateStretchButton();
+		this.saveSettings();
+	}
+
+	private applyStretch(): void {
+		if (!this.snappedTo) return;
+
+		const { width: windowWidth, height: windowHeight } = getWindowSize();
+
+		if (this.snappedTo === 'left') {
+			this.container.style.height = `${windowHeight}px`;
+			this.container.style.top = '0px';
+			this.container.style.left = '0px';
+		} else if (this.snappedTo === 'right') {
+			this.container.style.height = `${windowHeight}px`;
+			this.container.style.top = '0px';
+			const panelWidth = this.container.offsetWidth;
+			this.container.style.left = `${windowWidth - panelWidth}px`;
+		} else if (this.snappedTo === 'top') {
+			this.container.style.width = `${windowWidth}px`;
+			this.container.style.left = '0px';
+			this.container.style.top = '0px';
+		} else if (this.snappedTo === 'bottom') {
+			this.container.style.width = `${windowWidth}px`;
+			this.container.style.left = '0px';
+			const panelHeight = this.container.offsetHeight;
+			this.container.style.top = `${windowHeight - panelHeight}px`;
+		} else if (this.snappedTo) {
+			// Corner snap - stretch to full height
+			this.container.style.height = `${windowHeight}px`;
+
+			if (this.snappedTo.includes('top')) {
+				this.container.style.top = '0px';
+			} else {
+				const panelHeight = this.container.offsetHeight;
+				this.container.style.top = `${windowHeight - panelHeight}px`;
+			}
+
+			if (this.snappedTo.includes('Left')) {
+				this.container.style.left = '0px';
+			} else {
+				const panelWidth = this.container.offsetWidth;
+				this.container.style.left = `${windowWidth - panelWidth}px`;
+			}
+		}
+	}
+
+	private toggleLayoutMode(): void {
+		this.layoutMode = this.layoutMode === 'row' ? 'column' : 'row';
+		this.applyLayoutMode();
+		this.updateLayoutButtonTooltip();
+		this.saveSettings();
+	}
+
+	private applyLayoutMode(): void {
+		const content = this.contentContainer.querySelector(`[data-namespace="${this.activeTab}"]`)  as HTMLElement;
+		if (!content) return;
+
+		if (this.layoutMode === 'column') {
+			content.classList.add('layout-columns');
+			content.style.display = 'flex';
+		} else {
+			content.classList.remove('layout-columns');
+			content.style.display = 'block';
+		}
 	}
 
 	// Panel controls
@@ -779,6 +1341,9 @@ export class DebugPanel {
 	}
 
 	public hide(): void {
+		if (this.clearOnHide) {
+			this.clearCurrentTab();
+		}
 		this.container.classList.remove('visible');
 		this.saveSettings();
 	}

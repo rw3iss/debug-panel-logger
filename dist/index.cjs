@@ -42,7 +42,7 @@ __export(index_exports, {
 module.exports = __toCommonJS(index_exports);
 
 // src/DebugPanel/DebugPanel.scss
-var css = '.debug-panel{position:fixed;z-index:99999;background:#222;border-radius:8px;box-shadow:0 4px 10px rgba(0,0,0,.3);display:flex;flex-direction:column;overflow:hidden;font-family:Arial,sans-serif;color:#fff;transition:transform .2s ease-in-out,visibility .2s ease-in-out}.debug-panel.visible{visibility:visible;transform:translateY(0)}.debug-panel:not(.visible){visibility:hidden;transform:translateY(10px);pointer-events:none}.debug-panel .debug-panel-tabs{display:flex;flex-wrap:wrap;background:#1a1a1a;padding:6px 6px 0 6px;gap:3px;cursor:grab;user-select:none}.debug-panel .debug-panel-tabs:active{cursor:grabbing}.debug-panel .debug-panel-tabs .debug-tab{background:#2d2d2d;color:#888;padding:7px 8px;margin:0;border:none;border-top-left-radius:6px;border-top-right-radius:6px;cursor:pointer;position:relative;box-shadow:inset 0 -2px 4px rgba(0,0,0,.3);font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen,Ubuntu,Cantarell,"Open Sans","Helvetica Neue",sans-serif}.debug-panel .debug-panel-tabs .debug-tab:hover{background:#353535;color:#aaa}.debug-panel .debug-panel-tabs .debug-tab:focus{outline:none}.debug-panel .debug-panel-tabs .debug-tab.active{background:linear-gradient(to bottom, #3f6d9c, #24384d);color:#fff;box-shadow:0 -3px 8px rgba(0,102,204,.4),inset 0 1px 0 hsla(0,0%,100%,.2);z-index:1}.debug-panel .debug-panel-content{flex:1;display:flex;flex-direction:column;overflow-y:auto;padding:0px 15px;background:#0d0d0d}.debug-panel .debug-panel-content .debug-tab-content{display:none;flex-direction:column;flex:1;gap:5px}.debug-panel .debug-panel-content .debug-tab-content .debug-log-entry{background:#292929;color:#ddd;padding:5px 8px;border-radius:4px;font-size:12px;word-break:break-word;border-left:3px solid #007bff;position:relative;display:flex;align-items:center}.debug-panel .debug-panel-content .debug-tab-content .debug-log-entry:hover .debug-delete-button,.debug-panel .debug-panel-content .debug-tab-content .debug-log-entry:hover .debug-copy-button{opacity:1}.debug-panel .debug-panel-content .debug-tab-content .debug-log-entry .debug-log-entry-text{flex:1;padding-right:70px}.debug-panel .debug-panel-content .debug-tab-content .debug-log-entry .debug-action-button,.debug-panel .debug-panel-content .debug-tab-content .debug-log-entry .debug-delete-button,.debug-panel .debug-panel-content .debug-tab-content .debug-log-entry .debug-copy-button{position:absolute;top:50%;transform:translateY(-50%);background:rgba(100,100,100,.8);color:#fff;border:none;cursor:pointer;font-size:12px;font-weight:bold;width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .2s ease-in-out,background .2s ease-in-out}.debug-panel .debug-panel-content .debug-tab-content .debug-log-entry .debug-action-button:hover,.debug-panel .debug-panel-content .debug-tab-content .debug-log-entry .debug-delete-button:hover,.debug-panel .debug-panel-content .debug-tab-content .debug-log-entry .debug-copy-button:hover{background:#969696}.debug-panel .debug-panel-content .debug-tab-content .debug-log-entry .debug-copy-button{right:36px;background:rgba(85,170,255,.8)}.debug-panel .debug-panel-content .debug-tab-content .debug-log-entry .debug-copy-button:hover{background:#28f}.debug-panel .debug-panel-content .debug-tab-content .debug-log-entry .debug-delete-button{right:8px;background:rgba(223,161,152,.8)}.debug-panel .debug-panel-content .debug-tab-content .debug-log-entry .debug-delete-button:hover{background:#f22}.debug-panel .debug-toolbar{display:flex;box-sizing:border-box;width:100%;align-items:center;justify-content:flex-end;gap:2px;padding:8px;background:#111;border-top:1px solid hsla(0,0%,100%,.1);flex-wrap:wrap}.debug-panel .debug-toolbar .debug-keyboard-hint{margin-right:auto;color:#999;font-size:11px;white-space:nowrap}.debug-panel .debug-toolbar .debug-opacity-container{display:flex;align-items:center;gap:0px;max-width:100px;min-width:40px;flex-shrink:1;padding:4px 0}.debug-panel .debug-toolbar .debug-opacity-container .debug-opacity-label{font-size:11px;color:#999;white-space:nowrap}.debug-panel .debug-toolbar .debug-opacity-container .debug-opacity-slider{flex:1;min-width:40px;width:100%;max-width:100%;height:4px;background:#444;border-radius:2px;outline:none;-webkit-appearance:none;appearance:none}.debug-panel .debug-toolbar .debug-opacity-container .debug-opacity-slider::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:14px;height:14px;background:#007bff;cursor:pointer;border-radius:50%;position:relative;top:-4px;transition:background .2s}.debug-panel .debug-toolbar .debug-opacity-container .debug-opacity-slider::-webkit-slider-thumb:hover{background:#0056b3}.debug-panel .debug-toolbar .debug-opacity-container .debug-opacity-slider::-moz-range-thumb{width:14px;height:14px;background:#007bff;cursor:pointer;border-radius:50%;border:none;position:relative;top:-4px;transition:background .2s}.debug-panel .debug-toolbar .debug-opacity-container .debug-opacity-slider::-moz-range-thumb:hover{background:#0056b3}.debug-panel .debug-toolbar .debug-opacity-container .debug-opacity-slider::-webkit-slider-runnable-track{height:4px;background:#444;border-radius:2px}.debug-panel .debug-toolbar .debug-opacity-container .debug-opacity-slider::-moz-range-track{height:4px;background:#444;border-radius:2px}.debug-panel .debug-toolbar button{background:#ba6c38;color:#fff;border:none;padding:5px 10px;margin:2px;border-radius:4px;font-size:12px;cursor:pointer;transition:background .2s;white-space:nowrap;flex-shrink:0}.debug-panel .debug-toolbar button:hover{background:#c9302c}.debug-panel .debug-toolbar button:focus{outline:none}.debug-panel .debug-toolbar{container-type:inline-size}@container (max-width: 350px){.debug-panel .debug-toolbar{flex-direction:column;align-items:stretch}.debug-panel .debug-toolbar .debug-keyboard-hint{display:none}.debug-panel .debug-toolbar .debug-opacity-container{max-width:100%;justify-content:center}}.debug-panel.narrow-panel .debug-toolbar{flex-direction:column;align-items:stretch}.debug-panel.narrow-panel .debug-toolbar .debug-keyboard-hint{margin-right:0;text-align:center}.debug-panel.narrow-panel .debug-toolbar .debug-opacity-container{max-width:100%;justify-content:center}.debug-panel .resize-handle{position:absolute;background:hsla(0,0%,100%,.1);z-index:10;transition:background .2s}.debug-panel .resize-handle:hover{background:hsla(0,0%,100%,.3)}.debug-panel .resize-left,.debug-panel .resize-right{top:0;bottom:0;width:6px;cursor:ew-resize}.debug-panel .resize-left{left:-3px}.debug-panel .resize-right{right:-3px}.debug-panel .resize-top,.debug-panel .resize-bottom{left:0;right:0;height:6px;cursor:ns-resize}.debug-panel .resize-top{top:-3px}.debug-panel .resize-bottom{bottom:-3px}.debug-panel .resize-top-left,.debug-panel .resize-top-right,.debug-panel .resize-bottom-left,.debug-panel .resize-bottom-right{width:10px;height:10px}.debug-panel .resize-top-left{left:-3px;top:-3px;cursor:nwse-resize}.debug-panel .resize-top-right{right:-3px;top:-3px;cursor:nesw-resize}.debug-panel .resize-bottom-left{left:-3px;bottom:-3px;cursor:nesw-resize}.debug-panel .resize-bottom-right{right:-3px;bottom:-3px;cursor:nwse-resize}.debug-state{position:relative;flex:1 0 100%;display:flex;flex-direction:column;margin-bottom:5px;margin-left:10px}.debug-state .json-toggle{position:absolute;top:2px;left:-22px;margin:0 10px 0 0;border:none;background:none;cursor:pointer;color:#888;font-size:14px;padding:0;width:20px;height:20px;transition:color .2s}.debug-state .json-toggle:hover{color:#fff}.debug-state .json-toggle:focus{outline:none}.debug-state .debug-state-label{font-size:13px;font-weight:bold;padding:5px 0;color:#ccc}.debug-state .debug-state-label:hover{color:#fff;cursor:pointer;text-decoration:underline}.debug-state .json-wrapper{position:relative;padding:5px;margin-left:-15px;background:#292929;border-radius:4px;border-left:3px solid #28a745}.debug-state .json-wrapper .debug-state-hover-actions{position:absolute;top:4px;right:4px;display:flex;gap:6px;opacity:0;transition:opacity .2s ease-in-out;z-index:10}.debug-state .json-wrapper:hover .debug-state-hover-actions{opacity:1}.debug-state .json-wrapper .debug-state-action-button{background:rgba(100,100,100,.8);color:#fff;border:none;cursor:pointer;font-size:16px;width:28px;height:28px;border-radius:4px;display:flex;align-items:center;justify-content:center;padding:0;transition:background .2s ease-in-out,transform .1s ease-in-out}.debug-state .json-wrapper .debug-state-action-button:hover{transform:scale(1.1)}.debug-state .json-wrapper .debug-state-action-button:active{transform:scale(0.95)}.debug-state .json-wrapper .debug-state-action-button:focus{outline:none}.debug-state .json-wrapper .debug-state-copy-button{background:rgba(85,170,255,.8)}.debug-state .json-wrapper .debug-state-copy-button:hover{background:#28f}.debug-state .json-wrapper .debug-state-delete-button{background:rgba(255,85,85,.8)}.debug-state .json-wrapper .debug-state-delete-button:hover{background:#f22}.debug-state.collapsed .json-wrapper{display:none}';
+var css = '.debug-panel{position:fixed;z-index:99999;background:#222;border-radius:8px;box-shadow:0 4px 10px rgba(0,0,0,.3);display:flex;flex-direction:column;overflow:hidden;font-family:Arial,sans-serif;color:#fff;transition:transform .1s ease-in-out,visibility .1s ease-in-out}.debug-panel.visible{visibility:visible;transform:translateY(0)}.debug-panel:not(.visible){visibility:hidden;transform:translateY(10px);pointer-events:none}.debug-panel .debug-panel-tabs{display:flex;flex-wrap:wrap;background:#1a1a1a;padding:6px 6px 0 6px;gap:3px;cursor:grab;user-select:none}.debug-panel .debug-panel-tabs:active{cursor:grabbing}.debug-panel .debug-panel-tabs .debug-tab{background:#2d2d2d;color:#888;padding:5px 6px 7px;margin:0;border:none;border-top-left-radius:6px;border-top-right-radius:6px;cursor:pointer;position:relative;box-shadow:inset 0 -2px 4px rgba(0,0,0,.3);font-size:12px;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen,Ubuntu,Cantarell,"Open Sans","Helvetica Neue",sans-serif}.debug-panel .debug-panel-tabs .debug-tab:hover{background:#353535;color:#aaa}.debug-panel .debug-panel-tabs .debug-tab:focus{outline:none}.debug-panel .debug-panel-tabs .debug-tab.active{background:linear-gradient(to bottom, #3f6d9c, #324f6e, #121b25);color:#fff;box-shadow:0 -3px 8px rgba(0,102,204,.4),inset 0 1px 0 hsla(0,0%,100%,.2);z-index:1;border-bottom-left-radius:0;border-bottom-right-radius:0}.debug-panel .debug-panel-content{flex:1;display:flex;flex-direction:column;overflow-y:auto;padding:0;background:#0d0d0d;overscroll-behavior:contain}.debug-panel .debug-panel-content .debug-tab-content{display:none;flex-direction:column;flex:1;gap:2px;padding:5px 0}.debug-panel .debug-panel-content .debug-tab-content.layout-columns{display:flex;flex-direction:row;overflow-x:auto;overflow-y:hidden}.debug-panel .debug-panel-content .debug-tab-content.layout-columns .debug-state{min-width:150px;flex:1 1 0;padding:0 2px}.debug-panel .debug-panel-content .debug-tab-content .debug-log-entry{background:#292929;color:#ddd;padding:5px 8px;border-radius:4px;font-size:12px;word-break:break-word;border-left:3px solid #007bff;position:relative;display:flex;align-items:center}.debug-panel .debug-panel-content .debug-tab-content .debug-log-entry:hover .debug-delete-button,.debug-panel .debug-panel-content .debug-tab-content .debug-log-entry:hover .debug-copy-button{opacity:1}.debug-panel .debug-panel-content .debug-tab-content .debug-log-entry .debug-log-entry-text{flex:1;padding-right:70px}.debug-panel .debug-panel-content .debug-tab-content .debug-log-entry .debug-action-button,.debug-panel .debug-panel-content .debug-tab-content .debug-log-entry .debug-delete-button,.debug-panel .debug-panel-content .debug-tab-content .debug-log-entry .debug-copy-button{position:absolute;top:50%;transform:translateY(-50%);background:rgba(100,100,100,.8);border:none;cursor:pointer;transition:background .1s}.debug-panel .debug-panel-content .debug-tab-content .debug-log-entry .debug-action-button:focus,.debug-panel .debug-panel-content .debug-tab-content .debug-log-entry .debug-delete-button:focus,.debug-panel .debug-panel-content .debug-tab-content .debug-log-entry .debug-copy-button:focus{outline:none}.debug-panel .debug-panel-content .debug-tab-content .debug-log-entry .debug-action-button,.debug-panel .debug-panel-content .debug-tab-content .debug-log-entry .debug-delete-button,.debug-panel .debug-panel-content .debug-tab-content .debug-log-entry .debug-copy-button{color:#fff;display:flex;align-items:center;justify-content:center;padding:0;margin:0;font-size:14px;width:20px;height:20px;border-radius:3px;transition:background .1s,transform .1s}.debug-panel .debug-panel-content .debug-tab-content .debug-log-entry .debug-action-button:hover,.debug-panel .debug-panel-content .debug-tab-content .debug-log-entry .debug-delete-button:hover,.debug-panel .debug-panel-content .debug-tab-content .debug-log-entry .debug-copy-button:hover{transform:scale(1.1)}.debug-panel .debug-panel-content .debug-tab-content .debug-log-entry .debug-action-button:active,.debug-panel .debug-panel-content .debug-tab-content .debug-log-entry .debug-delete-button:active,.debug-panel .debug-panel-content .debug-tab-content .debug-log-entry .debug-copy-button:active{transform:scale(0.95)}.debug-panel .debug-panel-content .debug-tab-content .debug-log-entry .debug-action-button,.debug-panel .debug-panel-content .debug-tab-content .debug-log-entry .debug-delete-button,.debug-panel .debug-panel-content .debug-tab-content .debug-log-entry .debug-copy-button{border-radius:50%;opacity:0;transition:opacity .1s,background .1s}.debug-panel .debug-panel-content .debug-tab-content .debug-log-entry .debug-action-button:hover,.debug-panel .debug-panel-content .debug-tab-content .debug-log-entry .debug-delete-button:hover,.debug-panel .debug-panel-content .debug-tab-content .debug-log-entry .debug-copy-button:hover{background:#969696}.debug-panel .debug-panel-content .debug-tab-content .debug-log-entry .debug-copy-button{right:36px;opacity:.7}.debug-panel .debug-panel-content .debug-tab-content .debug-log-entry .debug-copy-button:hover{opacity:1}.debug-panel .debug-panel-content .debug-tab-content .debug-log-entry .debug-delete-button{right:8px;opacity:.7}.debug-panel .debug-panel-content .debug-tab-content .debug-log-entry .debug-delete-button:hover{opacity:1}.debug-panel .debug-toolbar{display:flex;box-sizing:border-box;width:100%;align-items:center;gap:2px;padding:2px;background:#111;border-top:1px solid hsla(0,0%,100%,.1);flex-wrap:wrap;position:relative}.debug-panel .debug-toolbar .debug-opacity-container{display:flex;align-items:center;gap:0;max-width:100px;min-width:40px;flex-shrink:1;padding:4px 0}.debug-panel .debug-toolbar .debug-opacity-container .debug-opacity-label{font-size:11px;color:#999;white-space:nowrap}.debug-panel .debug-toolbar .debug-opacity-container .debug-opacity-slider{flex:1;min-width:40px;width:100%;height:4px;background:#444;border-radius:2px;outline:none;-webkit-appearance:none;appearance:none}.debug-panel .debug-toolbar .debug-opacity-container .debug-opacity-slider::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:14px;height:14px;background:#007bff;cursor:pointer;border-radius:50%;position:relative;top:-4px;transition:background .1s}.debug-panel .debug-toolbar .debug-opacity-container .debug-opacity-slider::-webkit-slider-thumb:hover{background:#0056b3}.debug-panel .debug-toolbar .debug-opacity-container .debug-opacity-slider::-moz-range-thumb{width:14px;height:14px;background:#007bff;cursor:pointer;border-radius:50%;border:none;position:relative;top:-4px;transition:background .1s}.debug-panel .debug-toolbar .debug-opacity-container .debug-opacity-slider::-moz-range-thumb:hover{background:#0056b3}.debug-panel .debug-toolbar .debug-opacity-container .debug-opacity-slider::-webkit-slider-runnable-track,.debug-panel .debug-toolbar .debug-opacity-container .debug-opacity-slider::-moz-range-track{height:4px;background:#444;border-radius:2px}.debug-panel .debug-toolbar button{border:none;cursor:pointer;transition:background .1s}.debug-panel .debug-toolbar button:focus{outline:none}.debug-panel .debug-toolbar button{background:#ba6c38;color:#fff;padding:4px 6px;margin:2px;border-radius:4px;font-size:12px;white-space:nowrap;flex-shrink:0}.debug-panel .debug-toolbar button:hover{background:#c9302c}.debug-panel .debug-toolbar button.debug-icon-button{font-size:13px;padding:3px 5px;background:#555}.debug-panel .debug-toolbar button.debug-icon-button:hover{background:#666}.debug-panel .debug-toolbar .debug-settings-panel{position:absolute;bottom:100%;right:0;background:#1a1a1a;border:1px solid #444;border-radius:6px;padding:12px;margin-bottom:8px;box-shadow:0 4px 12px rgba(0,0,0,.5);min-width:200px;display:none;flex-direction:column;gap:10px;z-index:1000}.debug-panel .debug-toolbar .debug-settings-panel.visible{display:flex}.debug-panel .debug-toolbar .debug-settings-panel::before{content:"";position:absolute;top:-20px;left:-20px;right:-20px;bottom:-20px;z-index:-1}.debug-panel .debug-toolbar .debug-settings-panel .settings-row{display:flex;align-items:center;gap:8px;font-size:12px;color:#ccc}.debug-panel .debug-toolbar .debug-settings-panel .settings-row label{flex:1;cursor:pointer;user-select:none}.debug-panel .debug-toolbar .debug-settings-panel .settings-row input[type=checkbox]{cursor:pointer}.debug-panel .debug-toolbar .debug-settings-panel .settings-row .debug-opacity-slider{flex:1;min-width:100px}.debug-panel .resize-handle{position:absolute;background:hsla(0,0%,100%,.1);z-index:10;transition:background .1s}.debug-panel .resize-handle:hover{background:hsla(0,0%,100%,.3)}.debug-panel .resize-left,.debug-panel .resize-right{top:0;bottom:0;width:6px;cursor:ew-resize}.debug-panel .resize-left{left:-3px}.debug-panel .resize-right{right:-3px}.debug-panel .resize-top,.debug-panel .resize-bottom{left:0;right:0;height:6px;cursor:ns-resize}.debug-panel .resize-top{top:-3px}.debug-panel .resize-bottom{bottom:-3px}.debug-panel .resize-top-left,.debug-panel .resize-top-right,.debug-panel .resize-bottom-left,.debug-panel .resize-bottom-right{width:10px;height:10px}.debug-panel .resize-top-left{left:-3px;top:-3px;cursor:nwse-resize}.debug-panel .resize-top-right{right:-3px;top:-3px;cursor:nesw-resize}.debug-panel .resize-bottom-left{left:-3px;bottom:-3px;cursor:nesw-resize}.debug-panel .resize-bottom-right{right:-3px;bottom:-3px;cursor:nwse-resize}.debug-panel .debug-help-overlay{position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.95);z-index:1000;display:flex;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto;cursor:pointer;box-sizing:border-box}.debug-panel .debug-help-overlay .debug-help-content{background:linear-gradient(to bottom, #2a2a2a, #1a1a1a);border-radius:8px;padding:30px;max-width:500px;width:100%;box-shadow:0 8px 32px rgba(0,0,0,.5);border:1px solid #444;margin-top:auto;margin-bottom:auto;box-sizing:border-box}.debug-panel .debug-help-overlay .debug-help-content h2{margin:0 0 20px 0;color:#fff;font-size:24px;font-weight:bold;text-align:center;border-bottom:2px solid #007bff;padding-bottom:10px}.debug-panel .debug-help-overlay .debug-help-content .help-section{margin-bottom:25px}.debug-panel .debug-help-overlay .debug-help-content .help-section h3{color:#9cdcfe;font-size:16px;margin:0 0 10px 0;font-weight:bold}.debug-panel .debug-help-overlay .debug-help-content .help-section ul{list-style:none;padding:0;margin:0}.debug-panel .debug-help-overlay .debug-help-content .help-section ul li{padding:6px 0;color:#ddd;font-size:13px;line-height:1.5}.debug-panel .debug-help-overlay .debug-help-content .help-section ul li kbd{background:#333;border:1px solid #555;border-radius:3px;padding:2px 6px;font-family:monospace;font-size:12px;color:#9cdcfe}.debug-panel .debug-help-overlay .debug-help-content .help-section ul li strong{color:#fff}.debug-panel .debug-help-overlay .debug-help-content .help-section .help-links a{color:#4fc3f7;text-decoration:none;display:inline-flex;align-items:center;gap:6px;transition:color .1s}.debug-panel .debug-help-overlay .debug-help-content .help-section .help-links a:hover{color:#81d4fa;text-decoration:underline}.debug-panel .debug-help-overlay .debug-help-content .help-section .help-links a svg{vertical-align:middle}.debug-panel .debug-help-overlay .debug-help-content .help-close-hint{text-align:center;color:#888;font-size:12px;margin:20px 0 0 0;font-style:italic}.debug-state{position:relative;flex:1 1 100%;display:flex;flex-direction:column;margin-bottom:5px;width:100%}.debug-state .debug-state-label{font-size:13px;font-weight:bold;padding:5px 2px 5px 3px;margin-bottom:0;color:#fff;background:linear-gradient(to bottom, #3a3a3a, #2d2d2d);border-top-left-radius:4px;border-top-right-radius:4px;box-shadow:0 1px 3px rgba(0,0,0,.3);transition:all .1s ease-in-out;display:flex;align-items:center;gap:2px;width:100%;box-sizing:border-box;position:relative}.debug-state .debug-state-label:hover{background:linear-gradient(to bottom, #4a4a4a, #3d3d3d);cursor:pointer;box-shadow:0 2px 5px rgba(0,0,0,.4)}.debug-state .debug-state-label:hover .debug-state-hover-actions{opacity:1}.debug-state .debug-state-label:active{box-shadow:0 1px 2px rgba(0,0,0,.3)}.debug-state .debug-state-label .json-toggle{border:none;cursor:pointer;transition:background .1s}.debug-state .debug-state-label .json-toggle:focus{outline:none}.debug-state .debug-state-label .json-toggle{background:none;color:#888;font-size:12px;padding:0;width:20px;height:16px;transition:color .1s;flex-shrink:0}.debug-state .debug-state-label .json-toggle:hover{color:#fff}.debug-state .debug-state-label .debug-state-label-text{flex:1}.debug-state .debug-state-label .debug-state-hover-actions{display:flex;gap:4px;opacity:0;margin-right:10px;transition:opacity .1s ease-in-out;flex-shrink:0}.debug-state .debug-state-label .debug-state-action-button,.debug-state .debug-state-label .debug-state-delete-button,.debug-state .debug-state-label .debug-state-copy-button{border:none;cursor:pointer;transition:background .1s}.debug-state .debug-state-label .debug-state-action-button:focus,.debug-state .debug-state-label .debug-state-delete-button:focus,.debug-state .debug-state-label .debug-state-copy-button:focus{outline:none}.debug-state .debug-state-label .debug-state-action-button,.debug-state .debug-state-label .debug-state-delete-button,.debug-state .debug-state-label .debug-state-copy-button{color:#fff;display:flex;align-items:center;justify-content:center;padding:0;margin:0;font-size:14px;width:20px;height:20px;border-radius:3px;transition:background .1s,transform .1s}.debug-state .debug-state-label .debug-state-action-button:hover,.debug-state .debug-state-label .debug-state-delete-button:hover,.debug-state .debug-state-label .debug-state-copy-button:hover{transform:scale(1.1)}.debug-state .debug-state-label .debug-state-action-button:active,.debug-state .debug-state-label .debug-state-delete-button:active,.debug-state .debug-state-label .debug-state-copy-button:active{transform:scale(0.95)}.debug-state .debug-state-label .debug-state-action-button,.debug-state .debug-state-label .debug-state-delete-button,.debug-state .debug-state-label .debug-state-copy-button{background:rgba(100,100,100,.8)}.debug-state .debug-state-label .debug-state-copy-button:hover{background:rgba(34,166,120,.8)}.debug-state .debug-state-label .debug-state-delete-button:hover{background:rgba(198,62,41,.8)}.debug-state .json-wrapper{position:relative;padding:5px;background:#292929;max-height:400px;overflow-y:auto;overscroll-behavior:contain}.debug-state.collapsed .debug-state-label{border-radius:4px}.debug-state.collapsed .json-wrapper{display:none}';
 if (typeof document !== "undefined") {
   const style = document.createElement("style");
   style.textContent = css;
@@ -50,7 +50,7 @@ if (typeof document !== "undefined") {
 }
 
 // src/JsonView/JsonView.scss
-var css2 = ".json-node{position:relative;margin-left:20px;padding-left:0;font-size:12px;line-height:1.2em}.json-node .json-properties{display:flex;flex-direction:column}.json-node .json-property{position:relative;display:flex;align-items:flex-start;padding:2px 0}.json-node .json-property.object{flex-direction:column}.json-node .json-key{font-weight:bold;margin-right:5px;color:#9cdcfe}.json-node .json-key.clickable{cursor:pointer}.json-node .json-key.clickable:hover{color:#4fc3f7;text-decoration:underline}.json-node .json-value{color:#ce9178;white-space:pre-wrap;word-break:break-word;flex:1}.json-node .json-toggle{position:absolute;top:0px;left:-22px;border:none;background:none;cursor:pointer;color:#888;font-size:12px;padding:0;width:20px;height:20px;transition:color .2s}.json-node .json-toggle:hover{color:#fff}.json-node .json-toggle:focus{outline:none}.json-node .collapsed .json-properties{display:none}";
+var css2 = ".json-node{position:relative;margin-left:14px;padding-left:0;font-size:12px;line-height:1.2em}.json-node .json-properties{display:flex;flex-direction:column}.json-node .json-property{position:relative;display:flex;align-items:flex-start;padding:0}.json-node .json-property.object{flex-direction:column}.json-node .json-key{font-weight:bold;margin-right:5px;color:#9cdcfe;padding:2px 0;flex:0}.json-node .json-key.clickable{cursor:pointer;width:100%}.json-node .json-key.clickable:hover{color:#4fc3f7;text-decoration:underline}.json-node .json-key.clickable+.json-value{width:100%}.json-node .json-value{color:#ce9178;white-space:pre-wrap;padding:2px 0;flex:1}.json-node .json-toggle{position:absolute;top:-1px;left:-20px;border:none;background:none;cursor:pointer;color:#888;font-size:10px;padding:0;width:24px;height:20px;transition:color .1s}.json-node .json-toggle:hover{color:#fff}.json-node .json-toggle:focus{outline:none}.json-node.collapsed .json-properties{display:none}";
 if (typeof document !== "undefined") {
   const style = document.createElement("style");
   style.textContent = css2;
@@ -307,6 +307,7 @@ function makeResizable(container, options = {}) {
     maxHeight = Infinity,
     minWidth = 100,
     minHeight = 100,
+    snapPadding = 20,
     onResize = () => {
     }
   } = options;
@@ -343,24 +344,44 @@ function makeResizable(container, options = {}) {
     let newTop = startTop;
     const deltaX = event.clientX - startX;
     const deltaY = event.clientY - startY;
+    const windowWidth = window.innerWidth || document.documentElement.clientWidth;
+    const windowHeight = window.innerHeight || document.documentElement.clientHeight;
     if (resizeDirection.includes("right")) {
       newWidth = Math.min(Math.max(startWidth + deltaX, minWidth), maxWidth);
+      const rightEdge = startLeft + newWidth;
+      if (rightEdge >= windowWidth - snapPadding) {
+        newWidth = windowWidth - startLeft;
+      }
     }
     if (resizeDirection.includes("left")) {
       const potentialWidth = startWidth - deltaX;
       if (potentialWidth >= minWidth && potentialWidth <= maxWidth) {
         newWidth = potentialWidth;
         newLeft = startLeft + deltaX;
+        if (newLeft <= snapPadding) {
+          const widthDiff = newLeft;
+          newLeft = 0;
+          newWidth = startWidth - deltaX + widthDiff;
+        }
       }
     }
     if (resizeDirection.includes("bottom")) {
       newHeight = Math.min(Math.max(startHeight + deltaY, minHeight), maxHeight);
+      const bottomEdge = startTop + newHeight;
+      if (bottomEdge >= windowHeight - snapPadding) {
+        newHeight = windowHeight - startTop;
+      }
     }
     if (resizeDirection.includes("top")) {
       const potentialHeight = startHeight - deltaY;
       if (potentialHeight >= minHeight && potentialHeight <= maxHeight) {
         newHeight = potentialHeight;
         newTop = startTop + deltaY;
+        if (newTop <= snapPadding) {
+          const heightDiff = newTop;
+          newTop = 0;
+          newHeight = startHeight - deltaY + heightDiff;
+        }
       }
     }
     container.style.width = `${newWidth}px`;
@@ -465,14 +486,26 @@ var DebugPanel = class {
     this.debugStates = {};
     this.activeTab = "global";
     this.resizeThrottleTimer = null;
+    this.snappedTo = null;
+    this.isStretched = false;
+    this.layoutMode = "row";
+    this.logToConsole = false;
+    this.clearOnHide = false;
+    this.expandByDefault = false;
     this.options = {
       position: "bottomRight" /* BottomRight */,
       width: 600,
       height: 400,
       snap: true,
       snapPadding: 20,
+      logToConsole: false,
+      clearOnHide: false,
+      expandByDefault: false,
       ...options
     };
+    this.logToConsole = this.options.logToConsole || false;
+    this.clearOnHide = this.options.clearOnHide || false;
+    this.expandByDefault = this.options.expandByDefault || false;
     this.container = this.createContainer();
     this.tabContainer = this.createTabContainer();
     this.contentContainer = this.createContentContainer();
@@ -505,6 +538,9 @@ var DebugPanel = class {
   createTabContainer() {
     const tabContainer = document.createElement("div");
     tabContainer.classList.add("debug-panel-tabs");
+    tabContainer.addEventListener("dblclick", () => {
+      this.toggleStretch();
+    });
     return tabContainer;
   }
   createContentContainer() {
@@ -515,19 +551,84 @@ var DebugPanel = class {
   createGlobalToolbar() {
     const toolbar = document.createElement("div");
     toolbar.classList.add("debug-toolbar");
-    const hint = document.createElement("span");
-    hint.classList.add("debug-keyboard-hint");
-    hint.textContent = "Ctrl+Alt+D to hide/show";
-    hint.style.color = "#999";
-    hint.style.fontSize = "11px";
-    const opacityContainer = document.createElement("div");
-    opacityContainer.classList.add("debug-opacity-container");
+    const helpButton = document.createElement("button");
+    helpButton.classList.add("debug-icon-button");
+    helpButton.innerHTML = "?";
+    helpButton.title = "Help & Info";
+    helpButton.onclick = () => this.showHelpOverlay();
+    const hideButton = document.createElement("button");
+    hideButton.classList.add("debug-hide-button");
+    hideButton.textContent = "Hide";
+    hideButton.title = "Hide panel (Ctrl+Alt+D)";
+    hideButton.onclick = () => this.hide();
+    const clearButton = document.createElement("button");
+    clearButton.classList.add("debug-clear-button");
+    clearButton.textContent = "Clear";
+    clearButton.title = "Clear current tab";
+    clearButton.onclick = () => this.clearCurrentTab();
+    this.collapseAllButton = document.createElement("button");
+    this.collapseAllButton.classList.add("debug-icon-button");
+    this.collapseAllButton.innerHTML = "{ }";
+    this.updateCollapseAllTooltip();
+    this.collapseAllButton.onclick = () => this.toggleExpandAll();
+    this.stretchButton = document.createElement("button");
+    this.stretchButton.classList.add("debug-icon-button");
+    this.updateStretchButton();
+    this.stretchButton.onclick = () => this.toggleStretch();
+    this.layoutButton = document.createElement("button");
+    this.layoutButton.classList.add("debug-icon-button");
+    this.layoutButton.innerHTML = "\u268F";
+    this.updateLayoutButtonTooltip();
+    this.layoutButton.onclick = () => this.toggleLayoutMode();
+    const settingsButton = document.createElement("button");
+    settingsButton.classList.add("debug-icon-button");
+    settingsButton.innerHTML = "\u2699";
+    settingsButton.title = "Settings";
+    this.settingsPanel = this.createSettingsPanel();
+    settingsButton.onclick = (e) => {
+      e.stopPropagation();
+      this.settingsPanel.classList.toggle("visible");
+    };
+    document.addEventListener("click", (e) => {
+      if (!this.settingsPanel.contains(e.target) && !settingsButton.contains(e.target)) {
+        this.settingsPanel.classList.remove("visible");
+      }
+    });
+    toolbar.appendChild(helpButton);
+    toolbar.appendChild(hideButton);
+    toolbar.appendChild(clearButton);
+    const spacer = document.createElement("div");
+    spacer.style.flex = "1";
+    toolbar.appendChild(spacer);
+    toolbar.appendChild(this.collapseAllButton);
+    toolbar.appendChild(this.stretchButton);
+    toolbar.appendChild(this.layoutButton);
+    toolbar.appendChild(settingsButton);
+    toolbar.appendChild(this.settingsPanel);
+    return toolbar;
+  }
+  updateCollapseAllTooltip() {
+    const allExpanded = Object.values(this.debugStates).every((state) => state.isExpanded);
+    this.collapseAllButton.title = allExpanded ? "Collapse all objects" : "Expand all objects";
+  }
+  updateStretchButton() {
+    let icon = "\u2194";
+    if (this.snappedTo === "left" || this.snappedTo === "right" || this.snappedTo === "topLeft" || this.snappedTo === "topRight" || this.snappedTo === "bottomLeft" || this.snappedTo === "bottomRight") {
+      icon = "\u21F5";
+    }
+    this.stretchButton.innerHTML = icon;
+    this.stretchButton.title = this.isStretched ? "Unstretch panel" : "Stretch panel";
+  }
+  updateLayoutButtonTooltip() {
+    this.layoutButton.title = this.layoutMode === "row" ? "Switch to column layout" : "Switch to row layout";
+  }
+  createSettingsPanel() {
+    const panel = document.createElement("div");
+    panel.classList.add("debug-settings-panel");
+    const opacityRow = document.createElement("div");
+    opacityRow.classList.add("settings-row");
     const opacityLabel = document.createElement("label");
-    opacityLabel.classList.add("debug-opacity-label");
-    opacityLabel.textContent = "O";
-    opacityLabel.style.fontSize = "11px";
-    opacityLabel.style.color = "#999";
-    opacityLabel.style.marginRight = "5px";
+    opacityLabel.textContent = "Opacity";
     this.opacitySlider = document.createElement("input");
     this.opacitySlider.type = "range";
     this.opacitySlider.min = "20";
@@ -535,20 +636,58 @@ var DebugPanel = class {
     this.opacitySlider.value = "100";
     this.opacitySlider.classList.add("debug-opacity-slider");
     this.opacitySlider.oninput = () => this.handleOpacityChange();
-    opacityContainer.appendChild(this.opacitySlider);
-    const clearButton = document.createElement("button");
-    clearButton.classList.add("debug-clear-button");
-    clearButton.textContent = "Clear";
-    clearButton.onclick = () => this.clearCurrentTab();
-    const hideButton = document.createElement("button");
-    hideButton.classList.add("debug-hide-button");
-    hideButton.textContent = "Hide";
-    hideButton.onclick = () => this.hide();
-    toolbar.appendChild(hint);
-    toolbar.appendChild(opacityContainer);
-    toolbar.appendChild(clearButton);
-    toolbar.appendChild(hideButton);
-    return toolbar;
+    opacityRow.appendChild(opacityLabel);
+    opacityRow.appendChild(this.opacitySlider);
+    const logToConsoleRow = document.createElement("div");
+    logToConsoleRow.classList.add("settings-row");
+    this.logToConsoleCheckbox = document.createElement("input");
+    this.logToConsoleCheckbox.type = "checkbox";
+    this.logToConsoleCheckbox.id = "logToConsole";
+    this.logToConsoleCheckbox.checked = this.logToConsole;
+    this.logToConsoleCheckbox.onchange = () => {
+      this.logToConsole = this.logToConsoleCheckbox.checked;
+      this.saveSettings();
+    };
+    const logToConsoleLabel = document.createElement("label");
+    logToConsoleLabel.htmlFor = "logToConsole";
+    logToConsoleLabel.textContent = "Log to console";
+    logToConsoleRow.appendChild(this.logToConsoleCheckbox);
+    logToConsoleRow.appendChild(logToConsoleLabel);
+    const clearOnHideRow = document.createElement("div");
+    clearOnHideRow.classList.add("settings-row");
+    this.clearOnHideCheckbox = document.createElement("input");
+    this.clearOnHideCheckbox.type = "checkbox";
+    this.clearOnHideCheckbox.id = "clearOnHide";
+    this.clearOnHideCheckbox.checked = this.clearOnHide;
+    this.clearOnHideCheckbox.onchange = () => {
+      this.clearOnHide = this.clearOnHideCheckbox.checked;
+      this.saveSettings();
+    };
+    const clearOnHideLabel = document.createElement("label");
+    clearOnHideLabel.htmlFor = "clearOnHide";
+    clearOnHideLabel.textContent = "Clear on hide";
+    clearOnHideRow.appendChild(this.clearOnHideCheckbox);
+    clearOnHideRow.appendChild(clearOnHideLabel);
+    const expandByDefaultRow = document.createElement("div");
+    expandByDefaultRow.classList.add("settings-row");
+    this.expandByDefaultCheckbox = document.createElement("input");
+    this.expandByDefaultCheckbox.type = "checkbox";
+    this.expandByDefaultCheckbox.id = "expandByDefault";
+    this.expandByDefaultCheckbox.checked = this.expandByDefault;
+    this.expandByDefaultCheckbox.onchange = () => {
+      this.expandByDefault = this.expandByDefaultCheckbox.checked;
+      this.saveSettings();
+    };
+    const expandByDefaultLabel = document.createElement("label");
+    expandByDefaultLabel.htmlFor = "expandByDefault";
+    expandByDefaultLabel.textContent = "Expand new objects by default";
+    expandByDefaultRow.appendChild(this.expandByDefaultCheckbox);
+    expandByDefaultRow.appendChild(expandByDefaultLabel);
+    panel.appendChild(opacityRow);
+    panel.appendChild(logToConsoleRow);
+    panel.appendChild(clearOnHideRow);
+    panel.appendChild(expandByDefaultRow);
+    return panel;
   }
   setupEventListeners() {
     import_eventbusjs.default.addEventListener("log", (event) => {
@@ -568,6 +707,7 @@ var DebugPanel = class {
       maxHeight: height - 20,
       minWidth: 200,
       minHeight: 150,
+      snapPadding: this.options.snapPadding || 20,
       onResize: (newWidth) => {
         this.updateToolbarLayout(newWidth);
         this.saveSettings();
@@ -631,11 +771,79 @@ var DebugPanel = class {
   }
   setupKeyboardShortcut() {
     document.addEventListener("keydown", (event) => {
-      if (event.ctrlKey && event.altKey && event.key.toLowerCase() === "d") {
+      const isCtrlAltD = event.ctrlKey && event.altKey && event.key.toLowerCase() === "d" && !event.metaKey;
+      const isCmdD = event.metaKey && event.key.toLowerCase() === "d" && !event.ctrlKey;
+      if (isCtrlAltD || isCmdD) {
         event.preventDefault();
         this.toggle();
       }
     });
+  }
+  showHelpOverlay() {
+    const existingOverlay = this.contentContainer.querySelector(".debug-help-overlay");
+    if (existingOverlay) {
+      existingOverlay.remove();
+      return;
+    }
+    const overlay = document.createElement("div");
+    overlay.classList.add("debug-help-overlay");
+    overlay.innerHTML = `
+			<div class="debug-help-content">
+				<h2>Dev Debug Panel</h2>
+
+				<section class="help-section">
+					<h3>Keyboard Shortcuts</h3>
+					<ul>
+						<li><kbd>Ctrl+Alt+D</kbd> (Windows/Linux) or <kbd>Cmd+D</kbd> (Mac) - Toggle panel visibility</li>
+						<li><kbd>Double-click</kbd> title bar - Stretch/unstretch panel</li>
+					</ul>
+				</section>
+
+				<section class="help-section">
+					<h3>Library Info</h3>
+					<ul class="help-links">
+						<li>Version: <strong>1.1.1</strong></li>
+						<li>
+							<a href="https://github.com/rw3iss/dev-debug-panel" target="_blank" rel="noopener">
+								<svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+									<path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
+								</svg>
+								GitHub Repository
+							</a>
+						</li>
+						<li>
+							<a href="https://github.com/rw3iss/dev-debug-panel/issues" target="_blank" rel="noopener">
+								Report Issue / Feedback
+							</a>
+						</li>
+					</ul>
+				</section>
+
+				<section class="help-section">
+					<h3>Author</h3>
+					<ul class="help-links">
+						<li><strong>Ryan Weiss</strong></li>
+						<li>
+							<a href="mailto:rw3iss@gmail.com">rw3iss@gmail.com</a>
+						</li>
+						<li>
+							<a href="https://www.ryanweiss.net" target="_blank" rel="noopener">www.ryanweiss.net</a>
+						</li>
+						<li>
+							<a href="https://www.buymeacoffee.com/ryanweiss" target="_blank" rel="noopener">
+								\u2615 Buy Me a Coffee
+							</a>
+						</li>
+					</ul>
+				</section>
+
+				<p class="help-close-hint">Click anywhere to close</p>
+			</div>
+		`;
+    overlay.addEventListener("click", () => {
+      overlay.remove();
+    });
+    this.contentContainer.appendChild(overlay);
   }
   setupWindowResizeListener() {
     window.addEventListener("resize", () => {
@@ -698,6 +906,35 @@ var DebugPanel = class {
       if (this.opacitySlider) {
         this.opacitySlider.value = String(Math.round(opacity * 100));
       }
+      if (savedSettings.snappedTo) {
+        this.snappedTo = savedSettings.snappedTo;
+        if (savedSettings.isStretched) {
+          this.isStretched = true;
+          this.applyStretch();
+        }
+      }
+      if (savedSettings.layoutMode) {
+        this.layoutMode = savedSettings.layoutMode;
+        this.applyLayoutMode();
+      }
+      if (savedSettings.logToConsole !== void 0) {
+        this.logToConsole = savedSettings.logToConsole;
+        if (this.logToConsoleCheckbox) {
+          this.logToConsoleCheckbox.checked = this.logToConsole;
+        }
+      }
+      if (savedSettings.clearOnHide !== void 0) {
+        this.clearOnHide = savedSettings.clearOnHide;
+        if (this.clearOnHideCheckbox) {
+          this.clearOnHideCheckbox.checked = this.clearOnHide;
+        }
+      }
+      if (savedSettings.expandByDefault !== void 0) {
+        this.expandByDefault = savedSettings.expandByDefault;
+        if (this.expandByDefaultCheckbox) {
+          this.expandByDefaultCheckbox.checked = this.expandByDefault;
+        }
+      }
       if (savedSettings.visible) {
         this.container.classList.add("visible");
       } else {
@@ -727,7 +964,13 @@ var DebugPanel = class {
         width: this.container.offsetWidth,
         height: this.container.offsetHeight,
         visible: this.container.classList.contains("visible"),
-        opacity
+        opacity,
+        snappedTo: this.snappedTo,
+        isStretched: this.isStretched,
+        layoutMode: this.layoutMode,
+        logToConsole: this.logToConsole,
+        clearOnHide: this.clearOnHide,
+        expandByDefault: this.expandByDefault
       };
       localStorage.setItem("debugPanelSettings", JSON.stringify(settings));
     } catch (error) {
@@ -736,18 +979,42 @@ var DebugPanel = class {
   }
   // Debug objects
   // Send any object to the DebugPanel for observation. Use a string id as first argument to label it.
-  debug(idOrState, state) {
-    let _id = idOrState;
-    let _state = state;
-    if (!state && typeof idOrState == "object") {
-      _id = "object";
-      _state = idOrState;
+  debug(...args) {
+    if (args.length === 0) return;
+    if (this.logToConsole) {
+      console.log(...args);
     }
-    if (this.debugStates[_id]) {
-      this.updateDebugState(_id, _state);
-    } else {
-      this.addDebugState(_id, _state);
+    let startIndex = 0;
+    let baseId = null;
+    if (typeof args[0] === "string" && args.length > 1) {
+      baseId = args[0];
+      startIndex = 1;
     }
+    for (let i = startIndex; i < args.length; i++) {
+      const value = args[i];
+      let id;
+      if (baseId && args.length === 2) {
+        id = baseId;
+      } else if (baseId) {
+        id = `${baseId}-${i - startIndex}`;
+      } else {
+        const typeId = this.generateTypeId(value);
+        id = typeId;
+      }
+      if (this.debugStates[id]) {
+        this.updateDebugState(id, value);
+      } else {
+        this.addDebugState(id, value);
+      }
+    }
+  }
+  generateTypeId(value) {
+    const type = Array.isArray(value) ? "array" : typeof value;
+    let index = 1;
+    while (this.debugStates[`${type}-${index}`]) {
+      index++;
+    }
+    return `${type}-${index}`;
   }
   updateDebugState(id, state) {
     const content = this.contentContainer.querySelector(`[data-namespace="${DEBUG_STATE_NAMESPACE}"]`);
@@ -775,7 +1042,6 @@ var DebugPanel = class {
       console.error("No content for debug namespace.");
       return;
     }
-    const clonedState = state ? JSON.parse(JSON.stringify(state)) : {};
     const debugWrapper = document.createElement("div");
     debugWrapper.classList.add("debug-state");
     debugWrapper.setAttribute("id", `debug-state-${id}`);
@@ -785,38 +1051,62 @@ var DebugPanel = class {
       debugWrapper.classList.toggle("collapsed", isExpanded);
       toggleButton.textContent = isExpanded ? COLLAPSED_INDICATOR : EXPANDED_INDICATOR;
     };
+    const label = document.createElement("div");
+    label.classList.add("debug-state-label");
     const toggleButton = document.createElement("button");
     toggleButton.classList.add("json-toggle");
     toggleButton.textContent = EXPANDED_INDICATOR;
     toggleButton.onclick = toggleObjectOpen;
-    debugWrapper.appendChild(toggleButton);
-    const label = document.createElement("div");
-    label.classList.add("debug-state-label");
-    label.innerText = id || "untitled";
-    label.onclick = toggleObjectOpen;
-    debugWrapper.appendChild(label);
-    const jsonWrapper = document.createElement("div");
-    jsonWrapper.classList.add("json-wrapper");
-    debugWrapper.appendChild(jsonWrapper);
-    const jsonView = new JsonView(clonedState, jsonWrapper, {
-      //expandObjs: [/children/, /children\/(.*)/, /entry/]
-      // todo: pass options
-    });
+    label.appendChild(toggleButton);
+    const labelText = document.createElement("span");
+    labelText.classList.add("debug-state-label-text");
+    labelText.innerText = id || "untitled";
+    labelText.onclick = toggleObjectOpen;
+    label.appendChild(labelText);
     const hoverActions = document.createElement("div");
     hoverActions.classList.add("debug-state-hover-actions");
     const copyButton = document.createElement("button");
     copyButton.classList.add("debug-state-action-button", "debug-state-copy-button");
     copyButton.innerHTML = "\u{1F4CB}";
     copyButton.title = "Copy JSON to clipboard";
-    copyButton.onclick = () => this.copyDebugStateToClipboard(id, this.debugStates[id].state, copyButton);
+    copyButton.onclick = (e) => {
+      e.stopPropagation();
+      this.copyDebugStateToClipboard(id, state, copyButton);
+    };
     hoverActions.appendChild(copyButton);
     const deleteButton = document.createElement("button");
     deleteButton.classList.add("debug-state-action-button", "debug-state-delete-button");
     deleteButton.innerHTML = "\u{1F5D1}\uFE0F";
     deleteButton.title = "Delete this object";
-    deleteButton.onclick = () => this.removeDebugState(id);
+    deleteButton.onclick = (e) => {
+      e.stopPropagation();
+      this.removeDebugState(id);
+    };
     hoverActions.appendChild(deleteButton);
-    jsonWrapper.appendChild(hoverActions);
+    label.appendChild(hoverActions);
+    debugWrapper.appendChild(label);
+    const jsonWrapper = document.createElement("div");
+    jsonWrapper.classList.add("json-wrapper");
+    debugWrapper.appendChild(jsonWrapper);
+    const isPrimitive = state === null || state === void 0 || typeof state === "string" || typeof state === "number" || typeof state === "boolean";
+    let jsonView;
+    let clonedState;
+    if (isPrimitive) {
+      const valueDiv = document.createElement("div");
+      valueDiv.style.padding = "8px";
+      valueDiv.style.color = "#ce9178";
+      valueDiv.textContent = String(state);
+      jsonWrapper.appendChild(valueDiv);
+      clonedState = { value: state };
+      jsonView = new JsonView(clonedState, document.createElement("div"), {
+        expandAll: this.expandByDefault
+      });
+    } else {
+      clonedState = state ? JSON.parse(JSON.stringify(state)) : {};
+      jsonView = new JsonView(clonedState, jsonWrapper, {
+        expandAll: this.expandByDefault
+      });
+    }
     this.debugStates[id] = {
       state: clonedState,
       jsonView,
@@ -891,7 +1181,8 @@ var DebugPanel = class {
     });
     const activeContent = this.contentContainer.querySelector(`[data-namespace="${namespace}"]`);
     if (activeContent) {
-      activeContent.style.display = "block";
+      activeContent.style.display = activeContent.classList.contains("layout-columns") ? "flex" : "block";
+      ;
     }
   }
   // Log controls
@@ -969,17 +1260,175 @@ var DebugPanel = class {
     const panelHeight = this.container.offsetHeight;
     let snappedX = x;
     let snappedY = y;
-    if (x < snapPadding) {
+    let newSnappedTo = null;
+    const snappedLeft = x < snapPadding;
+    const snappedRight = x + panelWidth > windowWidth - snapPadding;
+    const snappedTop = y < snapPadding;
+    const snappedBottom = y + panelHeight > windowHeight - snapPadding;
+    if (snappedLeft && snappedTop) {
       snappedX = 0;
-    } else if (x + panelWidth > windowWidth - snapPadding) {
-      snappedX = windowWidth - panelWidth;
-    }
-    if (y < snapPadding) {
       snappedY = 0;
-    } else if (y + panelHeight > windowHeight - snapPadding) {
+      newSnappedTo = "topLeft";
+    } else if (snappedRight && snappedTop) {
+      snappedX = windowWidth - panelWidth;
+      snappedY = 0;
+      newSnappedTo = "topRight";
+    } else if (snappedLeft && snappedBottom) {
+      snappedX = 0;
       snappedY = windowHeight - panelHeight;
+      newSnappedTo = "bottomLeft";
+    } else if (snappedRight && snappedBottom) {
+      snappedX = windowWidth - panelWidth;
+      snappedY = windowHeight - panelHeight;
+      newSnappedTo = "bottomRight";
+    } else if (snappedLeft) {
+      snappedX = 0;
+      newSnappedTo = "left";
+    } else if (snappedRight) {
+      snappedX = windowWidth - panelWidth;
+      newSnappedTo = "right";
+    } else if (snappedTop) {
+      snappedY = 0;
+      newSnappedTo = "top";
+    } else if (snappedBottom) {
+      snappedY = windowHeight - panelHeight;
+      newSnappedTo = "bottom";
+    }
+    if (newSnappedTo !== this.snappedTo) {
+      this.snappedTo = newSnappedTo;
+      this.updateStretchButton();
+      if (this.isStretched && newSnappedTo) {
+        setTimeout(() => this.applyStretch(), 0);
+      }
     }
     return { x: snappedX, y: snappedY };
+  }
+  // Toggle Methods
+  toggleExpandAll() {
+    const allExpanded = Object.values(this.debugStates).every((state) => state.isExpanded);
+    Object.keys(this.debugStates).forEach((id) => {
+      const debugWrapper = document.getElementById(`debug-state-${id}`);
+      if (!debugWrapper) return;
+      this.debugStates[id].isExpanded = !allExpanded;
+      debugWrapper.classList.toggle("collapsed", allExpanded);
+      const toggleButton = debugWrapper.querySelector(".json-toggle");
+      if (toggleButton) {
+        toggleButton.textContent = allExpanded ? COLLAPSED_INDICATOR : EXPANDED_INDICATOR;
+      }
+    });
+    this.updateCollapseAllTooltip();
+  }
+  toggleStretch() {
+    if (!this.snappedTo) {
+      const { width: windowWidth, height: windowHeight } = getWindowSize();
+      const panelRect = this.container.getBoundingClientRect();
+      const panelCenterX = panelRect.left + panelRect.width / 2;
+      const panelCenterY = panelRect.top + panelRect.height / 2;
+      const distToLeft = panelCenterX;
+      const distToRight = windowWidth - panelCenterX;
+      const distToTop = panelCenterY;
+      const distToBottom = windowHeight - panelCenterY;
+      const minDist = Math.min(distToLeft, distToRight, distToTop, distToBottom);
+      if (minDist === distToLeft) {
+        this.snappedTo = "left";
+        this.container.style.left = "0px";
+      } else if (minDist === distToRight) {
+        this.snappedTo = "right";
+        this.container.style.left = `${windowWidth - panelRect.width}px`;
+      } else if (minDist === distToTop) {
+        this.snappedTo = "top";
+        this.container.style.top = "0px";
+      } else {
+        this.snappedTo = "bottom";
+        this.container.style.top = `${windowHeight - panelRect.height}px`;
+      }
+    }
+    this.isStretched = !this.isStretched;
+    if (this.isStretched) {
+      this.applyStretch();
+    } else {
+      const { width: windowWidth, height: windowHeight } = getWindowSize();
+      if (this.snappedTo === "left" || this.snappedTo === "right") {
+        const newHeight = windowHeight * 0.5;
+        this.container.style.height = `${newHeight}px`;
+        this.container.style.top = `${(windowHeight - newHeight) / 2}px`;
+      } else if (this.snappedTo === "top" || this.snappedTo === "bottom") {
+        const newWidth = windowWidth * 0.5;
+        this.container.style.width = `${newWidth}px`;
+        this.container.style.left = `${(windowWidth - newWidth) / 2}px`;
+      } else if (this.snappedTo) {
+        const newHeight = windowHeight * 0.5;
+        const newWidth = windowWidth * 0.5;
+        this.container.style.height = `${newHeight}px`;
+        this.container.style.width = `${newWidth}px`;
+        if (this.snappedTo.includes("top")) {
+          this.container.style.top = `${(windowHeight - newHeight) / 2}px`;
+        } else {
+          this.container.style.top = `${(windowHeight - newHeight) / 2}px`;
+        }
+        if (this.snappedTo.includes("Left")) {
+          this.container.style.left = `${(windowWidth - newWidth) / 2}px`;
+        } else {
+          this.container.style.left = `${(windowWidth - newWidth) / 2}px`;
+        }
+      }
+    }
+    this.updateStretchButton();
+    this.saveSettings();
+  }
+  applyStretch() {
+    if (!this.snappedTo) return;
+    const { width: windowWidth, height: windowHeight } = getWindowSize();
+    if (this.snappedTo === "left") {
+      this.container.style.height = `${windowHeight}px`;
+      this.container.style.top = "0px";
+      this.container.style.left = "0px";
+    } else if (this.snappedTo === "right") {
+      this.container.style.height = `${windowHeight}px`;
+      this.container.style.top = "0px";
+      const panelWidth = this.container.offsetWidth;
+      this.container.style.left = `${windowWidth - panelWidth}px`;
+    } else if (this.snappedTo === "top") {
+      this.container.style.width = `${windowWidth}px`;
+      this.container.style.left = "0px";
+      this.container.style.top = "0px";
+    } else if (this.snappedTo === "bottom") {
+      this.container.style.width = `${windowWidth}px`;
+      this.container.style.left = "0px";
+      const panelHeight = this.container.offsetHeight;
+      this.container.style.top = `${windowHeight - panelHeight}px`;
+    } else if (this.snappedTo) {
+      this.container.style.height = `${windowHeight}px`;
+      if (this.snappedTo.includes("top")) {
+        this.container.style.top = "0px";
+      } else {
+        const panelHeight = this.container.offsetHeight;
+        this.container.style.top = `${windowHeight - panelHeight}px`;
+      }
+      if (this.snappedTo.includes("Left")) {
+        this.container.style.left = "0px";
+      } else {
+        const panelWidth = this.container.offsetWidth;
+        this.container.style.left = `${windowWidth - panelWidth}px`;
+      }
+    }
+  }
+  toggleLayoutMode() {
+    this.layoutMode = this.layoutMode === "row" ? "column" : "row";
+    this.applyLayoutMode();
+    this.updateLayoutButtonTooltip();
+    this.saveSettings();
+  }
+  applyLayoutMode() {
+    const content = this.contentContainer.querySelector(`[data-namespace="${this.activeTab}"]`);
+    if (!content) return;
+    if (this.layoutMode === "column") {
+      content.classList.add("layout-columns");
+      content.style.display = "flex";
+    } else {
+      content.classList.remove("layout-columns");
+      content.style.display = "block";
+    }
   }
   // Panel controls
   show() {
@@ -989,6 +1438,9 @@ var DebugPanel = class {
     this.saveSettings();
   }
   hide() {
+    if (this.clearOnHide) {
+      this.clearCurrentTab();
+    }
     this.container.classList.remove("visible");
     this.saveSettings();
   }

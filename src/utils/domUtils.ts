@@ -4,6 +4,7 @@ export type ResizeOptions = {
 	maxHeight?: number;
 	minWidth?: number;
 	minHeight?: number;
+	snapPadding?: number;
 	onResize?: (width: number, height: number) => void;
 };
 
@@ -18,6 +19,7 @@ export function makeResizable(container: HTMLElement, options: ResizeOptions = {
 		maxHeight = Infinity,
 		minWidth = 100,
 		minHeight = 100,
+		snapPadding = 20,
 		onResize = () => { }
 	} = options;
 
@@ -66,27 +68,56 @@ export function makeResizable(container: HTMLElement, options: ResizeOptions = {
 		const deltaX = event.clientX - startX;
 		const deltaY = event.clientY - startY;
 
+		const windowWidth = window.innerWidth || document.documentElement.clientWidth;
+		const windowHeight = window.innerHeight || document.documentElement.clientHeight;
+
 		// Handle horizontal resizing
 		if (resizeDirection.includes('right')) {
 			newWidth = Math.min(Math.max(startWidth + deltaX, minWidth), maxWidth);
+
+			// Snap right edge to right side of window
+			const rightEdge = startLeft + newWidth;
+			if (rightEdge >= windowWidth - snapPadding) {
+				newWidth = windowWidth - startLeft;
+			}
 		}
 		if (resizeDirection.includes('left')) {
 			const potentialWidth = startWidth - deltaX;
 			if (potentialWidth >= minWidth && potentialWidth <= maxWidth) {
 				newWidth = potentialWidth;
 				newLeft = startLeft + deltaX;
+
+				// Snap left edge to left side of window
+				if (newLeft <= snapPadding) {
+					const widthDiff = newLeft;
+					newLeft = 0;
+					newWidth = startWidth - deltaX + widthDiff;
+				}
 			}
 		}
 
 		// Handle vertical resizing
 		if (resizeDirection.includes('bottom')) {
 			newHeight = Math.min(Math.max(startHeight + deltaY, minHeight), maxHeight);
+
+			// Snap bottom edge to bottom of window
+			const bottomEdge = startTop + newHeight;
+			if (bottomEdge >= windowHeight - snapPadding) {
+				newHeight = windowHeight - startTop;
+			}
 		}
 		if (resizeDirection.includes('top')) {
 			const potentialHeight = startHeight - deltaY;
 			if (potentialHeight >= minHeight && potentialHeight <= maxHeight) {
 				newHeight = potentialHeight;
 				newTop = startTop + deltaY;
+
+				// Snap top edge to top of window
+				if (newTop <= snapPadding) {
+					const heightDiff = newTop;
+					newTop = 0;
+					newHeight = startHeight - deltaY + heightDiff;
+				}
 			}
 		}
 

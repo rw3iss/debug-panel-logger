@@ -1,3 +1,25 @@
+// Variables
+$animTime: 0.1s;
+$colorBg: #222;
+$colorBgDark: #0d0d0d;
+$colorBgMedium: #292929;
+$colorBgLight: #3a3a3a;
+$colorBorder: rgba(255, 255, 255, 0.1);
+$colorText: #fff;
+$colorTextDim: #888;
+$colorTextMuted: #999;
+$colorAccent: #007bff;
+$colorAccentHover: #0056b3;
+$colorButton: #ba6c38;
+$colorButtonHover: #c9302c;
+$colorButtonIcon: #555;
+$colorButtonIconHover: #666;
+$colorCopy: rgba(34, 166, 120, 0.8);
+$colorCopyHover: lighten($colorCopy, 20%);
+$colorDelete: rgba(198, 62, 41, 0.8);
+$colorDeleteHover: lighten($colorDelete, 20%);
+$minObjectColumnWidth: 150px;
+
 @mixin font-console {
 	font-family:
 		system-ui,
@@ -13,21 +35,55 @@
 		sans-serif;
 }
 
-// DebugPanel.scss
+@mixin button-base {
+	border: none;
+	cursor: pointer;
+	transition: background $animTime;
+
+	&:focus {
+		outline: none;
+	}
+}
+
+@mixin action-button-base {
+	@include button-base;
+	color: white;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 0;
+	margin: 0;
+	font-size: 14px;
+	width: 20px;
+	height: 20px;
+	border-radius: 3px;
+	transition:
+		background $animTime,
+		transform $animTime;
+
+	&:hover {
+		transform: scale(1.1);
+	}
+
+	&:active {
+		transform: scale(0.95);
+	}
+}
+
 .debug-panel {
 	position: fixed;
 	z-index: 99999;
-	background: #222;
+	background: $colorBg;
 	border-radius: 8px;
 	box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
 	display: flex;
 	flex-direction: column;
 	overflow: hidden;
 	font-family: Arial, sans-serif;
-	color: #fff;
+	color: $colorText;
 	transition:
-		transform 0.2s ease-in-out,
-		visibility 0.2s ease-in-out;
+		transform $animTime ease-in-out,
+		visibility $animTime ease-in-out;
 
 	&.visible {
 		visibility: visible;
@@ -56,8 +112,8 @@
 
 		.debug-tab {
 			background: #2d2d2d;
-			color: #888;
-			padding: 7px 8px;
+			color: $colorTextDim;
+			padding: 5px 6px 7px;
 			margin: 0;
 			border: none;
 			border-top-left-radius: 6px;
@@ -65,6 +121,7 @@
 			cursor: pointer;
 			position: relative;
 			box-shadow: inset 0 -2px 4px rgba(0, 0, 0, 0.3);
+			font-size: 12px;
 			@include font-console;
 
 			&:hover {
@@ -77,12 +134,14 @@
 			}
 
 			&.active {
-				background: linear-gradient(to bottom, #3f6d9c, #24384d);
-				color: #ffffff;
+				background: linear-gradient(to bottom, #3f6d9c, #324f6e, #121b25);
+				color: $colorText;
 				box-shadow:
 					0 -3px 8px rgba(0, 102, 204, 0.4),
 					inset 0 1px 0 rgba(255, 255, 255, 0.2);
 				z-index: 1;
+				border-bottom-left-radius: 0;
+				border-bottom-right-radius: 0;
 			}
 		}
 	}
@@ -93,24 +152,39 @@
 		display: flex;
 		flex-direction: column;
 		overflow-y: auto;
-		padding: 0px 15px;
-		background: #0d0d0d;
+		padding: 0;
+		background: $colorBgDark;
+		overscroll-behavior: contain;
 
 		.debug-tab-content {
 			display: none;
 			flex-direction: column;
 			flex: 1;
-			gap: 5px;
+			gap: 2px;
+			padding: 5px 0;
+
+			&.layout-columns {
+				display: flex;
+				flex-direction: row;
+				overflow-x: auto;
+				overflow-y: hidden;
+
+				.debug-state {
+					min-width: $minObjectColumnWidth;
+					flex: 1 1 0;
+					padding: 0 2px;
+				}
+			}
 
 			// Log Entries
 			.debug-log-entry {
-				background: #292929;
+				background: $colorBgMedium;
 				color: #ddd;
 				padding: 5px 8px;
 				border-radius: 4px;
 				font-size: 12px;
 				word-break: break-word;
-				border-left: 3px solid #007bff;
+				border-left: 3px solid $colorAccent;
 				position: relative;
 				display: flex;
 				align-items: center;
@@ -132,21 +206,12 @@
 					top: 50%;
 					transform: translateY(-50%);
 					background: rgba(100, 100, 100, 0.8);
-					color: white;
-					border: none;
-					cursor: pointer;
-					font-size: 12px;
-					font-weight: bold;
-					width: 20px;
-					height: 20px;
+					@include action-button-base;
 					border-radius: 50%;
-					display: flex;
-					align-items: center;
-					justify-content: center;
 					opacity: 0;
 					transition:
-						opacity 0.2s ease-in-out,
-						background 0.2s ease-in-out;
+						opacity $animTime,
+						background $animTime;
 
 					&:hover {
 						background: rgba(150, 150, 150, 1);
@@ -156,20 +221,24 @@
 				.debug-copy-button {
 					@extend .debug-action-button;
 					right: 36px;
-					background: rgba(85, 170, 255, 0.8);
+					//background: $colorCopyHover;
+					opacity: 0.7;
 
 					&:hover {
-						background: rgba(34, 136, 255, 1);
+						opacity: 1;
+						//background: $colorCopyHover;
 					}
 				}
 
 				.debug-delete-button {
 					@extend .debug-action-button;
 					right: 8px;
-					background: rgba(223, 161, 152, 0.8);
+					//background: $colorDeleteHover;
+					opacity: 0.7;
 
 					&:hover {
-						background: rgba(255, 34, 34, 1);
+						opacity: 1;
+						//background: $colorDeleteHover;
 					}
 				}
 			}
@@ -182,24 +251,17 @@
 		box-sizing: border-box;
 		width: 100%;
 		align-items: center;
-		justify-content: flex-end;
 		gap: 2px;
-		padding: 8px;
+		padding: 2px;
 		background: #111;
-		border-top: 1px solid rgba(255, 255, 255, 0.1);
+		border-top: 1px solid $colorBorder;
 		flex-wrap: wrap;
-
-		.debug-keyboard-hint {
-			margin-right: auto;
-			color: #999;
-			font-size: 11px;
-			white-space: nowrap;
-		}
+		position: relative;
 
 		.debug-opacity-container {
 			display: flex;
 			align-items: center;
-			gap: 0px;
+			gap: 0;
 			max-width: 100px;
 			min-width: 40px;
 			flex-shrink: 1;
@@ -207,7 +269,7 @@
 
 			.debug-opacity-label {
 				font-size: 11px;
-				color: #999;
+				color: $colorTextMuted;
 				white-space: nowrap;
 			}
 
@@ -215,7 +277,6 @@
 				flex: 1;
 				min-width: 40px;
 				width: 100%;
-				max-width: 100%;
 				height: 4px;
 				background: #444;
 				border-radius: 2px;
@@ -228,40 +289,35 @@
 					appearance: none;
 					width: 14px;
 					height: 14px;
-					background: #007bff;
+					background: $colorAccent;
 					cursor: pointer;
 					border-radius: 50%;
 					position: relative;
 					top: -4px;
-					transition: background 0.2s;
+					transition: background $animTime;
 
 					&:hover {
-						background: #0056b3;
+						background: $colorAccentHover;
 					}
 				}
 
 				&::-moz-range-thumb {
 					width: 14px;
 					height: 14px;
-					background: #007bff;
+					background: $colorAccent;
 					cursor: pointer;
 					border-radius: 50%;
 					border: none;
 					position: relative;
 					top: -4px;
-					transition: background 0.2s;
+					transition: background $animTime;
 
 					&:hover {
-						background: #0056b3;
+						background: $colorAccentHover;
 					}
 				}
 
-				&::-webkit-slider-runnable-track {
-					height: 4px;
-					background: #444;
-					border-radius: 2px;
-				}
-
+				&::-webkit-slider-runnable-track,
 				&::-moz-range-track {
 					height: 4px;
 					background: #444;
@@ -271,62 +327,83 @@
 		}
 
 		button {
-			background: #ba6c38;
+			@include button-base;
+			background: $colorButton;
 			color: white;
-			border: none;
-			padding: 5px 10px;
+			padding: 4px 6px;
 			margin: 2px;
 			border-radius: 4px;
 			font-size: 12px;
-			cursor: pointer;
-			transition: background 0.2s;
 			white-space: nowrap;
 			flex-shrink: 0;
 
 			&:hover {
-				background: #c9302c;
+				background: $colorButtonHover;
 			}
 
-			&:focus {
-				outline: none;
-			}
-		}
-	}
+			&.debug-icon-button {
+				font-size: 13px;
+				padding: 3px 5px;
+				background: $colorButtonIcon;
 
-	// Responsive layout for narrow panels
-	.debug-toolbar {
-		container-type: inline-size;
-
-		// When panel width is less than 400px, stack toolbar vertically
-		@container (max-width: 350px) {
-			flex-direction: column;
-			align-items: stretch;
-
-			.debug-keyboard-hint {
-				display: none;
-			}
-
-			.debug-opacity-container {
-				max-width: 100%;
-				justify-content: center;
+				&:hover {
+					background: $colorButtonIconHover;
+				}
 			}
 		}
-	}
 
-	// Container query alternative using JavaScript-set class
-	&.narrow-panel {
-		.debug-toolbar {
+		// Settings Panel
+		.debug-settings-panel {
+			position: absolute;
+			bottom: 100%;
+			right: 0;
+			background: #1a1a1a;
+			border: 1px solid #444;
+			border-radius: 6px;
+			padding: 12px;
+			margin-bottom: 8px;
+			box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+			min-width: 200px;
+			display: none;
 			flex-direction: column;
-			align-items: stretch;
+			gap: 10px;
+			z-index: 1000;
 
-			.debug-keyboard-hint {
-				margin-right: 0;
-				text-align: center;
+			&.visible {
+				display: flex;
 			}
 
-			.debug-opacity-container {
-				max-width: 100%;
-				justify-content: center;
+			&::before {
+				content: "";
+				position: absolute;
+				top: -20px;
+				left: -20px;
+				right: -20px;
+				bottom: -20px;
+				z-index: -1;
+			}
+
+			.settings-row {
+				display: flex;
+				align-items: center;
+				gap: 8px;
+				font-size: 12px;
+				color: #ccc;
+
+				label {
+					flex: 1;
+					cursor: pointer;
+					user-select: none;
+				}
+
+				input[type="checkbox"] {
+					cursor: pointer;
+				}
+
+				.debug-opacity-slider {
+					flex: 1;
+					min-width: 100px;
+				}
 			}
 		}
 	}
@@ -336,7 +413,7 @@
 		position: absolute;
 		background: rgba(255, 255, 255, 0.1);
 		z-index: 10;
-		transition: background 0.2s;
+		transition: background $animTime;
 
 		&:hover {
 			background: rgba(255, 255, 255, 0.3);
@@ -406,128 +483,222 @@
 		bottom: -3px;
 		cursor: nwse-resize;
 	}
+
+	// Help Overlay
+	.debug-help-overlay {
+		position: absolute;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		background: rgba(0, 0, 0, 0.95);
+		z-index: 1000;
+		display: flex;
+		align-items: flex-start;
+		justify-content: center;
+		padding: 20px;
+		overflow-y: auto;
+		cursor: pointer;
+		box-sizing: border-box;
+
+		.debug-help-content {
+			background: linear-gradient(to bottom, #2a2a2a, #1a1a1a);
+			border-radius: 8px;
+			padding: 30px;
+			max-width: 500px;
+			width: 100%;
+			box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+			border: 1px solid #444;
+			margin-top: auto;
+			margin-bottom: auto;
+			box-sizing: border-box;
+
+			h2 {
+				margin: 0 0 20px 0;
+				color: $colorText;
+				font-size: 24px;
+				font-weight: bold;
+				text-align: center;
+				border-bottom: 2px solid $colorAccent;
+				padding-bottom: 10px;
+			}
+
+			.help-section {
+				margin-bottom: 25px;
+
+				h3 {
+					color: #9cdcfe;
+					font-size: 16px;
+					margin: 0 0 10px 0;
+					font-weight: bold;
+				}
+
+				ul {
+					list-style: none;
+					padding: 0;
+					margin: 0;
+
+					li {
+						padding: 6px 0;
+						color: #ddd;
+						font-size: 13px;
+						line-height: 1.5;
+
+						kbd {
+							background: #333;
+							border: 1px solid #555;
+							border-radius: 3px;
+							padding: 2px 6px;
+							font-family: monospace;
+							font-size: 12px;
+							color: #9cdcfe;
+						}
+
+						strong {
+							color: $colorText;
+						}
+					}
+				}
+
+				.help-links a {
+					color: #4fc3f7;
+					text-decoration: none;
+					display: inline-flex;
+					align-items: center;
+					gap: 6px;
+					transition: color $animTime;
+
+					&:hover {
+						color: #81d4fa;
+						text-decoration: underline;
+					}
+
+					svg {
+						vertical-align: middle;
+					}
+				}
+			}
+
+			.help-close-hint {
+				text-align: center;
+				color: $colorTextDim;
+				font-size: 12px;
+				margin: 20px 0 0 0;
+				font-style: italic;
+			}
+		}
+	}
 }
 
 // Debug State Container
 .debug-state {
 	position: relative;
-	flex: 1 0 100%;
+	flex: 1 1 100%;
 	display: flex;
 	flex-direction: column;
 	margin-bottom: 5px;
-	margin-left: 10px;
-
-	.json-toggle {
-		position: absolute;
-		top: 2px;
-		left: -22px;
-		margin: 0 10px 0 0;
-		border: none;
-		background: none;
-		cursor: pointer;
-		color: #888;
-		font-size: 14px;
-		padding: 0;
-		width: 20px;
-		height: 20px;
-		transition: color 0.2s;
-
-		&:hover {
-			color: #fff;
-		}
-
-		&:focus {
-			outline: none;
-		}
-	}
+	//border-left: 1px solid #4ca38b;
+	width: 100%;
 
 	.debug-state-label {
 		font-size: 13px;
 		font-weight: bold;
-		padding: 5px 0;
-		color: #ccc;
+		padding: 5px 2px 5px 3px;
+		margin-bottom: 0;
+		color: $colorText;
+		background: linear-gradient(to bottom, $colorBgLight, #2d2d2d);
+		border-top-left-radius: 4px;
+		border-top-right-radius: 4px;
+		box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+		transition: all $animTime ease-in-out;
+		display: flex;
+		align-items: center;
+		gap: 2px;
+		width: 100%;
+		box-sizing: border-box;
+		position: relative;
+
 		&:hover {
-			color: #fff;
+			background: linear-gradient(to bottom, #4a4a4a, #3d3d3d);
 			cursor: pointer;
-			text-decoration: underline;
+			box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
+
+			.debug-state-hover-actions {
+				opacity: 1;
+			}
+		}
+
+		&:active {
+			box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+		}
+
+		.json-toggle {
+			@include button-base;
+			background: none;
+			color: $colorTextDim;
+			font-size: 12px;
+			padding: 0;
+			width: 20px;
+			height: 16px;
+			transition: color $animTime;
+			flex-shrink: 0;
+
+			&:hover {
+				color: $colorText;
+			}
+		}
+
+		.debug-state-label-text {
+			flex: 1;
+		}
+
+		.debug-state-hover-actions {
+			display: flex;
+			gap: 4px;
+			opacity: 0;
+			margin-right: 10px;
+			transition: opacity $animTime ease-in-out;
+			flex-shrink: 0;
+		}
+
+		.debug-state-action-button {
+			@include action-button-base;
+			background: rgba(100, 100, 100, 0.8);
+		}
+
+		.debug-state-copy-button {
+			@extend .debug-state-action-button;
+			//background: $colorCopy;
+
+			&:hover {
+				background: $colorCopy;
+			}
+		}
+
+		.debug-state-delete-button {
+			@extend .debug-state-action-button;
+			//background: $colorDelete;
+
+			&:hover {
+				background: $colorDelete;
+			}
 		}
 	}
 
 	.json-wrapper {
 		position: relative;
 		padding: 5px;
-		margin-left: -15px;
-		background: #292929;
-		border-radius: 4px;
-		border-left: 3px solid #28a745;
-
-		> .json-node {
-			//margin-left: 5px;
-		}
-
-		.debug-state-hover-actions {
-			position: absolute;
-			top: 4px;
-			right: 4px;
-			display: flex;
-			gap: 6px;
-			opacity: 0;
-			transition: opacity 0.2s ease-in-out;
-			z-index: 10;
-		}
-
-		&:hover .debug-state-hover-actions {
-			opacity: 1;
-		}
-
-		.debug-state-action-button {
-			background: rgba(100, 100, 100, 0.8);
-			color: white;
-			border: none;
-			cursor: pointer;
-			font-size: 16px;
-			width: 28px;
-			height: 28px;
-			border-radius: 4px;
-			display: flex;
-			align-items: center;
-			justify-content: center;
-			padding: 0;
-			transition:
-				background 0.2s ease-in-out,
-				transform 0.1s ease-in-out;
-
-			&:hover {
-				transform: scale(1.1);
-			}
-
-			&:active {
-				transform: scale(0.95);
-			}
-
-			&:focus {
-				outline: none;
-			}
-		}
-
-		.debug-state-copy-button {
-			background: rgba(85, 170, 255, 0.8);
-
-			&:hover {
-				background: rgba(34, 136, 255, 1);
-			}
-		}
-
-		.debug-state-delete-button {
-			background: rgba(255, 85, 85, 0.8);
-
-			&:hover {
-				background: rgba(255, 34, 34, 1);
-			}
-		}
+		background: $colorBgMedium;
+		max-height: 400px;
+		overflow-y: auto;
+		overscroll-behavior: contain;
 	}
 
 	&.collapsed {
+		.debug-state-label {
+			border-radius: 4px;
+		}
+
 		.json-wrapper {
 			display: none;
 		}
